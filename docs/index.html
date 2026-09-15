@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HFF evidence map — interactive</title>
+<!-- The Google Fonts stylesheet (Inter/Newsreader) is loaded via @import in
+     styles.css and deliberately carries NO SRI: the fonts.googleapis.com CSS
+     response varies by user agent (woff2 vs ttf rules), so a fixed integrity
+     hash would break legitimate clients. The jsdelivr assets below are pinned
+     versions with SHA-384 integrity hashes verified by double fetch. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" integrity="sha384-krui876Mk6M6Lq6uj1SQo+u4MoImxFwCfwzWNU982QBMNci3VMZ3FoYSdUakJD5I" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css" integrity="sha384-PSZaVsyG9jDu8hFaSJev5s/9poIJlX7cuxSGdqCgXRHpo2DzIaZAyCd2rG/DJJmV" crossorigin="anonymous">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="#">HFF evidence map</a>
+  <div class="navbar-nav">
+    <button class="nav-link active" data-tab="overview">Overview</button>
+    <button class="nav-link" data-tab="explorer">Explorer</button>
+    <button class="nav-link" data-tab="country">Country profile</button>
+    <button class="nav-link" data-tab="methods">Methods</button>
+  </div>
+  <span class="navbar-text" id="nav-built"></span>
+</nav>
+
+<main>
+
+  <!-- ============ OVERVIEW ============ -->
+  <section class="tab-pane active" id="pane-overview">
+    <div class="card"><div class="card-body">
+      <h2 class="hero-title">Where health-financing-functions evidence exists — and where it is missing</h2>
+      <!-- Hero paragraph rendered by app.js from content.json `hero` segments -->
+      <p class="hero-text" id="ov-hero"></p>
+      <h2 class="glance-title">The evidence base at a glance</h2>
+      <div class="grid-4" id="ov-tiles"></div>
+    </div></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">Studies over time</div>
+        <div class="card-body"><div id="ov-trend" class="plot" style="height:300px"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">Studies by financing function</div>
+        <div class="card-body"><div id="ov-func" class="plot" style="height:300px"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EXPLORER ============ -->
+  <section class="tab-pane" id="pane-explorer">
+    <div class="explorer-layout">
+      <aside class="sidebar">
+        <h2 class="sidebar-title">Filter the corpus</h2>
+
+        <div class="control-group">
+          <label class="control-label" for="x-years">Publication years</label>
+          <div class="slider-wrap"><div id="x-years"></div></div>
+          <div class="slider-readout" id="x-years-readout"></div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="x-income">Income group</label>
+          <select id="x-income" multiple placeholder="All groups"></select>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="x-region">UN region</label>
+          <select id="x-region" multiple placeholder="All regions"></select>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="x-function">Financing function</label>
+          <select id="x-function" multiple placeholder="All functions"></select>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="x-outcome">Outcome domain</label>
+          <select id="x-outcome" multiple placeholder="All domains"></select>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="x-design">Study design</label>
+          <select id="x-design" multiple placeholder="All designs"></select>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Type of analysis</label>
+          <div class="radio-inline" id="x-analysis"></div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="x-datatype">Data type</label>
+          <select id="x-datatype" class="form-select"></select>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="x-datasource">Data source</label>
+          <select id="x-datasource" class="form-select"></select>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="x-scope">Geographic scope</label>
+          <select id="x-scope" class="form-select"></select>
+        </div>
+
+        <button class="btn-outline-secondary" id="x-reset">Reset filters</button>
+        <hr>
+        <p class="text-muted">
+          Every filter combines. A study can carry more than one financing function or outcome
+          domain, so it is counted in every one it's tagged with. Country panels count a
+          multi-country study once per country it is about.
+        </p>
+      </aside>
+
+      <div class="explorer-main">
+        <div class="grid-4">
+          <div class="value-box bg-primary"><div class="value-box-title">Studies in view</div><div class="value-box-value" id="v-studies">—</div></div>
+          <div class="value-box bg-info"><div class="value-box-title">Countries in view</div><div class="value-box-value" id="v-countries">—</div></div>
+          <div class="value-box bg-secondary"><div class="value-box-title">Quantitative</div><div class="value-box-value" id="v-quant">—</div></div>
+          <div class="value-box bg-success"><div class="value-box-title">Has a DOI</div><div class="value-box-value" id="v-doi">—</div></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">Studies over time</div>
+            <div class="card-body">
+              <div class="chart-toolbar">
+                <div class="tb-field"><label for="x-trend-by">Colour by</label><select id="x-trend-by" class="form-select"></select></div>
+              </div>
+              <div id="x-trend" class="plot" style="height:320px"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Map — intensity by country</div>
+            <div class="card-body">
+              <div class="chart-toolbar">
+                <div class="tb-field"><label for="x-map-metric">Metric</label><select id="x-map-metric" class="form-select"></select></div>
+              </div>
+              <div id="x-map" class="plot" style="height:320px"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Composition of the filtered corpus</div>
+            <div class="card-body">
+              <div class="chart-toolbar">
+                <div class="tb-field wide"><label for="x-comp-var">Variable</label><select id="x-comp-var" class="form-select"></select></div>
+                <div class="tb-field wide"><label for="x-comp-stack">Group by</label><select id="x-comp-stack" class="form-select"></select></div>
+                <div class="tb-field"><label for="x-comp-mode">Measure</label><select id="x-comp-mode" class="form-select"></select></div>
+              </div>
+              <div id="x-comp" class="plot" style="height:340px"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Countries — any two variables</div>
+            <div class="card-body">
+              <div class="chart-toolbar">
+                <div class="tb-field wide"><label for="x-scatter-x">X axis</label><select id="x-scatter-x" class="form-select"></select></div>
+                <div class="tb-field wide"><label for="x-scatter-y">Y axis</label><select id="x-scatter-y" class="form-select"></select></div>
+              </div>
+              <div id="x-scatter" class="plot" style="height:340px"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">Top countries in this view</div>
+          <div class="card-body">
+            <div class="table-wrap"><table class="dataTable" id="x-table"></table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COUNTRY PROFILE ============ -->
+  <section class="tab-pane" id="pane-country">
+    <div class="explorer-layout">
+      <aside class="sidebar">
+        <h2 class="sidebar-title">Country</h2>
+        <div class="control-group">
+          <select id="c-picker" placeholder="Pick a country…"></select>
+        </div>
+        <dl class="fact-list" id="c-facts"></dl>
+      </aside>
+      <div class="explorer-main">
+        <div class="grid-4">
+          <div class="value-box bg-primary"><div class="value-box-title">Studies</div><div class="value-box-value" id="c-n">—</div></div>
+          <div class="value-box bg-info"><div class="value-box-title">Per 100k DALYs</div><div class="value-box-value" id="c-daly">—</div></div>
+          <div class="value-box bg-secondary"><div class="value-box-title">Per US$1bn spending</div><div class="value-box-value" id="c-spend">—</div></div>
+          <div class="value-box bg-success"><div class="value-box-title">Per million people</div><div class="value-box-value" id="c-percap">—</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">Output over time — country vs income-group mean</div>
+            <div class="card-body"><div id="c-trend" class="plot" style="height:320px"></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header">Financing-function mix — country vs income group</div>
+            <div class="card-body"><div id="c-mix" class="plot" style="height:320px"></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header">Study design mix — country vs income group</div>
+            <div class="card-body"><div id="c-methods" class="plot" style="height:320px"></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header">Approach & reporting — country vs income group</div>
+            <div class="card-body"><div id="c-signals" class="plot" style="height:320px"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">Where the country sits among its income peers</div>
+          <div class="card-body"><div id="c-benchmark" class="plot" style="height:380px"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ METHODS ============ -->
+  <section class="tab-pane" id="pane-methods">
+    <div class="methods-wrap">
+
+      <div class="card">
+        <div class="card-header">How this dataset is built</div>
+        <div class="card-body">
+          <p>Every record's title and abstract is classified by an ensemble of LLMs (GLM,
+             Claude Sonnet, DeepSeek) against the health-financing-function taxonomy — <strong>
+             Revenue raising, Pooling, Purchasing, Benefits decisions, Public financial
+             management</strong>, plus recurrent and capital-investment financing — with a
+             consensus step across models. Records that no model places in any bucket, or that
+             stay <strong>Unclear</strong> after consensus, are screened out before full
+             extraction.</p>
+          <p>Records that pass the bucket screen go through full field extraction: study design,
+             type of analysis, data type and source, unit of observation, geography, outcome
+             domain, and (for Revenue-raising studies) sub-questions on external/donor and
+             non-governmental financing mechanisms. A DOI-recovery and MeSH/OpenAlex topic
+             harvest runs on the extracted set.</p>
+          <table class="methods-table">
+            <thead><tr><th>Pipeline stage</th><th>Records</th></tr></thead>
+            <tbody id="methods-funnel"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Data sources</div>
+        <div class="card-body">
+          <table class="methods-table">
+            <thead><tr><th>Input</th><th>Source</th></tr></thead>
+            <tbody>
+              <tr><td>Financing-function &amp; field classification</td>
+                  <td>LLM ensemble (GLM, Claude Sonnet, DeepSeek) with a per-field consensus
+                      step, run against title/abstract text</td></tr>
+              <tr><td>DOI recovery &amp; topic harvest</td>
+                  <td>CrossRef/OpenAlex/PubMed lookup; MeSH theme where a DOI resolves,
+                      OpenAlex fallback otherwise</td></tr>
+              <tr><td>Income groups &amp; UN region</td><td>World Bank classification (shared
+                  reference table)</td></tr>
+              <tr><td>Population</td>
+                  <td>World Bank SP.POP.TOTL (latest observation, mostly 2025)</td></tr>
+              <tr><td>Disease burden &amp; health spending</td>
+                  <td>IHME GBD 2023 DALYs and IHME Health Spending 1995–2022 — used only as
+                      country-level reference denominators, not as fields of the studies
+                      themselves</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Rules that keep the numbers honest</div>
+        <div class="card-body">
+          <p><strong>A study can carry more than one financing function or outcome domain</strong>
+            and is counted once in every one it's tagged with — composition shares in the
+            Explorer can add to more than 100%.</p>
+          <p><strong>Multi-country studies count once per country</strong> in the country panels
+            and the country profile; the "Studies in view" tile still counts each study once.</p>
+          <p><strong>Extracted geography only,</strong> matched against a reused country
+            reference table. A handful of real geographies named in the extraction — including
+            Taiwan, Israel, Kazakhstan and Cuba — aren't in that reference table and are
+            therefore visibly absent from country-level views (map, table, country profile)
+            while still counted in every other chart.</p>
+          <p><strong>"NA" classification values are dropped, not shown as a category</strong> —
+            a record with no financing-function or outcome-domain consensus simply carries no
+            tag on that dimension, rather than appearing as a fake "unknown" bucket.
+            <strong>"Other" and "Unclear"</strong> are kept as real, visible categories.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Limitations</div>
+        <div class="card-body">
+          <p>Classification is LLM-based with a cross-model consensus step, not independently
+            human-verified. Geography is free text matched against a fixed country list, so
+            genuine geographies outside that list are excluded from country-level figures (see
+            above). DOI and MeSH/topic coverage are partial. Disease-burden and health-spending
+            figures are country-level reference data, not something extracted from the studies —
+            comparisons against them are ecological, not causal.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  Sources: HFF extraction pipeline (LLM-assisted classification, GLM/Sonnet/DeepSeek consensus)
+  · World Bank (income groups, population) · IHME GBD 2023 &amp; IHME Health Spending 1995–2022
+  (country-level reference)
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js" integrity="sha384-EcVTHT5RdDTvzbTIbNOtaNxNALeJYDgmv5Crp3NBmcdrCPrDnqp6I1+ETJ/FCFHI" crossorigin="anonymous"></script>
+<script type="module" src="app.js?v=2026-09-15"></script>
+
+</body>
+</html>
