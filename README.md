@@ -23,6 +23,16 @@ files the app reads from `docs/data/`:
 Rebuild: `python docs/dex_hff/build_data.py` (reads the CSV/xlsx, overwrites `docs/data/*.json`,
 prints a validation report — record counts, unmatched geography names, category counts).
 
+`docs/dex_hff/build_texts.py` writes one small JSON shard per country to `docs/data/texts/`
+(`{"s": [...], "title": [...], "abstract": [...]}`), used by the Country Profile tab's
+"click a study, read it" feature. Title/abstract text for the full population is ~94MB, too
+large to bundle upfront, so shards are fetched lazily by the client only when a study point
+in that country is clicked, and cached client-side after the first fetch. Run it after
+`build_data.py` (it reads back `studies.json`/`geo.json`/`countries.json` to figure out which
+studies belong to which country). Unlike `docs/dex_hff/`'s raw CSV/xlsx inputs, the shards it
+writes under `docs/data/texts/` are published output and are committed like the rest of
+`docs/data/*.json`.
+
 Runtime deps are pinned jsdelivr CDNs: plotly.js-dist-min 2.35.2, tom-select 2.3.1,
 noUiSlider 15.8.1, Google Fonts (Newsreader + Inter). No build step, no bundler.
 

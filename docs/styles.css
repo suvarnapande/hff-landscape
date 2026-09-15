@@ -304,6 +304,17 @@ main { padding: 1.4rem 1.5rem 2.5rem; max-width: 1500px; margin: 0 auto; }
 .modal-close:hover { background: #f1eee7; }
 .modal-body { padding: 1.1rem 1.3rem 1.3rem; }
 .modal-fig { width: 100%; display: block; }
+.study-badges { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .9rem; }
+.study-badge {
+  display: inline-block;
+  background: #f1eee7;
+  border: 1px solid var(--hff-line);
+  border-radius: 999px;
+  padding: .15rem .7rem;
+  font-size: .78rem;
+  color: var(--hff-ink-soft);
+}
+.study-abstract { color: var(--hff-ink-soft); line-height: 1.6; white-space: pre-line; }
 
 /* ---- explorer ---- */
 .explorer-layout { display: flex; gap: 1.3rem; align-items: flex-start; }

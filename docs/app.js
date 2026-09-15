@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-09-15n";
+const BUILD = "2026-09-15o";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -610,6 +610,42 @@ export function countryProfile(db, iso3) {
   };
 }
 
+// One row per (study, financing-function tag) for studies geo-tagged to
+// `iso3` and passing `mask` (Explorer's current filter result) — a study
+// with several function tags appears once per tag, same convention as every
+// other chart's function-group counts. Studies with no function tag at all
+// still get one row, grouped under "Not classified", so they aren't silently
+// dropped from the strip.
+export function studiesStrip(db, iso3, mask) {
+  const ci = db.countries.findIndex(r => r.iso3 === iso3);
+  if (ci < 0) return [];
+  const g = db.geo;
+  const sSet = new Set();
+  for (let i = 0; i < g.s.length; i++) {
+    if (g.c[i] !== ci) continue;
+    const s = g.s[i];
+    if (mask && !mask[s]) continue;
+    sSet.add(s);
+  }
+  const rows = [];
+  const seen = new Set();
+  const fn = db.function;
+  for (let i = 0; i < fn.s.length; i++) {
+    const s = fn.s[i];
+    if (!sSet.has(s)) continue;
+    const grp = db.function_grps[fn.g[i]];
+    const key = s + "|" + grp;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    rows.push({ s, year: db.studies.year[s], func_grp: grp });
+  }
+  const tagged = new Set(rows.map(r => r.s));
+  for (const s of sSet) {
+    if (!tagged.has(s)) rows.push({ s, year: db.studies.year[s], func_grp: "Not classified" });
+  }
+  return rows;
+}
+
 export function countryFacts(db, iso3) {
   const r = db.countries.find(x => x.iso3 === iso3);
   if (!r) return [];
@@ -645,7 +681,8 @@ if (typeof document !== "undefined") {
     filt: null,
     result: null,
     country: "IND",
-    ts: {}
+    ts: {},
+    textCache: {}
   };
 
   function debounce(fn, ms) {
@@ -697,6 +734,56 @@ if (typeof document !== "undefined") {
     $("fig-modal-img").src = "";
   }
 
+  // Study title/abstract modal. Title, year and function tags come from data
+  // already loaded client-side; the abstract is lazy-fetched per country
+  // (docs/data/texts/<ISO3>.json) and cached in state.textCache thereafter.
+  async function openStudyModal(iso3, s) {
+    $("study-modal").classList.add("open");
+    $("study-modal-title").textContent = "Loading…";
+    const meta = $("study-modal-meta");
+    meta.textContent = "";
+    $("study-modal-abstract").textContent = "";
+
+    const year = db.studies.year[s];
+    const funcs = [];
+    const fn = db.function;
+    for (let i = 0; i < fn.s.length; i++) {
+      if (fn.s[i] === s) funcs.push(db.function_grps[fn.g[i]]);
+    }
+    const yearBadge = el("span", "study-badge");
+    yearBadge.textContent = String(year);
+    meta.appendChild(yearBadge);
+    for (const f of (funcs.length ? funcs : ["Not classified"])) {
+      const b = el("span", "study-badge");
+      b.textContent = f;
+      meta.appendChild(b);
+    }
+
+    try {
+      let shard = state.textCache[iso3];
+      if (!shard) {
+        const r = await fetch("data/texts/" + iso3 + ".json?v=" + BUILD);
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        const raw = await r.json();
+        shard = { ...raw, posOf: new Map(raw.s.map((sv, i) => [sv, i])) };
+        state.textCache[iso3] = shard;
+      }
+      const pos = shard.posOf.get(s);
+      const title = pos != null ? shard.title[pos] : null;
+      const abstract = pos != null ? shard.abstract[pos] : null;
+      $("study-modal-title").textContent = title || "(title unavailable)";
+      $("study-modal-abstract").textContent = abstract || "No abstract available for this study.";
+    } catch (err) {
+      $("study-modal-title").textContent = "(unable to load study text)";
+      // err.message may embed a data-derived HTTP status/URL — textContent only.
+      $("study-modal-abstract").textContent = "Failed to load: " + err.message;
+    }
+  }
+
+  function closeStudyModal() {
+    $("study-modal").classList.remove("open");
+  }
+
   function switchTab(name) {
     for (const b of document.querySelectorAll(".navbar .nav-link")) {
       b.classList.toggle("active", b.dataset.tab === name);
@@ -715,7 +802,7 @@ if (typeof document !== "undefined") {
       }
     }
     if (name === "country" && window.Plotly) {
-      for (const id of ["c-trend", "c-mix", "c-methods", "c-signals", "c-benchmark"]) {
+      for (const id of ["c-trend", "c-mix", "c-methods", "c-signals", "c-strip", "c-benchmark"]) {
         if ($(id).data) window.Plotly.Plots.resize($(id));
       }
     }
@@ -1013,6 +1100,7 @@ if (typeof document !== "undefined") {
     renderComp();
     renderScatter();
     renderTable();
+    renderStudiesStrip();
   }
 
   function renderValueBoxes() {
@@ -1250,6 +1338,47 @@ if (typeof document !== "undefined") {
     tbl.appendChild(tbody);
   }
 
+  // Deterministic pseudo-random offset in [-0.5, 0.5) from a study index, so
+  // points don't jump around on re-render (filter change / country switch).
+  function jitter(s) {
+    const x = Math.sin(s * 12.9898) * 43758.5453;
+    return (x - Math.floor(x)) - 0.5;
+  }
+
+  // One dot per (study, financing-function tag) for the selected country,
+  // restricted to whatever Explorer filters are currently active
+  // (state.result.mask) — clicking a dot opens the title/abstract modal.
+  function renderStudiesStrip() {
+    if (!state.result) return;
+    const iso3 = state.country;
+    const rows = studiesStrip(db, iso3, state.result.mask);
+    const cats = db.function_grps.concat(["Not classified"]);
+    const div = $("c-strip");
+    window.Plotly.react(div, [{
+      type: "scattergl", mode: "markers",
+      x: rows.map(r => r.year + 0.7 * jitter(r.s)),
+      y: rows.map(r => r.func_grp),
+      customdata: rows.map(r => r.s),
+      marker: { color: ACCENT, size: 7, opacity: 0.5 },
+      hovertemplate: "%{y} · %{x:.0f}<extra>click to read</extra>"
+    }], {
+      font: BASE_FONT,
+      margin: { t: 10, b: 40, l: 190, r: 20 },
+      xaxis: { title: "year", gridcolor: "#eeebe3" },
+      yaxis: { categoryorder: "array", categoryarray: cats.slice().reverse(), automargin: true },
+      plot_bgcolor: "rgba(0,0,0,0)",
+      paper_bgcolor: "rgba(0,0,0,0)"
+    }, PLOTLY_CFG);
+    if (!div._studyClickBound) {
+      div.on("plotly_click", ev => {
+        const pt = ev.points && ev.points[0];
+        if (!pt) return;
+        openStudyModal(state.country, pt.customdata);
+      });
+      div._studyClickBound = true;
+    }
+  }
+
   function setupCountryPane() {
     const sel = $("c-picker");
     for (const r of db.countries) {
@@ -1458,6 +1587,8 @@ if (typeof document !== "undefined") {
         marker: { color: "#b08d3e", size: 14 }
       }
     ], bmLayout, PLOTLY_CFG);
+
+    renderStudiesStrip();
   }
 
   async function boot() {
@@ -1466,7 +1597,9 @@ if (typeof document !== "undefined") {
     }
     $("fig-modal-close").addEventListener("click", closeModal);
     $("fig-modal").addEventListener("click", e => { if (e.target === $("fig-modal")) closeModal(); });
-    document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+    $("study-modal-close").addEventListener("click", closeStudyModal);
+    $("study-modal").addEventListener("click", e => { if (e.target === $("study-modal")) closeStudyModal(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") { closeModal(); closeStudyModal(); } });
     $("gal-back").addEventListener("click", hideSection);
 
     const get = async name => {
