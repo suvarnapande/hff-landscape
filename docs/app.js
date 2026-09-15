@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-09-15o";
+const BUILD = "2026-09-15p";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1338,34 +1338,56 @@ if (typeof document !== "undefined") {
     tbl.appendChild(tbody);
   }
 
-  // Deterministic pseudo-random offset in [-0.5, 0.5) from a study index, so
-  // points don't jump around on re-render (filter change / country switch).
-  function jitter(s) {
-    const x = Math.sin(s * 12.9898) * 43758.5453;
+  // Deterministic pseudo-random value in [-0.5, 0.5) from a seed, so points
+  // don't jump around on re-render (filter change / country switch). Two
+  // independent seeds per study (x vs y) decorrelate the horizontal and
+  // vertical jitter so points don't line up.
+  function hash01(seed) {
+    const x = Math.sin(seed) * 43758.5453;
     return (x - Math.floor(x)) - 0.5;
   }
+  const jitterX = s => hash01(s * 12.9898);
+  const jitterY = s => hash01(s * 78.233 + 4.898);
 
   // One dot per (study, financing-function tag) for the selected country,
   // restricted to whatever Explorer filters are currently active
   // (state.result.mask) — clicking a dot opens the title/abstract modal.
+  // Many studies commonly share the same country + function (and often the
+  // same year), so this is jittered on BOTH axes — a beeswarm-style strip,
+  // not a single line — to keep individual studies distinguishable and
+  // clickable rather than stacking into one solid blob. Narrowing the
+  // Explorer's filters (design, analysis, year range, ...) thins out dense
+  // cells further.
   function renderStudiesStrip() {
     if (!state.result) return;
     const iso3 = state.country;
     const rows = studiesStrip(db, iso3, state.result.mask);
     const cats = db.function_grps.concat(["Not classified"]);
+    const n = cats.length;
+    const idxOf = new Map(cats.map((c, i) => [c, n - 1 - i]));
     const div = $("c-strip");
     window.Plotly.react(div, [{
       type: "scattergl", mode: "markers",
-      x: rows.map(r => r.year + 0.7 * jitter(r.s)),
-      y: rows.map(r => r.func_grp),
+      x: rows.map(r => r.year + 0.7 * jitterX(r.s)),
+      y: rows.map(r => idxOf.get(r.func_grp) + 0.36 * jitterY(r.s)),
       customdata: rows.map(r => r.s),
-      marker: { color: ACCENT, size: 7, opacity: 0.5 },
-      hovertemplate: "%{y} · %{x:.0f}<extra>click to read</extra>"
+      // func_grp is a dict-level category label (developer-curated), escaped
+      // anyway since Plotly renders hover text as HTML.
+      text: rows.map(r => esc(r.func_grp) + " · " + r.year),
+      hoverinfo: "text",
+      marker: { color: ACCENT, size: 6, opacity: 0.45 }
     }], {
       font: BASE_FONT,
       margin: { t: 10, b: 40, l: 190, r: 20 },
       xaxis: { title: "year", gridcolor: "#eeebe3" },
-      yaxis: { categoryorder: "array", categoryarray: cats.slice().reverse(), automargin: true },
+      yaxis: {
+        tickmode: "array",
+        tickvals: cats.map((c, i) => n - 1 - i),
+        ticktext: cats,
+        range: [-0.5, n - 0.5],
+        gridcolor: "#eeebe3",
+        automargin: true
+      },
       plot_bgcolor: "rgba(0,0,0,0)",
       paper_bgcolor: "rgba(0,0,0,0)"
     }, PLOTLY_CFG);
