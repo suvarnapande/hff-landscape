@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-09-15p";
+const BUILD = "2026-09-15q";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -734,30 +734,22 @@ if (typeof document !== "undefined") {
     $("fig-modal-img").src = "";
   }
 
-  // Study title/abstract modal. Title, year and function tags come from data
-  // already loaded client-side; the abstract is lazy-fetched per country
+  // Study title/abstract modal — opens every study in one (country, function,
+  // year) cell together, rather than one dot at a time. Title/year/function
+  // are already known client-side; abstracts are lazy-fetched per country
   // (docs/data/texts/<ISO3>.json) and cached in state.textCache thereafter.
-  async function openStudyModal(iso3, s) {
+  async function openStudiesModal(iso3, funcGrp, year, sList) {
+    const country = db.countries.find(r => r.iso3 === iso3);
+    const countryName = country ? country.country : iso3;
     $("study-modal").classList.add("open");
-    $("study-modal-title").textContent = "Loading…";
-    const meta = $("study-modal-meta");
-    meta.textContent = "";
-    $("study-modal-abstract").textContent = "";
-
-    const year = db.studies.year[s];
-    const funcs = [];
-    const fn = db.function;
-    for (let i = 0; i < fn.s.length; i++) {
-      if (fn.s[i] === s) funcs.push(db.function_grps[fn.g[i]]);
-    }
-    const yearBadge = el("span", "study-badge");
-    yearBadge.textContent = String(year);
-    meta.appendChild(yearBadge);
-    for (const f of (funcs.length ? funcs : ["Not classified"])) {
-      const b = el("span", "study-badge");
-      b.textContent = f;
-      meta.appendChild(b);
-    }
+    $("study-modal-title").textContent =
+      funcGrp + " · " + year + " · " + countryName +
+      " (" + fmtNum(sList.length) + (sList.length === 1 ? " study" : " studies") + ")";
+    const list = $("study-modal-list");
+    list.textContent = "";
+    const loading = el("p", "study-abstract");
+    loading.textContent = "Loading…";
+    list.appendChild(loading);
 
     try {
       let shard = state.textCache[iso3];
@@ -768,15 +760,26 @@ if (typeof document !== "undefined") {
         shard = { ...raw, posOf: new Map(raw.s.map((sv, i) => [sv, i])) };
         state.textCache[iso3] = shard;
       }
-      const pos = shard.posOf.get(s);
-      const title = pos != null ? shard.title[pos] : null;
-      const abstract = pos != null ? shard.abstract[pos] : null;
-      $("study-modal-title").textContent = title || "(title unavailable)";
-      $("study-modal-abstract").textContent = abstract || "No abstract available for this study.";
+      list.textContent = "";
+      for (const s of sList) {
+        const pos = shard.posOf.get(s);
+        const title = pos != null ? shard.title[pos] : null;
+        const abstract = pos != null ? shard.abstract[pos] : null;
+        const entry = el("div", "study-entry");
+        const h = el("h4", "study-entry-title");
+        h.textContent = title || "(title unavailable)";
+        const p = el("p", "study-entry-abstract");
+        p.textContent = abstract || "No abstract available for this study.";
+        entry.appendChild(h);
+        entry.appendChild(p);
+        list.appendChild(entry);
+      }
     } catch (err) {
-      $("study-modal-title").textContent = "(unable to load study text)";
+      list.textContent = "";
       // err.message may embed a data-derived HTTP status/URL — textContent only.
-      $("study-modal-abstract").textContent = "Failed to load: " + err.message;
+      const p = el("p", "study-abstract");
+      p.textContent = "Failed to load: " + err.message;
+      list.appendChild(p);
     }
   }
 
@@ -1338,64 +1341,91 @@ if (typeof document !== "undefined") {
     tbl.appendChild(tbody);
   }
 
-  // Deterministic pseudo-random value in [-0.5, 0.5) from a seed, so points
-  // don't jump around on re-render (filter change / country switch). Two
-  // independent seeds per study (x vs y) decorrelate the horizontal and
-  // vertical jitter so points don't line up.
-  function hash01(seed) {
-    const x = Math.sin(seed) * 43758.5453;
-    return (x - Math.floor(x)) - 0.5;
-  }
-  const jitterX = s => hash01(s * 12.9898);
-  const jitterY = s => hash01(s * 78.233 + 4.898);
+  // Set by renderStudiesStrip on every render; read fresh (not captured) by
+  // the heatmap's click handler, which is bound once — so a click always
+  // resolves against the current country/filters, not whatever was active
+  // when the listener was first attached.
+  let stripIndex = null;
 
-  // One dot per (study, financing-function tag) for the selected country,
+  // Function x year grid of study counts for the selected country,
   // restricted to whatever Explorer filters are currently active
-  // (state.result.mask) — clicking a dot opens the title/abstract modal.
-  // Many studies commonly share the same country + function (and often the
-  // same year), so this is jittered on BOTH axes — a beeswarm-style strip,
-  // not a single line — to keep individual studies distinguishable and
-  // clickable rather than stacking into one solid blob. Narrowing the
-  // Explorer's filters (design, analysis, year range, ...) thins out dense
-  // cells further.
+  // (state.result.mask). Clicking a cell opens every study in that
+  // (country, function, year) group together — grouping first avoids the
+  // clutter of one dot per study, which piles up wherever a country has many
+  // studies for the same function/year.
   function renderStudiesStrip() {
     if (!state.result) return;
     const iso3 = state.country;
     const rows = studiesStrip(db, iso3, state.result.mask);
     const cats = db.function_grps.concat(["Not classified"]);
-    const n = cats.length;
-    const idxOf = new Map(cats.map((c, i) => [c, n - 1 - i]));
+    const catIndexOf = new Map(cats.map((c, i) => [c, i]));
+    const years = [...new Set(rows.map(r => r.year))].sort((a, b) => a - b);
     const div = $("c-strip");
+
+    if (!years.length) {
+      stripIndex = null;
+      window.Plotly.react(div, [], {
+        font: BASE_FONT,
+        margin: { t: 10, b: 10, l: 10, r: 10 },
+        xaxis: { visible: false }, yaxis: { visible: false },
+        annotations: [{
+          text: "No studies match the current filters", xref: "paper", yref: "paper",
+          x: 0.5, y: 0.5, showarrow: false, font: { size: 13, color: "#6b7280" }
+        }],
+        plot_bgcolor: "rgba(0,0,0,0)", paper_bgcolor: "rgba(0,0,0,0)"
+      }, PLOTLY_CFG);
+      return;
+    }
+
+    const yearIndexOf = new Map(years.map((y, i) => [y, i]));
+    const z = cats.map(() => years.map(() => 0));
+    const cellStudies = new Map();
+    for (const r of rows) {
+      const fi = catIndexOf.get(r.func_grp);
+      const yi = yearIndexOf.get(r.year);
+      z[fi][yi]++;
+      const key = fi + "|" + yi;
+      let set = cellStudies.get(key);
+      if (!set) { set = new Set(); cellStudies.set(key, set); }
+      set.add(r.s);
+    }
+    stripIndex = { iso3, cats, years, cellStudies };
+
+    const xLabels = years.map(String);
+    const nStudy = n => n === 1 ? " study" : " studies";
+    // cats/years are dict-level labels (developer-curated), escaped anyway
+    // since Plotly renders hover text as HTML.
+    const text = cats.map((c, fi) => years.map((y, yi) =>
+      z[fi][yi] > 0
+        ? esc(c) + " · " + y + "<br>" + z[fi][yi] + nStudy(z[fi][yi]) + " — click to read"
+        : ""));
+
     window.Plotly.react(div, [{
-      type: "scattergl", mode: "markers",
-      x: rows.map(r => r.year + 0.7 * jitterX(r.s)),
-      y: rows.map(r => idxOf.get(r.func_grp) + 0.36 * jitterY(r.s)),
-      customdata: rows.map(r => r.s),
-      // func_grp is a dict-level category label (developer-curated), escaped
-      // anyway since Plotly renders hover text as HTML.
-      text: rows.map(r => esc(r.func_grp) + " · " + r.year),
-      hoverinfo: "text",
-      marker: { color: ACCENT, size: 6, opacity: 0.45 }
+      type: "heatmap",
+      x: xLabels, y: cats, z,
+      text, hoverinfo: "text",
+      colorscale: [[0, "#f4f2ec"], [0.001, "#cfe0f3"], [0.5, "#5590cc"], [1, "#0b3d78"]],
+      hoverongaps: false,
+      showscale: true,
+      colorbar: { title: "studies", thickness: 12, len: 0.8 }
     }], {
       font: BASE_FONT,
-      margin: { t: 10, b: 40, l: 190, r: 20 },
-      xaxis: { title: "year", gridcolor: "#eeebe3" },
-      yaxis: {
-        tickmode: "array",
-        tickvals: cats.map((c, i) => n - 1 - i),
-        ticktext: cats,
-        range: [-0.5, n - 0.5],
-        gridcolor: "#eeebe3",
-        automargin: true
-      },
+      margin: { t: 10, b: 40, l: 190, r: 60 },
+      xaxis: { title: "year", type: "category", gridcolor: "#eeebe3" },
+      yaxis: { autorange: "reversed", automargin: true },
       plot_bgcolor: "rgba(0,0,0,0)",
       paper_bgcolor: "rgba(0,0,0,0)"
     }, PLOTLY_CFG);
+
     if (!div._studyClickBound) {
       div.on("plotly_click", ev => {
         const pt = ev.points && ev.points[0];
-        if (!pt) return;
-        openStudyModal(state.country, pt.customdata);
+        if (!pt || !stripIndex) return;
+        const fi = stripIndex.cats.indexOf(pt.y);
+        const yi = stripIndex.years.indexOf(Number(pt.x));
+        const set = stripIndex.cellStudies.get(fi + "|" + yi);
+        if (!set || !set.size) return;
+        openStudiesModal(stripIndex.iso3, pt.y, pt.x, [...set].sort((a, b) => a - b));
       });
       div._studyClickBound = true;
     }

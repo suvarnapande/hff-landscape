@@ -220,11 +220,11 @@
           </div>
         </div>
         <div class="card">
-          <div class="card-header">Studies — click a point to read the title and abstract</div>
+          <div class="card-header">Studies — click a cell to read every abstract together</div>
           <div class="card-body">
-            <p class="fig-caption">One dot per study (and per financing function it's tagged with),
-              jittered so studies sharing a country/function/year stay separable. Reflects
-              whatever filters are set in the Explorer tab.</p>
+            <p class="fig-caption">Grid of study counts by financing function and year. Click a
+              cell to open all of that country's studies for that function and year at once.
+              Reflects whatever filters are set in the Explorer tab.</p>
             <div id="c-strip" class="plot" style="height:360px"></div>
           </div>
         </div>
@@ -340,15 +340,14 @@
 </div>
 
 <div class="modal-backdrop" id="study-modal">
-  <div class="modal-dialog" style="width:min(720px, 96vw)">
+  <div class="modal-dialog" style="width:min(760px, 96vw)">
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title" id="study-modal-title"></h3>
         <button class="modal-close" id="study-modal-close">Close</button>
       </div>
       <div class="modal-body">
-        <div class="study-badges" id="study-modal-meta"></div>
-        <p class="study-abstract" id="study-modal-abstract"></p>
+        <div class="study-list" id="study-modal-list"></div>
       </div>
     </div>
   </div>
@@ -363,7 +362,7 @@
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js" integrity="sha384-EcVTHT5RdDTvzbTIbNOtaNxNALeJYDgmv5Crp3NBmcdrCPrDnqp6I1+ETJ/FCFHI" crossorigin="anonymous"></script>
-<script type="module" src="app.js?v=2026-09-15p"></script>
+<script type="module" src="app.js?v=2026-09-15q"></script>
 
 </body>
 </html>
