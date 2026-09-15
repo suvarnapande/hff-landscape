@@ -1,5 +1,4 @@
-# Raw extraction source data — kept locally only, not published.
+# Raw extraction source data and build scripts — kept locally only, not published.
 # Mirrors HEE's own setup: the public site repo ships the built dashboard
-# (docs/index.html, app.js, data/*.json), not the raw pipeline inputs.
-docs/dex_hff/*.csv
-docs/dex_hff/*.xlsx
+# (docs/index.html, app.js, data/*.json), not the raw pipeline inputs/scripts.
+docs/dex_hff/
