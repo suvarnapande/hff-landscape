@@ -19,6 +19,7 @@
   <a class="navbar-brand" href="#">HFF evidence map</a>
   <div class="navbar-nav">
     <button class="nav-link active" data-tab="overview">Overview</button>
+    <button class="nav-link" data-tab="gallery">Gallery</button>
     <button class="nav-link" data-tab="explorer">Explorer</button>
     <button class="nav-link" data-tab="country">Country profile</button>
     <button class="nav-link" data-tab="methods">Methods</button>
@@ -45,6 +46,21 @@
       <div class="card">
         <div class="card-header">Studies by financing function</div>
         <div class="card-body"><div id="ov-func" class="plot" style="height:300px"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GALLERY ============ -->
+  <section class="tab-pane" id="pane-gallery">
+    <div class="theme-wrap">
+      <div id="gal-index">
+        <div class="section-index" id="gal-section-index"></div>
+      </div>
+      <div id="gal-section" style="display:none">
+        <button class="back-link" id="gal-back">&larr; All sections</button>
+        <h2 class="hero-title" id="gal-sec-title"></h2>
+        <p class="theme-blurb" id="gal-sec-blurb"></p>
+        <div class="fig-grid" id="gal-sec-grid"></div>
       </div>
     </div>
   </section>
@@ -299,6 +315,21 @@
 
 </main>
 
+<div class="modal-backdrop" id="fig-modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="fig-modal-title"></h3>
+        <button class="modal-close" id="fig-modal-close">Close</button>
+      </div>
+      <div class="modal-body">
+        <img class="modal-fig" id="fig-modal-img" src="" alt="">
+        <p class="fig-caption" id="fig-modal-caption" style="margin-top:.6rem"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <footer class="site-footer">
   Sources: HFF extraction pipeline (LLM-assisted classification, GLM/Sonnet/DeepSeek consensus)
   · World Bank (income groups, population) · IHME GBD 2023 &amp; IHME Health Spending 1995–2022
@@ -308,7 +339,7 @@
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js" integrity="sha384-EcVTHT5RdDTvzbTIbNOtaNxNALeJYDgmv5Crp3NBmcdrCPrDnqp6I1+ETJ/FCFHI" crossorigin="anonymous"></script>
-<script type="module" src="app.js?v=2026-09-15"></script>
+<script type="module" src="app.js?v=2026-09-15b"></script>
 
 </body>
 </html>

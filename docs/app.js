@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-09-15";
+const BUILD = "2026-09-15b";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -639,6 +639,8 @@ if (typeof document !== "undefined") {
   const BASE_FONT = { family: "Inter, sans-serif", size: 12, color: "#1c2733" };
 
   let db = null;
+  let GALLERY = [];
+  let FIG_INDEX = {};
   const state = {
     filt: null,
     result: null,
@@ -677,6 +679,22 @@ if (typeof document !== "undefined") {
       if (selected && selected.includes(lab)) o.selected = true;
       sel.appendChild(o);
     }
+  }
+
+  function openModal(file) {
+    const f = FIG_INDEX[file];
+    if (!f) return;
+    $("fig-modal-title").textContent = f.title;
+    const img = $("fig-modal-img");
+    img.src = "figures/" + f.file;
+    img.alt = f.title;
+    $("fig-modal-caption").textContent = f.caption;
+    $("fig-modal").classList.add("open");
+  }
+
+  function closeModal() {
+    $("fig-modal").classList.remove("open");
+    $("fig-modal-img").src = "";
   }
 
   function switchTab(name) {
@@ -775,6 +793,56 @@ if (typeof document !== "undefined") {
       plot_bgcolor: "rgba(0,0,0,0)",
       paper_bgcolor: "rgba(0,0,0,0)"
     }, PLOTLY_CFG);
+  }
+
+  function renderGalleryIndex() {
+    const idx = $("gal-section-index");
+    idx.textContent = "";
+    GALLERY.forEach((sec, i) => {
+      const card = el("button", "section-card");
+      const title = el("div", "sec-title");
+      title.textContent = sec.title;
+      const count = el("div", "sec-count");
+      count.textContent = sec.figs.length + " figures";
+      card.appendChild(title);
+      card.appendChild(count);
+      card.addEventListener("click", () => showSection(i));
+      idx.appendChild(card);
+    });
+  }
+
+  function showSection(i) {
+    const sec = GALLERY[i];
+    $("gal-index").style.display = "none";
+    $("gal-section").style.display = "block";
+    $("gal-sec-title").textContent = sec.title;
+    $("gal-sec-blurb").textContent = sec.blurb.replace(/\s+/g, " ").trim();
+    const grid = $("gal-sec-grid");
+    grid.textContent = "";
+    for (const f of sec.figs) {
+      const card = el("div", "fig-card");
+      const img = el("img");
+      img.src = "figures/" + f.file;
+      img.alt = f.title;
+      img.loading = "lazy";
+      img.addEventListener("click", () => openModal(f.file));
+      card.appendChild(img);
+      const body = el("div", "fig-body");
+      const ft = el("div", "fig-title");
+      ft.textContent = f.title;
+      const fc = el("div", "fig-caption");
+      fc.textContent = f.caption.replace(/\s+/g, " ").trim();
+      body.appendChild(ft);
+      body.appendChild(fc);
+      card.appendChild(body);
+      grid.appendChild(card);
+    }
+    window.scrollTo(0, 0);
+  }
+
+  function hideSection() {
+    $("gal-section").style.display = "none";
+    $("gal-index").style.display = "block";
   }
 
   // Methods selection funnel: rows from content.json. `records`
@@ -1396,6 +1464,10 @@ if (typeof document !== "undefined") {
     for (const b of document.querySelectorAll(".navbar .nav-link")) {
       b.addEventListener("click", () => switchTab(b.dataset.tab));
     }
+    $("fig-modal-close").addEventListener("click", closeModal);
+    $("fig-modal").addEventListener("click", e => { if (e.target === $("fig-modal")) closeModal(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+    $("gal-back").addEventListener("click", hideSection);
 
     const get = async name => {
       // ?v=BUILD cache-buster; BUILD is stamped at publish time (see top).
@@ -1407,8 +1479,13 @@ if (typeof document !== "undefined") {
       ["dict", "studies", "geo", "function", "outcome", "countries", "content"].map(get));
     db = loadData({ dict, studies, geo, func, outcome, countries, content });
 
+    GALLERY = db.content.gallery || [];
+    FIG_INDEX = {};
+    for (const sec of GALLERY) for (const f of sec.figs) FIG_INDEX[f.file] = f;
+
     renderOverview();
     renderOverviewCharts();
+    renderGalleryIndex();
     renderFunnel();
     setupExplorerControls();
     refreshExplorer();
