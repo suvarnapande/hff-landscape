@@ -62,3 +62,50 @@ table and are therefore excluded from country-level views (map, country profile)
 still counted everywhere else. Extending the reference table with these countries' income
 group/population/DALY/spending data would need a separate data-sourcing pass; `build_data.py`
 prints the full unmatched-name list (with counts) so this can be prioritized.
+
+## The opportunity matrix (`fig_funder_opportunity.png`)
+
+Modeled on HEE's `fig_funder_opportunity.webp` — a heatmap crossing disease area against
+income group, showing each disease's share of research divided by its share of disease
+burden (GBD DALYs) within that income level. Deep red means research is thin relative to
+burden; blue means it's disproportionately well covered.
+
+HFF can't build that exact chart: there's no `funder` field in the extraction, and there's
+no burden dataset broken out *by financing function* (DALYs measure disease burden, not
+which financing function needs more research). So the two axes here are different, and the
+"burden" denominator is replaced with a within-corpus reference:
+
+- **Rows — disease category.** Built from `mesh_theme`, but only for records where
+  `mesh_source == "pubmed"` (a true MeSH term list from PubMed metadata, not the
+  OpenAlex-fallback subject hierarchy used elsewhere, e.g. in `fig_topic_landscape.png`).
+  Each record's semicolon-separated MeSH terms are keyword-matched
+  (`MESH_DISEASE_KEYWORDS` in `build_figures.py`) against 11 broad groups modeled on HEE's
+  own MeSH C-tree groupings (Infectious, Neoplasms, Cardiovascular, Chronic respiratory,
+  Digestive, Neurological & mental, Musculoskeletal, Skin, Maternal & neonatal, Metabolic &
+  nutritional, Injuries) and assigned to whichever category has the most matching terms.
+  Demographic/methods MeSH terms (*Humans*, *Female*, *United States*, *Cross-Sectional
+  Studies*, ...) never match anything, which is correct — they aren't diseases. Records
+  with no matching term (most financing-function papers aren't about a specific disease at
+  all — they're about Medicaid, insurance design, PFM reform, etc.) are excluded from this
+  figure entirely: 34.9% of the 20,164 PubMed-MeSH records matched a category, 7,031
+  studies in total.
+- **Columns — financing function**, the same multi-value tag as everywhere else in the
+  dashboard (a study counts toward every function it's tagged with).
+- **Cell value** = *(that disease's share of tags for that function)* ÷ *(that function's
+  overall share across all 7,031 disease-tagged studies)*. A value of 2× means that disease
+  area is tagged with that function twice as often as the disease-tagged corpus is on
+  average; 0.5× means half as often. This is a **relative-emphasis index within HFF's own
+  data**, not a burden-adjusted "evidence gap" the way HEE's version is — the footnote baked
+  into the image itself says so explicitly, so the two charts are never confused for
+  measuring the same thing.
+- **Grey cells** (`n=`) have fewer than 5 studies for that specific disease/function
+  pairing — too few to report a ratio, same threshold logic as HEE's own "<15" rule, scaled
+  down for HFF's smaller disease-tagged subset.
+
+Latest build: infectious-disease studies are tagged *Recurrent financing (supply chain)*
+2.1× as often as the disease-tagged average (vaccines, HIV/TB/malaria commodities — supply
+chains are central to how that research frames financing), while musculoskeletal studies
+are tagged *Revenue Raising* only 0.32× as often — the widest gaps in either direction.
+Row order is sorted by each disease's mean ratio across its non-grey cells, so the top of
+the chart reads as the areas getting relatively *less* financing-function-specific research
+attention than average, and the bottom as relatively *more*.
