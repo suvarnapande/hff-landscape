@@ -36,6 +36,12 @@ writes under `docs/data/texts/` are published output and are committed like the 
 Runtime deps are pinned jsdelivr CDNs: plotly.js-dist-min 2.35.2, tom-select 2.3.1,
 noUiSlider 15.8.1, Google Fonts (Newsreader + Inter). No build step, no bundler.
 
+`docs/dex_hff/build_figures.py` (not committed, run locally) additionally needs `plotly` and
+`kaleido` (`pip install plotly kaleido`) for the one Gallery figure that needs real country
+geometry (`fig_map_bivariate.png`) — Plotly's built-in map is rendered to a PNG via kaleido and
+composited into the usual matplotlib headline/footnote layout, so every figure's typography
+stays in one place.
+
 ## What changed from the HEE dashboard, and why
 
 HEE's fields describe *economic evaluations of interventions* (does the study use a QALY,
@@ -109,3 +115,30 @@ are tagged *Revenue Raising* only 0.32× as often — the widest gaps in either 
 Row order is sorted by each disease's mean ratio across its non-grey cells, so the top of
 the chart reads as the areas getting relatively *less* financing-function-specific research
 attention than average, and the bottom as relatively *more*.
+
+## Two more figures worth a methodology note
+
+**`fig_topic_landscape_treemap.png`** — the same OpenAlex-style subfield taxonomy as
+`fig_topic_landscape.png`'s circular bar chart, laid out as a treemap instead. HFF's version
+is dominated by one subfield ("Economics and Econometrics", ~26% of tagged studies, 2.1× the
+next-largest) far more than HEE's own circular chart is by any single clinical specialty —
+a real difference (financing-function research clusters into generic economics/policy topics
+much more than clinical cost-effectiveness research does), not a formatting bug. Bar-length
+encoding makes that skew look like a single broken spoke, so the treemap exists alongside the
+circular chart as an area-encoded alternative. Getting it to render well needed two
+departures from a textbook treemap: a flat (non-nested) squarified layout — nesting by
+domain first degenerates into thin slivers when, as here, only two domains matter at any
+real scale — and cell area proportional to √(studies) rather than studies directly, since
+the linear scale is so dominated by one cell that every other one would collapse to an
+unreadable sliver. The circular chart remains the exact-linear-scale reference; the treemap
+trades that for legibility, and says so in its own footnote.
+
+**`fig_map_bivariate.png`** — modeled directly on HEE's `fig_map_bivariate.webp`: a 3×3
+bivariate choropleth crossing each country's disease burden (GBD 2023 DALYs, tertiles)
+against its HFF research volume (study-country pairs, tertiles). Unlike the opportunity
+matrix, this one needed no conceptual substitution — HFF has exactly the two country-level
+ingredients HEE's version uses. It's also the only Gallery figure needing real country
+geometry, which the rest of `build_figures.py` doesn't otherwise touch (the interactive
+dashboard's map uses Plotly loaded from a CDN in the browser; this is Plotly used locally, at
+build time, purely to rasterize a map tile that gets composited into the same matplotlib
+headline/footnote layout as every other figure).
