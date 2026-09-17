@@ -21,6 +21,7 @@
     <button class="nav-link active" data-tab="overview">Overview</button>
     <button class="nav-link" data-tab="gallery">Gallery</button>
     <button class="nav-link" data-tab="explorer">Explorer</button>
+    <button class="nav-link" data-tab="landscape">Country landscape</button>
     <button class="nav-link" data-tab="country">Country profile</button>
     <button class="nav-link" data-tab="methods">Methods</button>
   </div>
@@ -163,7 +164,7 @@
             </div>
           </div>
           <div class="card">
-            <div class="card-header">Countries — any two variables</div>
+            <div class="card-header">Countries — any two variables (bubble size = studies)</div>
             <div class="card-body">
               <div class="chart-toolbar">
                 <div class="tb-field wide"><label for="x-scatter-x">X axis</label><select id="x-scatter-x" class="form-select"></select></div>
@@ -180,6 +181,48 @@
             <div class="table-wrap"><table class="dataTable" id="x-table"></table></div>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COUNTRY LANDSCAPE ============ -->
+  <section class="tab-pane" id="pane-landscape">
+    <div class="card">
+      <div class="card-body">
+        <p class="fig-caption">Every country by disease burden, health spending per person, and
+          income group — bubble size is the number of HFF studies naming that country. Click a
+          bubble to see that country's financing-function and outcome-domain spread below.
+          Unfiltered — shows the whole dataset, independent of the Explorer tab's filters.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Disease burden &times; health spending &times; income group</div>
+      <div class="card-body"><div id="land-scatter" class="plot" style="height:440px"></div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header" id="land-func-title">Financing-function mix</div>
+        <div class="card-body"><div id="land-func-mix" class="plot" style="height:340px"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header" id="land-outcome-title">Outcome-domain mix</div>
+        <div class="card-body"><div id="land-outcome-mix" class="plot" style="height:340px"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" id="land-cross-title">Outcome domain &times; financing function</div>
+      <div class="card-body">
+        <p class="fig-caption">Row shares: of this country's studies reporting each outcome
+          domain, the share that also carry each financing-function tag. A study can carry more
+          than one tag of either kind. Click a cell to read the title and abstract of every study
+          behind it.</p>
+        <div id="land-cross-heatmap" class="plot" style="height:420px"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <button class="back-link" id="land-author-link">See who leads this research: the
+          local-authorship map across all countries &rarr;</button>
       </div>
     </div>
   </section>
@@ -352,6 +395,7 @@
     </div>
   </div>
 </div>
+
 
 <footer class="site-footer">
   Sources: HFF extraction pipeline (LLM-assisted classification, GLM/Sonnet/DeepSeek consensus)

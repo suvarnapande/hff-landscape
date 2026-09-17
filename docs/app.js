@@ -247,7 +247,8 @@ export function applyFilters(db, filt) {
       studies: counts[c],
       per100k: ratio(counts[c], dalys == null ? null : dalys / 1e5),
       per_bn: ratio(counts[c], spend),
-      per_million: ratio(counts[c], pop == null ? null : pop / 1e6)
+      per_million: ratio(counts[c], pop == null ? null : pop / 1e6),
+      spend_per_capita: (spend != null && pop) ? (spend * 1e9) / pop : null
     };
   });
 
@@ -646,6 +647,85 @@ export function studiesStrip(db, iso3, mask) {
   return rows;
 }
 
+// Financing-function and outcome-domain mix for one country, optionally
+// restricted to a study mask (pass null for the whole dataset) — used by the
+// Country landscape tab's click-through drill-down. A study can carry >1 tag
+// of either kind, so shares needn't sum to 100%.
+export function functionOutcomeMix(db, iso3, mask) {
+  const ci = db.countries.findIndex(r => r.iso3 === iso3);
+  if (ci < 0) return null;
+  const g = db.geo;
+  const sSet = new Set();
+  for (let i = 0; i < g.s.length; i++) {
+    if (g.c[i] !== ci) continue;
+    const s = g.s[i];
+    if (mask && !mask[s]) continue;
+    sSet.add(s);
+  }
+  // study -> set of tags (excluding "Unclear"), for both the bar-chart tally
+  // below and the function x outcome co-occurrence cross-tab.
+  const tagsOf = (junction, grps) => {
+    const m = new Map();
+    for (let i = 0; i < junction.s.length; i++) {
+      const s = junction.s[i];
+      if (!sSet.has(s)) continue;
+      const grp = grps[junction.g[i]];
+      if (grp === "Unclear") continue;
+      if (!m.has(s)) m.set(s, new Set());
+      m.get(s).add(grp);
+    }
+    return m;
+  };
+  const tally = tagMap => {
+    const counts = new Map();
+    for (const tags of tagMap.values()) {
+      for (const t of tags) counts.set(t, (counts.get(t) || 0) + 1);
+    }
+    const rows = [...counts.entries()]
+      .map(([grp, n]) => ({ grp, n, pct: 100 * n / sSet.size }))
+      .sort((a, b) => b.n - a.n);
+    return { rows };
+  };
+  const funcTags = tagsOf(db.function, db.function_grps);
+  const outTags = tagsOf(db.outcome, db.outcome_grps);
+  const crossCounts = new Map();
+  const crossStudies = new Map(); // "function|outcome" -> Set of study indices
+  for (const [s, funcs] of funcTags) {
+    const outs = outTags.get(s);
+    if (!outs) continue;
+    for (const fn of funcs) {
+      for (const o of outs) {
+        const key = fn + "|" + o;
+        crossCounts.set(key, (crossCounts.get(key) || 0) + 1);
+        if (!crossStudies.has(key)) crossStudies.set(key, new Set());
+        crossStudies.get(key).add(s);
+      }
+    }
+  }
+  const functionMix = tally(funcTags);
+  const outcomeMix = tally(outTags);
+  const funcOrder = functionMix.rows.map(r => r.grp);
+  const outOrder = outcomeMix.rows.map(r => r.grp);
+  // Rows = outcome domain, columns = financing function; row-normalized by
+  // each outcome's own total (share of this outcome's studies that also
+  // carry each financing function).
+  const outTotalOf = new Map(outcomeMix.rows.map(r => [r.grp, r.n]));
+  const crossCountRow = o => funcOrder.map(fn => crossCounts.get(fn + "|" + o) || 0);
+  const crossCounts2d = outOrder.map(crossCountRow);
+  const crossGrid = outOrder.map((o, i) => {
+    const total = outTotalOf.get(o) || 0;
+    return crossCounts2d[i].map(n => total ? 100 * n / total : 0);
+  });
+  return {
+    iso3, country: db.countries[ci].country, n_studies: sSet.size,
+    function_mix: functionMix, outcome_mix: outcomeMix,
+    cross_tab: {
+      row_order: outOrder, col_order: funcOrder, grid: crossGrid, counts: crossCounts2d,
+      studies: crossStudies // key: "<function>|<outcome>"
+    }
+  };
+}
+
 export function countryFacts(db, iso3) {
   const r = db.countries.find(x => x.iso3 === iso3);
   if (!r) return [];
@@ -787,6 +867,141 @@ if (typeof document !== "undefined") {
     $("study-modal").classList.remove("open");
   }
 
+  // Financing-function / outcome-domain mix bar, reused by the Country
+  // landscape tab below.
+  function mixBarTrace(rows, color) {
+    const top = rows.slice(0, 10).slice().reverse();
+    return [{
+      type: "bar", orientation: "h",
+      y: top.map(r => r.grp), x: top.map(r => r.pct),
+      marker: { color },
+      text: top.map(r => fmtNum(r.n)),
+      textposition: "outside",
+      hovertemplate: "%{y}: %{x:.1f}%<extra></extra>"
+    }];
+  }
+
+  function mixLayout() {
+    return {
+      font: BASE_FONT,
+      margin: { t: 10, b: 30, l: 190, r: 30 },
+      xaxis: { title: "share of this country's studies (%)", gridcolor: "#eeebe3" },
+      yaxis: { automargin: true },
+      plot_bgcolor: "rgba(0,0,0,0)",
+      paper_bgcolor: "rgba(0,0,0,0)"
+    };
+  }
+
+  function crossTabTrace(ct) {
+    return [{
+      type: "heatmap",
+      z: ct.grid, x: ct.col_order, y: ct.row_order,
+      text: ct.counts.map(row => row.map(n => "n=" + n)),
+      hovertemplate: "%{y} × %{x}: %{z:.0f}%<br>%{text}<extra></extra>",
+      colorscale: [[0, "#eef5f5"], [1, "#123a40"]],
+      showscale: true,
+      colorbar: { title: "%", thickness: 12 }
+    }];
+  }
+
+  function crossTabLayout() {
+    return {
+      font: BASE_FONT,
+      margin: { t: 10, b: 110, l: 190, r: 20 },
+      xaxis: { tickangle: -30, automargin: true },
+      yaxis: { automargin: true },
+      plot_bgcolor: "rgba(0,0,0,0)",
+      paper_bgcolor: "rgba(0,0,0,0)"
+    };
+  }
+
+  // Set on every showCountryMix() call, read fresh by the heatmap's click
+  // handler (bound once) — same pattern as stripIndex/renderStudiesStrip.
+  let landCrossIndex = null;
+
+  // Country landscape tab: disease burden x health spending x income group,
+  // bubble size = studies, unfiltered (whole dataset). Clicking a bubble
+  // fills in that country's financing-function mix, outcome-domain mix, and
+  // their cross-tab below — the "spread of financing function and outcomes"
+  // alongside burden, spending and income in one place. Clicking a cell in
+  // the cross-tab opens the title/abstract of every study behind it.
+  function showCountryMix(iso3) {
+    const mix = functionOutcomeMix(db, iso3, null);
+    if (!mix) return;
+    $("land-func-title").textContent = "Financing-function mix — " + mix.country +
+      " (" + fmtNum(mix.n_studies) + (mix.n_studies === 1 ? " study" : " studies") + ")";
+    $("land-outcome-title").textContent = "Outcome-domain mix — " + mix.country;
+    $("land-cross-title").textContent = "Outcome domain × financing function — " + mix.country;
+    window.Plotly.react("land-func-mix", mixBarTrace(mix.function_mix.rows, ACCENT), mixLayout(), PLOTLY_CFG);
+    window.Plotly.react("land-outcome-mix", mixBarTrace(mix.outcome_mix.rows, "#b08d3e"), mixLayout(), PLOTLY_CFG);
+    window.Plotly.react("land-cross-heatmap", crossTabTrace(mix.cross_tab), crossTabLayout(), PLOTLY_CFG);
+    landCrossIndex = { iso3: mix.iso3, cross_tab: mix.cross_tab };
+
+    const crossDiv = $("land-cross-heatmap");
+    if (!crossDiv._cellClickBound) {
+      crossDiv.on("plotly_click", ev => {
+        const pt = ev.points && ev.points[0];
+        if (!pt || !landCrossIndex) return;
+        const outcomeLabel = pt.y, functionLabel = pt.x;
+        const set = landCrossIndex.cross_tab.studies.get(functionLabel + "|" + outcomeLabel);
+        if (!set || !set.size) return;
+        openStudiesModal(landCrossIndex.iso3, outcomeLabel, functionLabel,
+          [...set].sort((a, b) => a - b));
+      });
+      crossDiv._cellClickBound = true;
+    }
+  }
+
+  function renderLandscape() {
+    const rows = db.countries
+      .map(r => ({
+        iso3: r.iso3, country: r.country, income: r.income,
+        dalys: num(r.dalys), studies: r.studies,
+        spend_per_capita: (num(r.total_spend_bn) != null && r.pop) ? (num(r.total_spend_bn) * 1e9) / r.pop : null
+      }))
+      .filter(r => r.studies > 0 && r.dalys != null && r.dalys > 0 &&
+        r.spend_per_capita != null && r.spend_per_capita > 0 && r.income != null);
+    const maxStudies = rows.reduce((m, r) => Math.max(m, r.studies), 1);
+    const bubbleSize = n => 6 + 30 * Math.sqrt(n / maxStudies);
+    const traces = db.incLv.map(inc => {
+      const sub = rows.filter(r => r.income === inc);
+      return {
+        type: "scatter", mode: "markers", name: inc,
+        x: sub.map(r => r.dalys), y: sub.map(r => r.spend_per_capita),
+        customdata: sub.map(r => r.iso3),
+        text: sub.map(r => esc(r.country) + "<br>" + fmtNum(r.studies) + " studies — click for mix"),
+        hoverinfo: "text",
+        marker: {
+          color: db.palInc[inc], size: sub.map(r => bubbleSize(r.studies)), opacity: 0.75,
+          line: { color: "white", width: 0.5 }
+        }
+      };
+    });
+    window.Plotly.react("land-scatter", traces, {
+      font: BASE_FONT,
+      margin: { t: 20, b: 60, l: 80, r: 20 },
+      legend: hLegend(-0.18),
+      xaxis: { type: "log", title: "disease burden, DALYs (log)", gridcolor: "#eeebe3" },
+      yaxis: { type: "log", title: "health spending per person, US$ PPP (log)", gridcolor: "#eeebe3" },
+      plot_bgcolor: "rgba(0,0,0,0)",
+      paper_bgcolor: "rgba(0,0,0,0)"
+    }, PLOTLY_CFG);
+
+    const div = $("land-scatter");
+    if (!div._mixClickBound) {
+      div.on("plotly_click", ev => {
+        const pt = ev.points && ev.points[0];
+        if (!pt || pt.customdata == null) return;
+        showCountryMix(pt.customdata);
+      });
+      div._mixClickBound = true;
+    }
+    // Seed the mix panels with the most-studied country so the tab never
+    // opens looking empty.
+    const seed = rows.slice().sort((a, b) => b.studies - a.studies)[0];
+    if (seed) showCountryMix(seed.iso3);
+  }
+
   function switchTab(name) {
     for (const b of document.querySelectorAll(".navbar .nav-link")) {
       b.classList.toggle("active", b.dataset.tab === name);
@@ -806,6 +1021,11 @@ if (typeof document !== "undefined") {
     }
     if (name === "country" && window.Plotly) {
       for (const id of ["c-trend", "c-mix", "c-methods", "c-signals", "c-strip", "c-benchmark"]) {
+        if ($(id).data) window.Plotly.Plots.resize($(id));
+      }
+    }
+    if (name === "landscape" && window.Plotly) {
+      for (const id of ["land-scatter", "land-func-mix", "land-outcome-mix", "land-cross-heatmap"]) {
         if ($(id).data) window.Plotly.Plots.resize($(id));
       }
     }
@@ -1284,6 +1504,10 @@ if (typeof document !== "undefined") {
     const xv = db.registries.SCAT_X.get(xLabel);
     const yv = db.registries.SCAT_Y.get(yLabel);
     const pts = scatterPoints(db, state.result, xv, yv);
+    // Bubble area (not radius) scales with study count, so twice the studies
+    // reads as roughly twice the visual weight, not 4x.
+    const maxStudies = pts.reduce((m, r) => Math.max(m, r.studies), 1);
+    const bubbleSize = n => 6 + 26 * Math.sqrt(n / maxStudies);
     const traces = db.incLv.map(inc => {
       const rows = pts.filter(r => r.income === inc);
       return {
@@ -1294,7 +1518,10 @@ if (typeof document !== "undefined") {
         // country names are data-derived; Plotly renders hover text as HTML.
         text: rows.map(r => esc(r.country) + "<br>" + fmtNum(r.studies) + " studies"),
         hoverinfo: "text",
-        marker: { color: db.palInc[inc], size: 8, opacity: 0.8 }
+        marker: {
+          color: db.palInc[inc], size: rows.map(r => bubbleSize(r.studies)), opacity: 0.75,
+          line: { color: "white", width: 0.5 }
+        }
       };
     });
     window.Plotly.react("x-scatter", traces, {
@@ -1651,8 +1878,11 @@ if (typeof document !== "undefined") {
     $("fig-modal").addEventListener("click", e => { if (e.target === $("fig-modal")) closeModal(); });
     $("study-modal-close").addEventListener("click", closeStudyModal);
     $("study-modal").addEventListener("click", e => { if (e.target === $("study-modal")) closeStudyModal(); });
-    document.addEventListener("keydown", e => { if (e.key === "Escape") { closeModal(); closeStudyModal(); } });
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") { closeModal(); closeStudyModal(); }
+    });
     $("gal-back").addEventListener("click", hideSection);
+    $("land-author-link").addEventListener("click", () => openModal("fig_map_authorship.png"));
 
     const get = async name => {
       // ?v=BUILD cache-buster; BUILD is stamped at publish time (see top).
@@ -1675,6 +1905,7 @@ if (typeof document !== "undefined") {
     setupExplorerControls();
     refreshExplorer();
     setupCountryPane();
+    renderLandscape();
   }
 
   // err.message can embed data-derived text (URLs, server responses) —
