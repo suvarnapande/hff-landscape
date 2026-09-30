@@ -1,0 +1,352 @@
+{
+  "source": "HSF extraction 29 Sept v4",
+  "n_studies": 36495,
+  "n_fcas": 1179,
+  "n_country_level": 29182,
+  "last_year_with_wb_lookup": 2025,
+  "fcas_top_countries": {
+    "Nigeria": 297,
+    "Ethiopia": 184,
+    "Democratic Republic of the Congo": 76,
+    "Zimbabwe": 63,
+    "Burkina Faso": 56,
+    "Afghanistan": 43,
+    "Ukraine": 43,
+    "Myanmar": 41,
+    "Lebanon": 37,
+    "Mali": 37,
+    "Cameroon": 36,
+    "Sudan": 34,
+    "Nepal": 27,
+    "Mozambique": 26,
+    "Palestine": 24,
+    "Burundi": 23,
+    "Iraq": 17,
+    "Chad": 16,
+    "Sierra Leone": 15,
+    "Haiti": 13
+  },
+  "fcas_by_year": {
+    "2010": {
+      "fcas_that_year": 17,
+      "fcas_fixed_set": 44,
+      "country_level": 1062,
+      "share_pct": 1.6,
+      "share_fixed_pct": 4.14
+    },
+    "2011": {
+      "fcas_that_year": 18,
+      "fcas_fixed_set": 50,
+      "country_level": 1074,
+      "share_pct": 1.68,
+      "share_fixed_pct": 4.66
+    },
+    "2012": {
+      "fcas_that_year": 16,
+      "fcas_fixed_set": 67,
+      "country_level": 1216,
+      "share_pct": 1.32,
+      "share_fixed_pct": 5.51
+    },
+    "2013": {
+      "fcas_that_year": 26,
+      "fcas_fixed_set": 87,
+      "country_level": 1337,
+      "share_pct": 1.94,
+      "share_fixed_pct": 6.51
+    },
+    "2014": {
+      "fcas_that_year": 34,
+      "fcas_fixed_set": 89,
+      "country_level": 1434,
+      "share_pct": 2.37,
+      "share_fixed_pct": 6.21
+    },
+    "2015": {
+      "fcas_that_year": 48,
+      "fcas_fixed_set": 116,
+      "country_level": 1583,
+      "share_pct": 3.03,
+      "share_fixed_pct": 7.33
+    },
+    "2016": {
+      "fcas_that_year": 25,
+      "fcas_fixed_set": 108,
+      "country_level": 1734,
+      "share_pct": 1.44,
+      "share_fixed_pct": 6.23
+    },
+    "2017": {
+      "fcas_that_year": 42,
+      "fcas_fixed_set": 117,
+      "country_level": 1829,
+      "share_pct": 2.3,
+      "share_fixed_pct": 6.4
+    },
+    "2018": {
+      "fcas_that_year": 40,
+      "fcas_fixed_set": 130,
+      "country_level": 1984,
+      "share_pct": 2.02,
+      "share_fixed_pct": 6.55
+    },
+    "2019": {
+      "fcas_that_year": 43,
+      "fcas_fixed_set": 133,
+      "country_level": 2087,
+      "share_pct": 2.06,
+      "share_fixed_pct": 6.37
+    },
+    "2020": {
+      "fcas_that_year": 89,
+      "fcas_fixed_set": 174,
+      "country_level": 2170,
+      "share_pct": 4.1,
+      "share_fixed_pct": 8.02
+    },
+    "2021": {
+      "fcas_that_year": 101,
+      "fcas_fixed_set": 171,
+      "country_level": 2327,
+      "share_pct": 4.34,
+      "share_fixed_pct": 7.35
+    },
+    "2022": {
+      "fcas_that_year": 134,
+      "fcas_fixed_set": 177,
+      "country_level": 2336,
+      "share_pct": 5.74,
+      "share_fixed_pct": 7.58
+    },
+    "2023": {
+      "fcas_that_year": 155,
+      "fcas_fixed_set": 184,
+      "country_level": 2278,
+      "share_pct": 6.8,
+      "share_fixed_pct": 8.08
+    },
+    "2024": {
+      "fcas_that_year": 104,
+      "fcas_fixed_set": 140,
+      "country_level": 2334,
+      "share_pct": 4.46,
+      "share_fixed_pct": 6.0
+    },
+    "2025": {
+      "fcas_that_year": 138,
+      "fcas_fixed_set": 164,
+      "country_level": 2397,
+      "share_pct": 5.76,
+      "share_fixed_pct": 6.84
+    }
+  },
+  "fcas_first_listed_year": {
+    "Togo": 2010,
+    "Afghanistan": 2010,
+    "Palestine": 2010,
+    "Papua New Guinea": 2010,
+    "Sudan": 2010,
+    "Cameroon": 2010,
+    "Nepal": 2010,
+    "Tajikistan": 2010,
+    "Bosnia and Herzegovina": 2010,
+    "Zimbabwe": 2011,
+    "Democratic Republic of the Congo": 2011,
+    "Burundi": 2011,
+    "Liberia": 2011,
+    "Kosovo": 2011,
+    "Georgia": 2011,
+    "Solomon Islands": 2012,
+    "Yemen": 2012,
+    "Timor-Leste": 2012,
+    "Eritrea": 2012,
+    "Myanmar": 2013,
+    "Haiti": 2013,
+    "Chad": 2013,
+    "Republic of the Congo": 2013,
+    "Guinea-Bissau": 2013,
+    "Sierra Leone": 2013,
+    "Mali": 2014,
+    "Iraq": 2014,
+    "Syria": 2014,
+    "Malawi": 2014,
+    "Madagascar": 2015,
+    "Cote d'Ivoire": 2015,
+    "Comoros": 2015,
+    "Lebanon": 2016,
+    "Central African Republic": 2016,
+    "Gambia": 2016,
+    "South Sudan": 2016,
+    "Kiribati": 2017,
+    "Mozambique": 2018,
+    "Burkina Faso": 2020,
+    "Nigeria": 2020,
+    "Niger": 2020,
+    "Laos": 2021,
+    "The Gambia": 2021,
+    "Ethiopia": 2022,
+    "Armenia": 2022,
+    "Ukraine": 2023,
+    "Libya": 2024,
+    "Venezuela": 2024,
+    "Tuvalu": 2026
+  },
+  "outcome_domains": {
+    "Efficiency in the use of resources": 5181,
+    "Financial protection": 4964,
+    "Equitable distribution of health system resources": 3485,
+    "Improved level and distribution of health": 3234,
+    "Quality of service provision": 1930,
+    "Responsiveness to citizens": 1156,
+    "Transparency and accountability": 842,
+    "Economic development": 604,
+    "Other": 20735,
+    "Unclear": 1409
+  },
+  "other_themes": {
+    "Service use, access and coverage": 4518,
+    "Levels, trends and drivers of spending, prices or funding": 3944,
+    "Adequacy or sufficiency of financing": 1322,
+    "Insurance markets and enrolment behaviour": 1292,
+    "Stakeholder perceptions and implementation experience": 884,
+    "Responses to health taxes": 720,
+    "Priority-setting, HTA and reimbursement decision processes": 616,
+    "Provider or organisation financial performance": 528,
+    "Health-workforce outcomes": 462,
+    "Technical performance of a financing mechanism": 335,
+    "Supply-chain and operational management": 266,
+    "Not clustered": 6524,
+    "n_other": 20735
+  },
+  "outcome_share_2010_vs_2025_pct": {
+    "Efficiency in the use of resources": [
+      13.4,
+      14.4
+    ],
+    "Financial protection": [
+      10.3,
+      14.3
+    ],
+    "Equitable distribution of health system resources": [
+      10.3,
+      10.2
+    ],
+    "Improved level and distribution of health": [
+      6.4,
+      11.2
+    ],
+    "Quality of service provision": [
+      5.9,
+      5.0
+    ],
+    "Responsiveness to citizens": [
+      2.0,
+      3.4
+    ],
+    "Transparency and accountability": [
+      1.3,
+      2.4
+    ],
+    "Economic development": [
+      1.0,
+      2.0
+    ]
+  },
+  "outcome_by_context_pct": {
+    "Efficiency in the use of resources": {
+      "FCAS": 10.4,
+      "Low income": 12.0,
+      "Lower-middle": 10.0,
+      "Upper-middle": 13.8,
+      "High income": 16.2
+    },
+    "Financial protection": {
+      "FCAS": 22.1,
+      "Low income": 20.2,
+      "Lower-middle": 29.4,
+      "Upper-middle": 21.4,
+      "High income": 8.0
+    },
+    "Equitable distribution of health system resources": {
+      "FCAS": 10.3,
+      "Low income": 13.1,
+      "Lower-middle": 12.4,
+      "Upper-middle": 11.4,
+      "High income": 8.5
+    },
+    "Improved level and distribution of health": {
+      "FCAS": 7.9,
+      "Low income": 7.1,
+      "Lower-middle": 7.6,
+      "Upper-middle": 8.6,
+      "High income": 8.5
+    },
+    "Quality of service provision": {
+      "FCAS": 6.4,
+      "Low income": 7.3,
+      "Lower-middle": 5.1,
+      "Upper-middle": 4.6,
+      "High income": 5.6
+    },
+    "Responsiveness to citizens": {
+      "FCAS": 4.1,
+      "Low income": 4.0,
+      "Lower-middle": 4.4,
+      "Upper-middle": 2.4,
+      "High income": 3.3
+    },
+    "Transparency and accountability": {
+      "FCAS": 4.6,
+      "Low income": 5.5,
+      "Lower-middle": 3.9,
+      "Upper-middle": 2.1,
+      "High income": 1.8
+    },
+    "Economic development": {
+      "FCAS": 1.5,
+      "Low income": 1.6,
+      "Lower-middle": 1.6,
+      "Upper-middle": 1.9,
+      "High income": 1.3
+    }
+  },
+  "context_n": {
+    "FCAS": 1179,
+    "Low income": 1508,
+    "Lower-middle": 4279,
+    "Upper-middle": 6048,
+    "High income": 17810
+  },
+  "figures": [
+    {
+      "file": "fig_fcas_countries_v4.png",
+      "title": "Nigeria and Ethiopia carry the FCAS evidence base",
+      "caption": "Studies about each fragile or conflict-affected country, top 20. 1,179 studies (3.2% of all) cover an FCAS country; Nigeria (297) and Ethiopia (184) appear in 41% of them."
+    },
+    {
+      "file": "fig_fcas_trend_v4.png",
+      "title": "FCAS research is growing, but list changes exaggerate the jump",
+      "caption": "Studies on fragile or conflict-affected countries per year (top) and as a share of country-level studies (bottom). By each year's list the share tripled, 1.8% (2010-14) to 5.4% (2021-25); on a fixed set of countries it rose only from 5.5% to 7.2%."
+    },
+    {
+      "file": "fig_outcome_domains_v4.png",
+      "title": "Most studies measure outcomes outside the named health-system goals",
+      "caption": "Share of studies investigating each outcome domain (a study can have several). 'Other' tags 57% of studies; among named goals, efficiency in resource use (14%) and financial protection (14%) lead."
+    },
+    {
+      "file": "fig_outcome_other_themes_v4.png",
+      "title": "'Other' outcomes are led by access and spending",
+      "caption": "Themes within the studies whose outcome domain is tagged 'Other'. Service use, access and coverage (22%) and levels, trends and drivers of spending, prices or funding (19%) are the largest themes."
+    },
+    {
+      "file": "fig_outcome_trend_v4.png",
+      "title": "Health outcomes and financial protection gain ground",
+      "caption": "Share of each year's studies investigating each named health-system goal, 2010-2025. Improved level/distribution of health rose from 6% to 11% and financial protection from 10% to 14%; the rest barely moved."
+    },
+    {
+      "file": "fig_outcome_by_context_v4.png",
+      "title": "FCAS studies look more like low-income than high-income evidence",
+      "caption": "Share of studies in each setting that investigate each health-system goal. Versus high-income settings, FCAS studies focus more on financial protection (22% vs 8%) and less on efficiency in resource use (10% vs 16%)."
+    }
+  ]
+}
