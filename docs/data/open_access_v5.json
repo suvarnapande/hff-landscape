@@ -1,0 +1,651 @@
+{
+  "source": "HSF extraction 29 Sept v5",
+  "n_studies": 36495,
+  "n_with_doi": 29793,
+  "oa_share_pct_of_doi": 66.6,
+  "n_with_author_countries": 24135,
+  "oa_share_pct_author_known": 67.6,
+  "oa_by_year": {
+    "2010": {
+      "n": 907,
+      "oa": 384,
+      "share_pct": 42.3
+    },
+    "2011": {
+      "n": 899,
+      "oa": 419,
+      "share_pct": 46.6
+    },
+    "2012": {
+      "n": 1049,
+      "oa": 534,
+      "share_pct": 50.9
+    },
+    "2013": {
+      "n": 1151,
+      "oa": 605,
+      "share_pct": 52.6
+    },
+    "2014": {
+      "n": 1295,
+      "oa": 744,
+      "share_pct": 57.5
+    },
+    "2015": {
+      "n": 1433,
+      "oa": 869,
+      "share_pct": 60.6
+    },
+    "2016": {
+      "n": 1538,
+      "oa": 944,
+      "share_pct": 61.4
+    },
+    "2017": {
+      "n": 1742,
+      "oa": 1081,
+      "share_pct": 62.1
+    },
+    "2018": {
+      "n": 1914,
+      "oa": 1239,
+      "share_pct": 64.7
+    },
+    "2019": {
+      "n": 2053,
+      "oa": 1352,
+      "share_pct": 65.9
+    },
+    "2020": {
+      "n": 2183,
+      "oa": 1459,
+      "share_pct": 66.8
+    },
+    "2021": {
+      "n": 2295,
+      "oa": 1620,
+      "share_pct": 70.6
+    },
+    "2022": {
+      "n": 2313,
+      "oa": 1735,
+      "share_pct": 75.0
+    },
+    "2023": {
+      "n": 2234,
+      "oa": 1712,
+      "share_pct": 76.6
+    },
+    "2024": {
+      "n": 2375,
+      "oa": 1836,
+      "share_pct": 77.3
+    },
+    "2025": {
+      "n": 2402,
+      "oa": 1817,
+      "share_pct": 75.6
+    }
+  },
+  "oa_map": {
+    "min_studies": 20,
+    "n_countries": 98,
+    "n_above_average": 79,
+    "colour_midpoint_pct": 67.6,
+    "by_country": {
+      "Mozambique": {
+        "n": 30,
+        "oa_share_pct": 93.3
+      },
+      "Uganda": {
+        "n": 208,
+        "oa_share_pct": 90.9
+      },
+      "Sierra Leone": {
+        "n": 20,
+        "oa_share_pct": 90.0
+      },
+      "Mali": {
+        "n": 30,
+        "oa_share_pct": 90.0
+      },
+      "Democratic Republic of the Congo": {
+        "n": 39,
+        "oa_share_pct": 89.7
+      },
+      "Malawi": {
+        "n": 105,
+        "oa_share_pct": 89.5
+      },
+      "Ethiopia": {
+        "n": 278,
+        "oa_share_pct": 88.5
+      },
+      "Rwanda": {
+        "n": 59,
+        "oa_share_pct": 86.4
+      },
+      "Kenya": {
+        "n": 327,
+        "oa_share_pct": 86.2
+      },
+      "Ukraine": {
+        "n": 94,
+        "oa_share_pct": 86.2
+      },
+      "Lithuania": {
+        "n": 36,
+        "oa_share_pct": 86.1
+      },
+      "Cambodia": {
+        "n": 57,
+        "oa_share_pct": 86.0
+      },
+      "Peru": {
+        "n": 56,
+        "oa_share_pct": 83.9
+      },
+      "Republic of the Congo": {
+        "n": 43,
+        "oa_share_pct": 83.7
+      },
+      "Romania": {
+        "n": 86,
+        "oa_share_pct": 83.7
+      },
+      "Zimbabwe": {
+        "n": 54,
+        "oa_share_pct": 83.3
+      },
+      "United Republic of Tanzania": {
+        "n": 233,
+        "oa_share_pct": 83.3
+      },
+      "Zambia": {
+        "n": 104,
+        "oa_share_pct": 81.7
+      },
+      "South Africa": {
+        "n": 644,
+        "oa_share_pct": 81.7
+      },
+      "Netherlands": {
+        "n": 1076,
+        "oa_share_pct": 81.1
+      },
+      "Switzerland": {
+        "n": 894,
+        "oa_share_pct": 81.0
+      },
+      "Nigeria": {
+        "n": 369,
+        "oa_share_pct": 80.5
+      },
+      "Iran": {
+        "n": 491,
+        "oa_share_pct": 80.4
+      },
+      "Nepal": {
+        "n": 163,
+        "oa_share_pct": 80.4
+      },
+      "Hungary": {
+        "n": 163,
+        "oa_share_pct": 80.4
+      },
+      "Saudi Arabia": {
+        "n": 112,
+        "oa_share_pct": 80.4
+      },
+      "Slovakia": {
+        "n": 44,
+        "oa_share_pct": 79.5
+      },
+      "Bulgaria": {
+        "n": 82,
+        "oa_share_pct": 79.3
+      },
+      "Czechia": {
+        "n": 134,
+        "oa_share_pct": 79.1
+      },
+      "Poland": {
+        "n": 234,
+        "oa_share_pct": 78.2
+      },
+      "Burkina Faso": {
+        "n": 105,
+        "oa_share_pct": 78.1
+      },
+      "Norway": {
+        "n": 324,
+        "oa_share_pct": 77.8
+      },
+      "Jordan": {
+        "n": 49,
+        "oa_share_pct": 77.6
+      },
+      "LUX": {
+        "n": 31,
+        "oa_share_pct": 77.4
+      },
+      "Philippines": {
+        "n": 168,
+        "oa_share_pct": 77.4
+      },
+      "Afghanistan": {
+        "n": 22,
+        "oa_share_pct": 77.3
+      },
+      "Cameroon": {
+        "n": 57,
+        "oa_share_pct": 77.2
+      },
+      "Indonesia": {
+        "n": 324,
+        "oa_share_pct": 77.2
+      },
+      "MAC": {
+        "n": 26,
+        "oa_share_pct": 76.9
+      },
+      "KAZ": {
+        "n": 43,
+        "oa_share_pct": 76.7
+      },
+      "Senegal": {
+        "n": 43,
+        "oa_share_pct": 76.7
+      },
+      "Egypt": {
+        "n": 93,
+        "oa_share_pct": 76.3
+      },
+      "Bangladesh": {
+        "n": 169,
+        "oa_share_pct": 76.3
+      },
+      "Argentina": {
+        "n": 63,
+        "oa_share_pct": 76.2
+      },
+      "Brazil": {
+        "n": 417,
+        "oa_share_pct": 76.0
+      },
+      "United Kingdom": {
+        "n": 3492,
+        "oa_share_pct": 75.6
+      },
+      "Pakistan": {
+        "n": 223,
+        "oa_share_pct": 75.3
+      },
+      "Ghana": {
+        "n": 312,
+        "oa_share_pct": 75.3
+      },
+      "Mexico": {
+        "n": 178,
+        "oa_share_pct": 75.3
+      },
+      "Colombia": {
+        "n": 141,
+        "oa_share_pct": 75.2
+      },
+      "Belgium": {
+        "n": 489,
+        "oa_share_pct": 75.1
+      },
+      "Chile": {
+        "n": 132,
+        "oa_share_pct": 75.0
+      },
+      "Thailand": {
+        "n": 322,
+        "oa_share_pct": 74.2
+      },
+      "Sri Lanka": {
+        "n": 27,
+        "oa_share_pct": 74.1
+      },
+      "Lebanon": {
+        "n": 54,
+        "oa_share_pct": 74.1
+      },
+      "Laos": {
+        "n": 23,
+        "oa_share_pct": 73.9
+      },
+      "Malaysia": {
+        "n": 191,
+        "oa_share_pct": 73.8
+      },
+      "Qatar": {
+        "n": 57,
+        "oa_share_pct": 73.7
+      },
+      "Russia": {
+        "n": 266,
+        "oa_share_pct": 73.7
+      },
+      "Finland": {
+        "n": 143,
+        "oa_share_pct": 73.4
+      },
+      "Republic of Serbia": {
+        "n": 97,
+        "oa_share_pct": 73.2
+      },
+      "China": {
+        "n": 1947,
+        "oa_share_pct": 72.9
+      },
+      "Croatia": {
+        "n": 70,
+        "oa_share_pct": 72.9
+      },
+      "Iraq": {
+        "n": 21,
+        "oa_share_pct": 71.4
+      },
+      "Sweden": {
+        "n": 451,
+        "oa_share_pct": 71.4
+      },
+      "Denmark": {
+        "n": 229,
+        "oa_share_pct": 71.2
+      },
+      "Singapore": {
+        "n": 176,
+        "oa_share_pct": 71.0
+      },
+      "Australia": {
+        "n": 1404,
+        "oa_share_pct": 70.7
+      },
+      "United Arab Emirates": {
+        "n": 69,
+        "oa_share_pct": 69.6
+      },
+      "Spain": {
+        "n": 497,
+        "oa_share_pct": 69.4
+      },
+      "France": {
+        "n": 642,
+        "oa_share_pct": 69.3
+      },
+      "Estonia": {
+        "n": 32,
+        "oa_share_pct": 68.8
+      },
+      "Italy": {
+        "n": 671,
+        "oa_share_pct": 68.7
+      },
+      "Germany": {
+        "n": 1022,
+        "oa_share_pct": 68.7
+      },
+      "Georgia": {
+        "n": 22,
+        "oa_share_pct": 68.2
+      },
+      "South Korea": {
+        "n": 506,
+        "oa_share_pct": 68.2
+      },
+      "Portugal": {
+        "n": 181,
+        "oa_share_pct": 68.0
+      },
+      "Canada": {
+        "n": 1471,
+        "oa_share_pct": 67.8
+      },
+      "Japan": {
+        "n": 534,
+        "oa_share_pct": 67.6
+      },
+      "Slovenia": {
+        "n": 76,
+        "oa_share_pct": 67.1
+      },
+      "Vietnam": {
+        "n": 166,
+        "oa_share_pct": 66.9
+      },
+      "Myanmar": {
+        "n": 36,
+        "oa_share_pct": 66.7
+      },
+      "India": {
+        "n": 1000,
+        "oa_share_pct": 66.0
+      },
+      "Morocco": {
+        "n": 35,
+        "oa_share_pct": 65.7
+      },
+      "Hong Kong S.A.R.": {
+        "n": 138,
+        "oa_share_pct": 65.2
+      },
+      "Bosnia and Herzegovina": {
+        "n": 20,
+        "oa_share_pct": 65.0
+      },
+      "Austria": {
+        "n": 167,
+        "oa_share_pct": 64.7
+      },
+      "Cyprus": {
+        "n": 38,
+        "oa_share_pct": 63.2
+      },
+      "United States of America": {
+        "n": 10295,
+        "oa_share_pct": 62.9
+      },
+      "New Zealand": {
+        "n": 188,
+        "oa_share_pct": 62.8
+      },
+      "Greece": {
+        "n": 158,
+        "oa_share_pct": 62.7
+      },
+      "North Macedonia": {
+        "n": 21,
+        "oa_share_pct": 61.9
+      },
+      "Ireland": {
+        "n": 264,
+        "oa_share_pct": 61.7
+      },
+      "Taiwan": {
+        "n": 366,
+        "oa_share_pct": 59.6
+      },
+      "Israel": {
+        "n": 158,
+        "oa_share_pct": 58.9
+      },
+      "Turkey": {
+        "n": 156,
+        "oa_share_pct": 55.8
+      },
+      "PRI": {
+        "n": 20,
+        "oa_share_pct": 55.0
+      },
+      "Tunisia": {
+        "n": 22,
+        "oa_share_pct": 50.0
+      }
+    }
+  },
+  "oa_by_author_country": {
+    "Kenya": {
+      "n": 327,
+      "oa_share_pct": 86.2
+    },
+    "South Africa": {
+      "n": 644,
+      "oa_share_pct": 81.7
+    },
+    "Netherlands": {
+      "n": 1076,
+      "oa_share_pct": 81.1
+    },
+    "Switzerland": {
+      "n": 894,
+      "oa_share_pct": 81.0
+    },
+    "Nigeria": {
+      "n": 369,
+      "oa_share_pct": 80.5
+    },
+    "Iran": {
+      "n": 491,
+      "oa_share_pct": 80.4
+    },
+    "Norway": {
+      "n": 324,
+      "oa_share_pct": 77.8
+    },
+    "Indonesia": {
+      "n": 324,
+      "oa_share_pct": 77.2
+    },
+    "Brazil": {
+      "n": 417,
+      "oa_share_pct": 76.0
+    },
+    "United Kingdom": {
+      "n": 3492,
+      "oa_share_pct": 75.6
+    },
+    "Belgium": {
+      "n": 489,
+      "oa_share_pct": 75.1
+    },
+    "Thailand": {
+      "n": 322,
+      "oa_share_pct": 74.2
+    },
+    "China": {
+      "n": 1947,
+      "oa_share_pct": 72.9
+    },
+    "Sweden": {
+      "n": 451,
+      "oa_share_pct": 71.4
+    },
+    "Australia": {
+      "n": 1404,
+      "oa_share_pct": 70.7
+    },
+    "Spain": {
+      "n": 497,
+      "oa_share_pct": 69.4
+    },
+    "France": {
+      "n": 642,
+      "oa_share_pct": 69.3
+    },
+    "Italy": {
+      "n": 671,
+      "oa_share_pct": 68.7
+    },
+    "Germany": {
+      "n": 1022,
+      "oa_share_pct": 68.7
+    },
+    "South Korea": {
+      "n": 506,
+      "oa_share_pct": 68.2
+    },
+    "Canada": {
+      "n": 1471,
+      "oa_share_pct": 67.8
+    },
+    "Japan": {
+      "n": 534,
+      "oa_share_pct": 67.6
+    },
+    "India": {
+      "n": 1000,
+      "oa_share_pct": 66.0
+    },
+    "United States of America": {
+      "n": 10295,
+      "oa_share_pct": 62.9
+    },
+    "Taiwan": {
+      "n": 366,
+      "oa_share_pct": 59.6
+    }
+  },
+  "income_group_mean_of_top_countries_pct": {
+    "LMIC": 77.2,
+    "HIC": 71.7
+  },
+  "oa_by_author_income_pct": {
+    "Low income": {
+      "n": 897,
+      "oa_share_pct": 86.4
+    },
+    "Lower middle income": {
+      "n": 3087,
+      "oa_share_pct": 74.3
+    },
+    "Upper middle income": {
+      "n": 5231,
+      "oa_share_pct": 74.8
+    },
+    "High income": {
+      "n": 19191,
+      "oa_share_pct": 66.5
+    }
+  },
+  "oa_by_team_pct": {
+    "High-income authors only": {
+      "n": 14899,
+      "oa_share_pct": 63.5
+    },
+    "Mixed high-income and LMIC team": {
+      "n": 4292,
+      "oa_share_pct": 77.2
+    },
+    "LMIC authors only": {
+      "n": 4149,
+      "oa_share_pct": 73.0
+    }
+  },
+  "n_income_known": 23340,
+  "figures": [
+    {
+      "file": "fig_oa_trend_v5.png",
+      "title": "Open access has become the norm",
+      "caption": "Share of each year's studies (with a DOI) that are open access. It rose from 42% in 2010 to 76% in 2025, passing half in 2012."
+    },
+    {
+      "file": "fig_map_oa_author_v5.png",
+      "title": "Where open-access research comes from",
+      "caption": "Open-access share of studies with at least one author based in each country. Blue = more open access than the average study; red = less. 79 of 98 author countries beat the average study (68%), which the large US output (63% open) pulls down. Among countries with ≥200 studies, Uganda is highest (91%) and Taiwan lowest (60%)."
+    },
+    {
+      "file": "fig_oa_author_countries_v5.png",
+      "title": "Authors in lower-income countries publish open access more often",
+      "caption": "Open-access share of studies with at least one author based in each country, the 25 most active author countries. Kenya tops the list (86%) and Taiwan is lowest (60%); the average is 77% across middle/low-income author countries vs 72% across high-income ones."
+    },
+    {
+      "file": "fig_oa_author_income_v5.png",
+      "title": "Research with lower-income authors is more often open access",
+      "caption": "Open-access share by where a study's authors are based (dashed line: all studies). 73% of LMIC-only author teams publish open access and 77% of mixed teams, vs 63% of teams based only in high-income countries."
+    }
+  ]
+}
