@@ -148,6 +148,32 @@ main { padding: 1.4rem 1.5rem 2.5rem; max-width: 1500px; margin: 0 auto; }
   color: var(--hff-ink);
   margin: 1.5rem 0 .8rem;
 }
+.overview-funder-feature { margin-top: 1.2rem; }
+.overview-figure-button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: #fff;
+  cursor: zoom-in;
+}
+.overview-figure-button:focus-visible {
+  outline: 3px solid var(--hff-accent);
+  outline-offset: 3px;
+}
+.overview-figure {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 680px;
+  object-fit: contain;
+}
+.overview-figure-note {
+  margin: .75rem 0 0;
+  color: var(--hff-muted);
+  font-size: .82rem;
+  line-height: 1.5;
+}
 
 /* ---- value boxes ---- */
 .value-box {

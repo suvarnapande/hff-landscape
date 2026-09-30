@@ -35,11 +35,37 @@ ROOT = Path(__file__).resolve().parent.parent  # docs/
 DATA = ROOT / "data"
 FIGS = ROOT / "figures"
 DEX = ROOT / "dex_hff"
-FIGS.mkdir(exist_ok=True)
 # v5 copy of build_figures.py: reads the HSF extraction 29 Sept v5 file (via make_v5_csv.py)
 # instead of the v2 CSV. Run after build_data_v5.py.
 RAW_CSV = DEX / "hsf_extraction_29sept_v5.csv"
 SOURCE_NAME = "HSF extraction 29 Sept v5"
+
+REQUIRED_INPUTS = [
+    DATA / "dict.json",
+    DATA / "studies.json",
+    DATA / "function.json",
+    DATA / "outcome.json",
+    DATA / "geo.json",
+    DATA / "countries.json",
+    DATA / "content.json",
+    RAW_CSV,
+    DEX / "topic_map.csv",
+    DEX / "F03_Total_DAH_forecast_1990-2030.xlsx",
+    DEX / "F07_DAH_by_source_change_2024-2025.xlsx",
+    DEX / "F11_Total_health_spending_per_person_by_WB_income_group_2000-2030.xlsx",
+    DEX / "F04_DAH_by_GBD_super-region_forecast_2015-2030.xlsx",
+    DEX / "F12_Total_health_spending_per_person_by_country_2025.xlsx",
+]
+
+missing_inputs = [path for path in REQUIRED_INPUTS if not path.is_file()]
+if missing_inputs:
+    missing_list = "\n".join(f"  - {path}" for path in missing_inputs)
+    raise FileNotFoundError(
+        "Cannot build the complete V5 figure gallery because required input files are missing:\n"
+        f"{missing_list}\n\nNo figures were generated."
+    )
+
+FIGS.mkdir(exist_ok=True)
 
 ACCENT = "#1f5fa8"
 GREY = "#adb5bd"
