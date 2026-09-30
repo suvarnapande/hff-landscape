@@ -222,6 +222,13 @@ main { padding: 1.4rem 1.5rem 2.5rem; max-width: 1500px; margin: 0 auto; }
   line-height: 1.5;
   margin-top: .3rem;
 }
+.fig-footnote {
+  color: var(--hff-muted);
+  font-size: .74rem;
+  line-height: 1.4;
+  margin-top: .45rem;
+  font-style: italic;
+}
 .section-index {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

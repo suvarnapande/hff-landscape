@@ -4,6 +4,7 @@ const BUILD = "2026-09-15q";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
+const UNCLEAR_FOOTNOTE = '"Unclear" indicates that the available record did not provide sufficient information to classify the study confidently.';
 
 // HTML-escapes a string for HTML sinks. Plotly renders hover `text` and
 // hovertemplate output as HTML, so every data-derived string concatenated into
@@ -805,7 +806,7 @@ if (typeof document !== "undefined") {
     const img = $("fig-modal-img");
     img.src = "figures/" + f.file;
     img.alt = f.title;
-    $("fig-modal-caption").textContent = f.caption;
+    $("fig-modal-caption").textContent = `${f.caption} ${UNCLEAR_FOOTNOTE}`;
     $("fig-modal").classList.add("open");
   }
 
@@ -1142,8 +1143,11 @@ if (typeof document !== "undefined") {
       ft.textContent = f.title;
       const fc = el("div", "fig-caption");
       fc.textContent = f.caption.replace(/\s+/g, " ").trim();
+      const note = el("div", "fig-footnote");
+      note.textContent = UNCLEAR_FOOTNOTE;
       body.appendChild(ft);
       body.appendChild(fc);
+      body.appendChild(note);
       card.appendChild(body);
       grid.appendChild(card);
     }
