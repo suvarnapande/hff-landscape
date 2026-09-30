@@ -9,6 +9,13 @@ const UNCLEAR_FOOTNOTE_SECTIONS = new Set([
   "Financing functions & outcomes",
   "Methods & data"
 ]);
+const OTHER_OUTCOME_NOTE = 'Top five themes within "Other": Service use, access and coverage (4,518); Levels, trends and drivers of spending, prices or funding (3,944); Adequacy or sufficiency of financing (1,322); Insurance markets and enrolment behaviour (1,292); and Stakeholder perceptions and implementation experience (884).';
+const OTHER_OUTCOME_NOTE_FIGURES = new Set([
+  "fig_outcome_bar.png",
+  "fig_outcome_lollipop.png",
+  "fig_function_outcome_heatmap.png"
+]);
+const OUTCOME_CATEGORY_NOTE = '"Other" indicates an identifiable outcome that falls outside the predefined outcome categories; "Unclear" indicates that the available record did not provide sufficient information to classify the study confidently.';
 
 // HTML-escapes a string for HTML sinks. Plotly renders hover `text` and
 // hovertemplate output as HTML, so every data-derived string concatenated into
@@ -810,9 +817,13 @@ if (typeof document !== "undefined") {
     const img = $("fig-modal-img");
     img.src = "figures/" + f.file;
     img.alt = f.title;
-    $("fig-modal-caption").textContent = UNCLEAR_FOOTNOTE_SECTIONS.has(f.sectionTitle)
-      ? `${f.caption} ${UNCLEAR_FOOTNOTE}`
-      : f.caption;
+    const footnote = OTHER_OUTCOME_NOTE_FIGURES.has(f.file)
+      ? OUTCOME_CATEGORY_NOTE
+      : UNCLEAR_FOOTNOTE_SECTIONS.has(f.sectionTitle) ? UNCLEAR_FOOTNOTE : "";
+    $("fig-modal-caption").textContent = footnote ? `${f.caption} ${footnote}` : f.caption;
+    $("fig-modal-specific-note").textContent = OTHER_OUTCOME_NOTE_FIGURES.has(f.file)
+      ? OTHER_OUTCOME_NOTE
+      : "";
     $("fig-modal").classList.add("open");
   }
 
@@ -1153,7 +1164,14 @@ if (typeof document !== "undefined") {
       body.appendChild(fc);
       if (UNCLEAR_FOOTNOTE_SECTIONS.has(sec.title)) {
         const note = el("div", "fig-footnote");
-        note.textContent = UNCLEAR_FOOTNOTE;
+        note.textContent = OTHER_OUTCOME_NOTE_FIGURES.has(f.file)
+          ? OUTCOME_CATEGORY_NOTE
+          : UNCLEAR_FOOTNOTE;
+        body.appendChild(note);
+      }
+      if (OTHER_OUTCOME_NOTE_FIGURES.has(f.file)) {
+        const note = el("div", "fig-footnote other-outcome-note");
+        note.textContent = OTHER_OUTCOME_NOTE;
         body.appendChild(note);
       }
       card.appendChild(body);
