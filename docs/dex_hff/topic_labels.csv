@@ -1,0 +1,50 @@
+cluster,n,label,terms
+0,444,tuberculosis / patients / costs,tuberculosis; patients; costs; treatment
+1,273,hcv / hepatitis / treatment,hcv; hepatitis; treatment; daa
+2,786,dental / oral / insurance,dental; oral; insurance; dental insurance
+3,203,telehealth / telemedicine / patients,telehealth; telemedicine; patients; visits
+4,344,cataract / cataract surgery / eye,cataract; cataract surgery; eye; glaucoma
+5,729,dialysis / patients / kidney,dialysis; patients; kidney; transplant
+6,476,postpartum / larc / medicaid,postpartum; larc; medicaid; contraceptive
+7,695,tobacco / cigarette / cigarettes,tobacco; cigarette; cigarettes; smoking
+8,826,ssb / tax / ssbs,ssb; tax; ssbs; beverages
+9,1258,vaccine / vaccination / vaccines,vaccine; vaccination; vaccines; immunization
+10,214,sclerosis / epilepsy / multiple sclerosis,sclerosis; epilepsy; multiple sclerosis; patients
+11,247,genetic / testing / nipt,genetic; testing; nipt; genetic testing
+12,392,malaria / malaria control / itn,malaria; malaria control; itn; cost
+13,582,funding / crowdfunding / nih,funding; crowdfunding; nih; nih funding
+14,1040,hiv / prep / art,hiv; prep; art; aids
+15,234,buprenorphine / opioid / oud,buprenorphine; opioid; oud; naloxone
+16,214,mexico / seguro popular / mexican,mexico; seguro popular; mexican; seguro
+17,239,lumbar / fusion / spinal,lumbar; fusion; spinal; spine
+18,247,drugs / drug / china,drugs; drug; china; procurement
+19,2481,medical / china / insurance,medical; china; insurance; rural
+20,319,disinvestment / priority setting / priority,disinvestment; priority setting; priority; setting
+21,285,prostate / prostate cancer / radiation,prostate; prostate cancer; radiation; cancer
+22,321,model / outsourcing / medical,model; outsourcing; medical; insurance
+23,226,asthma / copd / patients,asthma; copd; patients; oxygen
+24,726,patients / treatment / cost,patients; treatment; cost; cadth
+25,345,insurance / social / spending,insurance; social; spending; colombia
+26,365,municipalities / brazil / brazilian,municipalities; brazil; brazilian; municipal
+27,342,screening / cancer / cancer screening,screening; cancer; cancer screening; mammography
+28,241,sud / treatment / substance,sud; treatment; substance; sud treatment
+29,579,mental / psychiatric / costs,mental; psychiatric; costs; treatment
+30,915,supply / management / supply chain,supply; management; supply chain; medical
+31,6030,patients / drug / drugs,patients; drug; drugs; cancer
+32,371,imaging / mri / patients,imaging; mri; patients; pci
+33,910,india / expenditure / insurance,india; expenditure; insurance; households
+34,555,aid / dah / development,aid; dah; development; water
+35,721,arthroplasty / patients / hip,arthroplasty; patients; hip; tka
+36,835,medicare / patients / surgery,medicare; patients; surgery; procedures
+37,632,informal payments / iran / medical,informal payments; iran; medical; informal
+38,311,households / iran / expenditures,households; iran; expenditures; expenditure
+39,302,workers / workers compensation / disability,workers; workers compensation; disability; compensation
+40,1964,insurance / cbhi / households,insurance; cbhi; households; scheme
+41,901,efficiency / hospitals / insurance,efficiency; hospitals; insurance; expenditure
+42,263,pbf / performance-based / chws,pbf; performance-based; chws; incentives
+43,633,maternal / women / delivery,maternal; women; delivery; anc
+44,827,expenditure / spending / expenditures,expenditure; spending; expenditures; economic
+45,650,hospitals / hospital / medical,hospitals; hospital; medical; management
+46,9317,insurance / medicaid / medicare,insurance; medicaid; medicare; spending
+47,532,insurance / indonesia / coverage,insurance; indonesia; coverage; jkn
+48,226,insurance / vietnam / coverage,insurance; vietnam; coverage; households
