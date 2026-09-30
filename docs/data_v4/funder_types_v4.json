@@ -1,0 +1,31 @@
+{
+  "source": "HSF extraction 29 Sept v4.xlsx",
+  "n_studies": 36495,
+  "n_funded": 7380,
+  "n_distinct_funder_strings": 5518,
+  "studies_by_type": {
+    "National governments": 3820,
+    "Universities, hospitals & institutes": 1635,
+    "Foundations & non-profits": 1585,
+    "Multilateral & EU bodies": 561,
+    "Sub-national governments": 472,
+    "Pharmaceutical companies": 430,
+    "Other private companies": 104,
+    "Unclassified": 1114
+  },
+  "share_of_funded_pct": {
+    "National governments": 51.8,
+    "Universities, hospitals & institutes": 22.2,
+    "Foundations & non-profits": 21.5,
+    "Multilateral & EU bodies": 7.6,
+    "Sub-national governments": 6.4,
+    "Pharmaceutical companies": 5.8,
+    "Other private companies": 1.4,
+    "Unclassified": 15.1
+  },
+  "figure": {
+    "file": "fig_funder_types_v4.png",
+    "title": "National governments fund most studies; industry funds few",
+    "caption": "Share of studies naming each type of funder, among studies that report any funder. National governments fund 52% of funded studies; pharmaceutical companies 5.8% and other private companies 1.4%."
+  }
+}
