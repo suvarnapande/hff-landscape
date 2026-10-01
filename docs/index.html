@@ -11,7 +11,7 @@
      versions with SHA-384 integrity hashes verified by double fetch. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" integrity="sha384-krui876Mk6M6Lq6uj1SQo+u4MoImxFwCfwzWNU982QBMNci3VMZ3FoYSdUakJD5I" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css" integrity="sha384-PSZaVsyG9jDu8hFaSJev5s/9poIJlX7cuxSGdqCgXRHpo2DzIaZAyCd2rG/DJJmV" crossorigin="anonymous">
-<link rel="stylesheet" href="styles.css?v=2026-10-01g">
+<link rel="stylesheet" href="styles.css?v=2026-10-01i">
 </head>
 <body>
 
@@ -40,32 +40,46 @@
   <section class="tab-pane active" id="pane-overview">
     <div class="overview-intro">
       <h2 class="hero-title">See where health financing evidence is strong — and where important gaps remain</h2>
-      <p class="hero-text">The HSF Evidence Map brings together more than 36,000 studies on how health systems raise, pool and spend money. Explore what has been studied, where evidence is concentrated, how the field is changing, and which countries and health financing priorities remain underexplored.</p>
-      <p class="hero-actions-copy">Use <strong>Thematic analysis</strong> to discover key patterns, the <strong>Explorer</strong> to investigate the evidence in detail, or <strong>Country profile</strong> to examine a specific setting.</p>
+      <p class="hero-text">The Health Systems Financing (HSF) Evidence Map brings together more than 36,000 studies recently published since 2010, on how health systems raise, pool and spend money. Explore what has been studied, where evidence is concentrated, how the field is changing, and which countries and health financing priorities remain underexplored.</p>
+      <p class="hero-actions-copy">Use <strong>Thematic analysis</strong> to discover key patterns, the <strong>Explorer</strong> to investigate the evidence in detail, or <strong>Country landscape/profile</strong> to examine a specific setting.</p>
       <h2 class="glance-title">The evidence base at a glance</h2>
       <div class="grid-4" id="ov-tiles"></div>
     </div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-header">Studies over time</div>
-        <div class="card-body"><div id="ov-trend" class="plot" style="height:300px"></div></div>
-      </div>
-      <div class="card">
-        <div class="card-header">Studies by financing function</div>
-        <div class="card-body"><div id="ov-func" class="plot" style="height:300px"></div></div>
-      </div>
+    <div class="card overview-trend-card">
+      <div class="card-header">Studies over time</div>
+      <div class="card-body"><div id="ov-trend" class="plot overview-trend-plot"></div></div>
     </div>
-    <div class="card overview-funder-feature">
-      <div class="card-header">Top research funders</div>
-      <div class="card-body">
-        <button class="overview-figure-button" id="ov-funders-open" type="button"
-                aria-label="Open the top research funders figure">
-          <img class="overview-figure" src="figures/fig_funder_funders.png"
-               alt="Bar chart showing the most frequently named research funders">
-        </button>
-        <p class="overview-figure-note">
-          Among studies that report funding, after combining variants of funder names. Select the figure to view it at full size.
-        </p>
+
+    <div class="overview-analysis-grid">
+      <div class="card overview-analysis-card">
+        <div class="card-header">Where the evidence is about</div>
+        <div class="card-body overview-analysis-body">
+          <button class="overview-figure-button" id="ov-worldmap-open" type="button"
+                  aria-label="Open the figure showing where the evidence is about">
+            <img class="overview-analysis-figure" src="figures/fig_worldmap.png"
+                 alt="World map showing where health financing studies are focused">
+          </button>
+        </div>
+      </div>
+      <div class="card overview-analysis-card">
+        <div class="card-header">Studies by financing function</div>
+        <div class="card-body overview-analysis-body">
+          <button class="overview-figure-button" id="ov-function-open" type="button"
+                  aria-label="Open the studies by financing function figure">
+            <img class="overview-analysis-figure" src="figures/fig_function_bar.png"
+                 alt="Bar chart showing studies by health financing function">
+          </button>
+        </div>
+      </div>
+      <div class="card overview-analysis-card">
+        <div class="card-header">Top research funders</div>
+        <div class="card-body overview-analysis-body">
+          <button class="overview-figure-button" id="ov-funders-open" type="button"
+                  aria-label="Open the top research funders figure">
+            <img class="overview-analysis-figure" src="figures/fig_funder_funders_treemap.png"
+                 alt="Treemap showing the most frequently named research funders">
+          </button>
+        </div>
       </div>
     </div>
     <aside class="overview-data-note">
@@ -438,7 +452,7 @@
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js" integrity="sha384-EcVTHT5RdDTvzbTIbNOtaNxNALeJYDgmv5Crp3NBmcdrCPrDnqp6I1+ETJ/FCFHI" crossorigin="anonymous"></script>
-<script type="module" src="app.js?v=2026-10-01g"></script>
+<script type="module" src="app.js?v=2026-10-01i"></script>
 
 </body>
 </html>
