@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-01d";
+const BUILD = "2026-10-01g";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -16,6 +16,16 @@ const OTHER_OUTCOME_NOTE_FIGURES = new Set([
   "fig_function_outcome_heatmap.png"
 ]);
 const OUTCOME_CATEGORY_NOTE = '"Other" indicates an identifiable outcome that falls outside the predefined outcome categories; "Unclear" indicates that the available record did not provide sufficient information to classify the study confidently.';
+
+const OVERVIEW_TILE_COPY = {
+  "Records analysed": { label: "Studies captured in the map", sub: null },
+  "Years covered": { label: "Publication years covered", sub: null },
+  "Countries studied": { label: "Countries covered by studies", sub: "Across the global evidence base" },
+  "Financing functions coded": { label: "Health financing functions covered", sub: null },
+  "Quantitative analysis": { label: "Studies using quantitative analysis", sub: null },
+  "Has a recovered DOI": { label: "Studies with DOI/URL", sub: null },
+  "Single-country studies": { label: "Studies focused on one country", sub: null }
+};
 
 // HTML-escapes a string for HTML sinks. Plotly renders hover `text` and
 // hovertemplate output as HTML, so every data-derived string concatenated into
@@ -1054,31 +1064,22 @@ if (typeof document !== "undefined") {
     const m = db.dict.meta;
     $("nav-built").textContent = "bundle " + m.built;
 
-    // Hero paragraph: ordered segments from content.json. Each segment
-    // becomes a <span>/<strong>/<em> filled via textContent — no innerHTML.
-    const hero = $("ov-hero");
-    hero.textContent = "";
-    for (const seg of db.content.hero) {
-      const node = document.createElement(seg.strong ? "strong" : seg.em ? "em" : "span");
-      node.textContent = seg.text;
-      hero.appendChild(node);
-    }
-
     // Glance tiles: final formatted strings from content.json;
     // sub === null means no footer line.
     const wrap = $("ov-tiles");
     wrap.textContent = "";
     for (const t of db.content.glance_tiles) {
+      const display = OVERVIEW_TILE_COPY[t.label] || t;
       const box = el("div", "value-box bg-" + t.theme);
       const title = el("div", "value-box-title");
-      title.textContent = t.label;
+      title.textContent = display.label;
       const value = el("div", "value-box-value");
       value.textContent = t.value;
       box.appendChild(title);
       box.appendChild(value);
-      if (t.sub != null) {
+      if (display.sub != null) {
         const sub = el("div", "value-box-sub");
-        sub.textContent = t.sub;
+        sub.textContent = display.sub;
         box.appendChild(sub);
       }
       wrap.appendChild(box);
