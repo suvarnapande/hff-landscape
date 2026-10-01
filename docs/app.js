@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-01c";
+const BUILD = "2026-10-01d";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1221,6 +1221,7 @@ if (typeof document !== "undefined") {
   function closeThematicMenu() {
     $("thematic-nav").classList.remove("open");
     $("thematic-toggle").setAttribute("aria-expanded", "false");
+    $("thematic-menu").hidden = true;
   }
 
   // Methods selection funnel: rows from content.json. `records`
@@ -1953,6 +1954,7 @@ if (typeof document !== "undefined") {
       }
       $("thematic-nav").classList.toggle("open", shouldOpen);
       $("thematic-toggle").setAttribute("aria-expanded", String(shouldOpen));
+      $("thematic-menu").hidden = !shouldOpen;
     });
     document.addEventListener("click", e => {
       if (!$("thematic-nav").contains(e.target)) closeThematicMenu();
