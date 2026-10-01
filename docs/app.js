@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-09-30e";
+const BUILD = "2026-10-01c";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1021,6 +1021,7 @@ if (typeof document !== "undefined") {
   }
 
   function switchTab(name) {
+    if (name !== "gallery") closeThematicMenu();
     for (const b of document.querySelectorAll(".navbar .nav-link")) {
       b.classList.toggle("active", b.dataset.tab === name);
     }
@@ -1125,17 +1126,46 @@ if (typeof document !== "undefined") {
 
   function renderGalleryIndex() {
     const idx = $("gal-section-index");
+    const menu = $("thematic-menu");
     idx.textContent = "";
+    menu.textContent = "";
     GALLERY.forEach((sec, i) => {
-      const card = el("button", "section-card");
-      const title = el("div", "sec-title");
+      const card = el("button", "thematic-card");
+      card.type = "button";
+      const img = el("img", "thematic-card-image");
+      img.src = "figures/" + sec.figs[0].file;
+      img.alt = "";
+      img.loading = "lazy";
+      const body = el("div", "thematic-card-body");
+      const title = el("h2", "thematic-card-title");
       title.textContent = sec.title;
-      const count = el("div", "sec-count");
+      const count = el("div", "thematic-card-count");
       count.textContent = sec.figs.length + " figures";
-      card.appendChild(title);
-      card.appendChild(count);
+      const description = el("p", "thematic-card-description");
+      const fullBlurb = sec.blurb.replace(/\s+/g, " ").trim();
+      description.textContent = fullBlurb.length > 155 ? fullBlurb.slice(0, 152) + "..." : fullBlurb;
+      const arrow = el("span", "thematic-card-arrow");
+      arrow.textContent = "→";
+      arrow.setAttribute("aria-hidden", "true");
+      body.appendChild(title);
+      body.appendChild(count);
+      body.appendChild(description);
+      body.appendChild(arrow);
+      card.appendChild(img);
+      card.appendChild(body);
       card.addEventListener("click", () => showSection(i));
       idx.appendChild(card);
+
+      const item = el("button", "nav-theme-link");
+      item.type = "button";
+      item.setAttribute("role", "menuitem");
+      item.textContent = sec.title;
+      item.addEventListener("click", () => {
+        closeThematicMenu();
+        switchTab("gallery");
+        showSection(i);
+      });
+      menu.appendChild(item);
     });
   }
 
@@ -1145,7 +1175,11 @@ if (typeof document !== "undefined") {
     $("gal-section").style.display = "block";
     $("gal-sec-title").textContent = sec.title;
     $("gal-sec-blurb").textContent = sec.blurb.replace(/\s+/g, " ").trim();
-    const grid = $("gal-sec-grid");
+    renderFigureGrid(sec, $("gal-sec-grid"));
+    window.scrollTo(0, 0);
+  }
+
+  function renderFigureGrid(sec, grid) {
     grid.textContent = "";
     for (const f of sec.figs) {
       const card = el("div", "fig-card");
@@ -1162,7 +1196,7 @@ if (typeof document !== "undefined") {
       fc.textContent = f.caption.replace(/\s+/g, " ").trim();
       body.appendChild(ft);
       body.appendChild(fc);
-      if (UNCLEAR_FOOTNOTE_SECTIONS.has(sec.title)) {
+      if (UNCLEAR_FOOTNOTE_SECTIONS.has(f.sourceSectionTitle || sec.title)) {
         const note = el("div", "fig-footnote");
         note.textContent = OTHER_OUTCOME_NOTE_FIGURES.has(f.file)
           ? OUTCOME_CATEGORY_NOTE
@@ -1177,12 +1211,16 @@ if (typeof document !== "undefined") {
       card.appendChild(body);
       grid.appendChild(card);
     }
-    window.scrollTo(0, 0);
   }
 
   function hideSection() {
     $("gal-section").style.display = "none";
     $("gal-index").style.display = "block";
+  }
+
+  function closeThematicMenu() {
+    $("thematic-nav").classList.remove("open");
+    $("thematic-toggle").setAttribute("aria-expanded", "false");
   }
 
   // Methods selection funnel: rows from content.json. `records`
@@ -1902,15 +1940,30 @@ if (typeof document !== "undefined") {
 
   async function boot() {
     for (const b of document.querySelectorAll(".navbar .nav-link")) {
+      if (b.id === "thematic-toggle") continue;
       b.addEventListener("click", () => switchTab(b.dataset.tab));
     }
+    $("thematic-toggle").addEventListener("click", e => {
+      e.stopPropagation();
+      const wasThematic = $("pane-gallery").classList.contains("active");
+      const shouldOpen = !$("thematic-nav").classList.contains("open");
+      if (!wasThematic) {
+        switchTab("gallery");
+        hideSection();
+      }
+      $("thematic-nav").classList.toggle("open", shouldOpen);
+      $("thematic-toggle").setAttribute("aria-expanded", String(shouldOpen));
+    });
+    document.addEventListener("click", e => {
+      if (!$("thematic-nav").contains(e.target)) closeThematicMenu();
+    });
     $("fig-modal-close").addEventListener("click", closeModal);
     $("fig-modal").addEventListener("click", e => { if (e.target === $("fig-modal")) closeModal(); });
     $("ov-funders-open").addEventListener("click", () => openModal("fig_funder_funders.png"));
     $("study-modal-close").addEventListener("click", closeStudyModal);
     $("study-modal").addEventListener("click", e => { if (e.target === $("study-modal")) closeStudyModal(); });
     document.addEventListener("keydown", e => {
-      if (e.key === "Escape") { closeModal(); closeStudyModal(); }
+      if (e.key === "Escape") { closeModal(); closeStudyModal(); closeThematicMenu(); }
     });
     $("gal-back").addEventListener("click", hideSection);
     $("land-author-link").addEventListener("click", () => openModal("fig_map_authorship.png"));

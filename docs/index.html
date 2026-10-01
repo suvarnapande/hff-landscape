@@ -19,7 +19,13 @@
   <a class="navbar-brand" href="#">HFF evidence map</a>
   <div class="navbar-nav">
     <button class="nav-link active" data-tab="overview">Overview</button>
-    <button class="nav-link" data-tab="gallery">Gallery</button>
+    <div class="nav-dropdown" id="thematic-nav">
+      <button class="nav-link nav-dropdown-toggle" id="thematic-toggle" data-tab="gallery"
+              aria-expanded="false" aria-controls="thematic-menu">
+        Thematic analysis <span class="nav-chevron" aria-hidden="true"></span>
+      </button>
+      <div class="nav-dropdown-menu" id="thematic-menu" role="menu"></div>
+    </div>
     <button class="nav-link" data-tab="explorer">Explorer</button>
     <button class="nav-link" data-tab="landscape">Country landscape</button>
     <button class="nav-link" data-tab="country">Country profile</button>
@@ -64,14 +70,22 @@
     </div>
   </section>
 
-  <!-- ============ GALLERY ============ -->
+  <!-- ============ THEMATIC ANALYSIS ============ -->
   <section class="tab-pane" id="pane-gallery">
     <div class="theme-wrap">
       <div id="gal-index">
-        <div class="section-index" id="gal-section-index"></div>
+        <header class="thematic-hero">
+          <img class="thematic-hero-map" src="figures/fig_worldmap.png" alt="" aria-hidden="true">
+          <div class="thematic-hero-copy">
+            <div class="thematic-eyebrow">Thematic analysis</div>
+            <h1>Explore key patterns in the global health financing evidence base.</h1>
+            <p>Browse the complete set of thematic analyses, from evidence growth and financing functions to geography, methods, funding and access.</p>
+          </div>
+        </header>
+        <div class="thematic-grid thematic-grid-gallery" id="gal-section-index"></div>
       </div>
       <div id="gal-section" style="display:none">
-        <button class="back-link" id="gal-back">&larr; All sections</button>
+        <button class="back-link" id="gal-back">&larr; All themes</button>
         <h2 class="hero-title" id="gal-sec-title"></h2>
         <p class="theme-blurb" id="gal-sec-blurb"></p>
         <div class="fig-grid" id="gal-sec-grid"></div>
@@ -420,7 +434,7 @@
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js" integrity="sha384-EcVTHT5RdDTvzbTIbNOtaNxNALeJYDgmv5Crp3NBmcdrCPrDnqp6I1+ETJ/FCFHI" crossorigin="anonymous"></script>
-<script type="module" src="app.js?v=2026-09-30e"></script>
+<script type="module" src="app.js?v=2026-10-01c"></script>
 
 </body>
 </html>
