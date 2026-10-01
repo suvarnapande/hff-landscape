@@ -336,31 +336,22 @@ for row in funnel_rows_raw:
     })
 
 hero = [
-    {"text": "This app maps the global evidence base on health financing functions — studies "
-             "that analyse how health systems raise, pool, allocate and spend money. ",
+    {"text": "The HSF Evidence Map brings together more than 36,000 studies on how health "
+             "systems raise, pool and spend money. Explore what has been studied, where evidence "
+             "is concentrated, how the field is changing, and which countries and health financing "
+             "priorities remain underexplored.",
      "strong": False, "em": False},
-    {"text": fmt(n_studies), "strong": True, "em": False},
-    {"text": f" studies from the {SOURCE_NAME} are classified by the LLM extraction pipeline; ",
-     "strong": False, "em": False},
-    {"text": fmt(n_ff), "strong": True, "em": False},
-    {"text": " carry a financing-function tag. The ", "strong": False, "em": False},
-    {"text": "Explorer", "strong": False, "em": True},
-    {"text": " crosses any variables in the corpus, the ", "strong": False, "em": False},
-    {"text": "Country profile", "strong": False, "em": True},
-    {"text": " opens a single setting, and ", "strong": False, "em": False},
-    {"text": "Methods", "strong": False, "em": True},
-    {"text": " explains how the map is built.", "strong": False, "em": False},
 ]
 
 glance_tiles = [
-    {"label": "Records analysed", "value": fmt(n_studies), "theme": "primary", "sub": None},
-    {"label": "Years covered", "value": "2010–2026", "theme": "secondary", "sub": None},
-    {"label": "Countries studied", "value": fmt(n_countries_with_studies), "theme": "info",
-     "sub": "named in extracted geography"},
-    {"label": "Financing functions coded", "value": fmt(len(function_grps)), "theme": "secondary", "sub": None},
-    {"label": "Quantitative analysis", "value": f"{pct_quant:.0f}%", "theme": "success", "sub": None},
-    {"label": "Has a recovered DOI", "value": f"{pct_doi:.0f}%", "theme": "info", "sub": None},
-    {"label": "Single-country studies", "value": f"{pct_single:.0f}%", "theme": "secondary", "sub": None},
+    {"label": "Studies captured in the map", "value": fmt(n_studies), "theme": "primary", "sub": None},
+    {"label": "Publication years covered", "value": "2010–2026", "theme": "secondary", "sub": None},
+    {"label": "Countries covered by studies", "value": fmt(n_countries_with_studies), "theme": "info",
+     "sub": "Across the global evidence base"},
+    {"label": "Health financing functions covered", "value": fmt(len(function_grps)), "theme": "secondary", "sub": None},
+    {"label": "Studies using quantitative analysis", "value": f"{pct_quant:.0f}%", "theme": "success", "sub": None},
+    {"label": "Studies with DOI/URL", "value": f"{pct_doi:.0f}%", "theme": "info", "sub": None},
+    {"label": "Studies focused on one country", "value": f"{pct_single:.0f}%", "theme": "secondary", "sub": None},
 ]
 
 content_json = {
