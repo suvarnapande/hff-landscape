@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-01g";
+const BUILD = "2026-10-01j";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1039,7 +1039,7 @@ if (typeof document !== "undefined") {
       p.classList.toggle("active", p.id === "pane-" + name);
     }
     if (name === "overview" && window.Plotly) {
-      for (const id of ["ov-trend", "ov-func"]) {
+      for (const id of ["ov-trend"]) {
         if ($(id).data) window.Plotly.Plots.resize($(id));
       }
     }
@@ -1091,6 +1091,7 @@ if (typeof document !== "undefined") {
   // via the same trendSeries/compCounts functions the Explorer uses, run once
   // against the unfiltered dataset.
   function renderOverviewCharts() {
+    if (!$('ov-trend')) return;
     const flt = applyFilters(db, {});
     const ser = trendSeries(db, flt, "none");
     const years = Object.keys(ser).map(Number);
@@ -1108,21 +1109,6 @@ if (typeof document !== "undefined") {
       paper_bgcolor: "rgba(0,0,0,0)"
     }, PLOTLY_CFG);
 
-    const res = compCounts(db, flt, "func_grp", null, "n");
-    const bottomUp = res.rows.slice().reverse();
-    window.Plotly.react("ov-func", [{
-      type: "bar", orientation: "h",
-      y: res.rows.map(r => r.x), x: res.rows.map(r => r.v),
-      marker: { color: ACCENT },
-      hovertemplate: "%{y}: %{x}<extra></extra>"
-    }], {
-      font: BASE_FONT,
-      margin: { t: 10, b: 40, l: 230, r: 20 },
-      yaxis: { categoryorder: "array", categoryarray: bottomUp.map(r => r.x), automargin: true },
-      xaxis: { title: "studies", gridcolor: "#eeebe3" },
-      plot_bgcolor: "rgba(0,0,0,0)",
-      paper_bgcolor: "rgba(0,0,0,0)"
-    }, PLOTLY_CFG);
   }
 
   function renderGalleryIndex() {
@@ -1962,7 +1948,9 @@ if (typeof document !== "undefined") {
     });
     $("fig-modal-close").addEventListener("click", closeModal);
     $("fig-modal").addEventListener("click", e => { if (e.target === $("fig-modal")) closeModal(); });
-    $("ov-funders-open").addEventListener("click", () => openModal("fig_funder_funders.png"));
+    $("ov-worldmap-open").addEventListener("click", () => openModal("fig_worldmap.png"));
+    $("ov-function-open").addEventListener("click", () => openModal("fig_function_bar.png"));
+    $("ov-funders-open").addEventListener("click", () => openModal("fig_funder_funders_treemap.png"));
     $("study-modal-close").addEventListener("click", closeStudyModal);
     $("study-modal").addEventListener("click", e => { if (e.target === $("study-modal")) closeStudyModal(); });
     document.addEventListener("keydown", e => {
