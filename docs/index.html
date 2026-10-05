@@ -11,7 +11,7 @@
      versions with SHA-384 integrity hashes verified by double fetch. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" integrity="sha384-krui876Mk6M6Lq6uj1SQo+u4MoImxFwCfwzWNU982QBMNci3VMZ3FoYSdUakJD5I" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css" integrity="sha384-PSZaVsyG9jDu8hFaSJev5s/9poIJlX7cuxSGdqCgXRHpo2DzIaZAyCd2rG/DJJmV" crossorigin="anonymous">
-<link rel="stylesheet" href="styles.css?v=2026-10-05p">
+<link rel="stylesheet" href="styles.css?v=2026-10-05s">
 </head>
 <body>
 
@@ -327,6 +327,15 @@
   <section class="tab-pane" id="pane-methods">
     <div class="methods-wrap">
 
+      <div class="methods-tabs" role="tablist" aria-label="Methods sections">
+        <button class="methods-tab active" type="button" data-methods-tab="methodology">Methodology</button>
+        <button class="methods-tab" type="button" data-methods-tab="eligibility">Eligibility criteria</button>
+        <button class="methods-tab" type="button" data-methods-tab="topics">Financing topics</button>
+        <button class="methods-tab" type="button" data-methods-tab="outcomes">Outcome domains</button>
+      </div>
+
+      <div class="methods-panel active" data-methods-panel="methodology">
+
       <div class="card">
         <div class="card-header">How this dataset is built</div>
         <div class="card-body">
@@ -409,6 +418,74 @@
         </div>
       </div>
 
+      </div>
+
+      <div class="methods-panel" data-methods-panel="eligibility">
+        <div class="card">
+          <div class="card-header">Summary of inclusion criteria</div>
+          <div class="card-body">
+            <table class="methods-table criteria-table">
+              <thead><tr><th>Criteria</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Population</strong></td><td>Global</td></tr>
+                <tr><td><strong>Interest</strong></td><td>Evidence on recurrent financing of health system services; capital investments; links to the supply chain; and the consequences for health-system and societal goals.</td></tr>
+                <tr><td><strong>Context</strong></td><td>No limitations based on location (geographic or health setting) or health characteristics.</td></tr>
+                <tr><td><strong>Study design</strong></td><td>All types of empirical studies using qualitative, quantitative or mixed-methods approaches are included. For non-economic evaluations, no restriction is placed on methodological rigour. For economic evaluations, only studies comparing both costs and benefits and two or more alternative methods of delivering care are included.</td></tr>
+                <tr><td><strong>Time and scope</strong></td><td>Published articles and reviews published since 2010. English-only search terms are used, but no language restrictions are placed on included studies.</td></tr>
+              </tbody>
+            </table>
+            <p class="methods-note">More detailed inclusion and exclusion criteria are available in Extended data, Appendices C and D: Marion, P., Lee, S., Lotfi, T., Hutchinson, B., Sempé, L., Pande, S., et al. (2026), <em>Systematic mapping of recent global research on health system financing using machine learning</em>. <a href="https://doi.org/10.17605/OSF.IO/R3CFA" target="_blank" rel="noopener">View the extended data ↗</a></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="methods-panel" data-methods-panel="topics">
+        <div class="card">
+          <div class="card-header">Key financing topics of interest</div>
+          <div class="card-body">
+            <p>These categories describe the health-financing functions and illustrative topics considered relevant to the evidence map.</p>
+            <div class="methods-accordion">
+              <details><summary>Revenue raising</summary><div><p><strong>Definition.</strong> The ways money is brought into the health system through public, external and private sources, including taxes, insurance contributions, out-of-pocket payments and development assistance.</p><p><strong>Illustrative topics.</strong> Revenue levels, trends and sources; domestic resource mobilisation; fiscal space; taxation and health taxes; earmarking; financial gap analysis; development assistance, donor dependency, transitions, remittances and fungibility.</p></div></details>
+              <details><summary>Pooling</summary><div><p><strong>Definition.</strong> The accumulation of prepaid funds that can be used to purchase goods and services on behalf of a population and redistribute financial risk.</p><p><strong>Illustrative topics.</strong> Insurance and other pooling mechanisms; adverse selection; pool fragmentation; cross-programmatic efficiency; intergovernmental transfers; equalisation formulae; risk adjustment; and conditional or unconditional grants.</p></div></details>
+              <details><summary>Purchasing and provider payment</summary><div><p><strong>Definition.</strong> The use of pooled funds to pay for health care on behalf of a population, including active and passive purchasing arrangements.</p><p><strong>Illustrative topics.</strong> Budgets, capitation, salaries, fee-for-service, case-based payment, pay-for-performance, performance- or results-based financing, direct facility funding, contracting, supplier-induced demand, and costing or pricing analyses that substantively inform payment decisions.</p></div></details>
+              <details><summary>Benefits decisions, coverage and rationing</summary><div><p><strong>Definition.</strong> Decisions about who is covered, what pooled revenues will pay for, and the restrictions or conditions governing access.</p><p><strong>Illustrative topics.</strong> Benefit-package design; prioritisation methods such as MCDA and PBMA; user charges and exemptions; benefit maximums; informal payments; waiting lists, exclusions and referral requirements; and economic evaluations of alternative service-delivery approaches.</p></div></details>
+              <details><summary>Public financial management</summary><div><p><strong>Definition.</strong> The rules and mechanisms governing the allocation, use and accountability of public funds, including health-budget formulation, execution, monitoring and transparency.</p><p><strong>Illustrative topics.</strong> Budget setting and structure; programme-based budgeting; expenditure tracking; fund-flow bottlenecks; digital PFM reforms; provider autonomy; reporting, transparency, accountability and anti-corruption.</p></div></details>
+              <details><summary>Capital investment: infrastructure</summary><div><p><strong>Definition.</strong> Policies and practices to acquire, upgrade or maintain physical facilities, medical equipment, technology and digital infrastructure across the health system.</p><p><strong>Illustrative topics.</strong> Infrastructure financing systems; investment levels; medical-equipment and technology investment; and implications for recurrent costs.</p></div></details>
+              <details><summary>Capital investment: other health-system inputs</summary><div><p><strong>Definition.</strong> Policies and practices to develop the health workforce and invest in the production of medicines, vaccines and other health products.</p><p><strong>Illustrative topics.</strong> Workforce education, recruitment, retention and incentives, and policy mechanisms supporting industries that produce medicines, vaccines, medical goods and other health-system inputs.</p></div></details>
+              <details><summary>Supply-chain financing</summary><div><p><strong>Definition.</strong> Policies and practices that finance health supply chains and support the optimal use of commodities, infrastructure, staffing, logistics, information and data systems.</p><p><strong>Illustrative topics.</strong> Planning and demand forecasting; sourcing and procurement; contracting; warehousing, transport and inventory management; information systems; governance and regulation; commodity financing; and supply-chain monitoring.</p></div></details>
+              <details><summary>Cross-cutting financing analysis</summary><div><p><strong>Illustrative topics.</strong> Health-financing assessments, policy analysis and political economy of financing choices and reforms, and studies examining alignment across financing functions.</p></div></details>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="methods-panel" data-methods-panel="outcomes">
+        <div class="card">
+          <div class="card-header">Outcome-domain definitions</div>
+          <div class="card-body">
+            <p>Seven definitions draw directly from, or use language from, the WHO Health System Performance Assessment framework. <strong>Economic development</strong> is defined specifically for this evidence map.</p>
+            <div class="methods-classification-note">
+              <p><strong>Other</strong> indicates an identifiable outcome that falls outside the eight predefined outcome domains.</p>
+              <p><strong>Unclear</strong> indicates that the available title and abstract did not provide enough information to classify the outcome confidently.</p>
+            </div>
+            <table class="methods-table outcome-definitions-table">
+              <thead><tr><th>Outcome domain</th><th>Definition and coding guidance</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Equitable distribution of health-system resources</strong></td><td>The extent to which the distribution of health care and its benefits among a population is fair. Health-service equity refers to the distribution of care quality and ensuring that it does not vary because of personal characteristics such as gender, ethnicity, geographic location or socioeconomic status. Code this outcome when a study assesses an outcome for an equity-relevant group relative to another demographic or socioeconomic group, or uses an explicit comparative measure of inequality or equity. Do not code it solely because the study covers an equity-relevant or disadvantaged group.</td></tr>
+                <tr><td><strong>Efficiency in the use of resources</strong></td><td>The relationship between a specific product (output) of the health system and the resources (inputs) used to create the product, distinguishing technical and allocative efficiency.</td></tr>
+                <tr><td><strong>Quality of service provision</strong></td><td>The degree to which health services for individuals and populations increase the likelihood of desired health outcomes and are consistent with current medical knowledge.</td></tr>
+                <tr><td><strong>Transparency and accountability</strong></td><td>Transparency is about the public availability of usable information, which ultimately allows scrutiny of public actors and their decisions. Accountability refers to how well the system is governed overall, as well as how well the governance of financing, service delivery and resource generation performs. At the heart of accountability is an accountability relationship: someone is accountable to someone else for something.</td></tr>
+                <tr><td><strong>Improved level and distribution of health</strong></td><td>Health improvement refers to improvement in the health of the population, where health includes different parts of the life cycle, morbidity and premature mortality.</td></tr>
+                <tr><td><strong>Responsiveness to citizens</strong></td><td>The extent to which the service-user perspective and experience of health care is measured and valued as an outcome of service delivery, including outcomes related to the perspectives and social preferences of individuals, carers, families and communities as participants in, and beneficiaries of, trusted health systems organised around people's comprehensive needs rather than individual diseases.</td></tr>
+                <tr><td><strong>Financial protection</strong></td><td>Safeguarding people against the financial hardship associated with paying for health services.</td></tr>
+                <tr><td><strong>Economic development</strong></td><td>The process by which the economic wellbeing and quality of life of a nation, region, local community or individual are improved according to targeted goals and objectives. Examples of impacts that health financing may have on economic development include, but are not limited to, labour-force opportunities, job creation, job mobility, business growth, investment decisions or macroeconomic growth. Goals, objectives or outcomes related only to the bottom line or financial health of a health-care organisation or private-sector entity are not classified as economic development.</td></tr>
+              </tbody>
+            </table>
+            <p class="methods-note">Source: WHO, <a href="https://iris.who.int/server/api/core/bitstreams/266443fd-e3c2-4c02-ad69-a5e7d99b5e3d/content" target="_blank" rel="noopener"><em>Health System Performance Assessment: A framework for policy analysis</em> ↗</a></p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -470,10 +547,10 @@
         <button class="modal-close" id="outcomes-help-close" type="button">Close</button>
       </div>
       <div class="modal-body info-modal-body">
-        <p>Apart from the <strong>Economic development</strong> outcome domain, all definitions are drawn directly from, or use language from, the source below.</p>
-        <p><strong>WHO. <em>Health System Performance Assessment: A framework for policy analysis.</em></strong></p>
-        <a class="info-modal-link" href="https://iris.who.int/server/api/core/bitstreams/266443fd-e3c2-4c02-ad69-a5e7d99b5e3d/content"
-           target="_blank" rel="noopener">Open the WHO source ↗</a>
+        <p>The map covers eight outcome domains: <strong>equitable distribution of health-system resources; efficiency in the use of resources; quality of service provision; transparency and accountability; improved level and distribution of health; responsiveness to citizens; financial protection; and economic development.</strong></p>
+        <p>Apart from <strong>Economic development</strong>, definitions draw directly from, or use language from, the WHO Health System Performance Assessment framework.</p>
+        <p><strong>Other</strong> is used for identifiable outcomes outside these domains; <strong>Unclear</strong> is used when the available record does not support confident classification.</p>
+        <button class="info-modal-link methods-jump-button" type="button" data-methods-view="outcomes">View all definitions</button>
       </div>
     </div>
   </div>
@@ -487,7 +564,7 @@
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js" integrity="sha384-EcVTHT5RdDTvzbTIbNOtaNxNALeJYDgmv5Crp3NBmcdrCPrDnqp6I1+ETJ/FCFHI" crossorigin="anonymous"></script>
-<script type="module" src="app.js?v=2026-10-05p"></script>
+<script type="module" src="app.js?v=2026-10-05s"></script>
 
 </body>
 </html>

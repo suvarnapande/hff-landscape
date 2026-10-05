@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-05p";
+const BUILD = "2026-10-05s";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1062,6 +1062,17 @@ if (typeof document !== "undefined") {
     }
   }
 
+  function switchMethodsPanel(name) {
+    for (const button of document.querySelectorAll(".methods-tab")) {
+      const active = button.dataset.methodsTab === name;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-selected", String(active));
+    }
+    for (const panel of document.querySelectorAll(".methods-panel")) {
+      panel.classList.toggle("active", panel.dataset.methodsPanel === name);
+    }
+  }
+
   function renderOverview() {
     const m = db.dict.meta;
     $("nav-built").textContent = "Last update " + m.built;
@@ -1973,6 +1984,18 @@ if (typeof document !== "undefined") {
     for (const b of document.querySelectorAll(".navbar .nav-link")) {
       if (b.id === "thematic-toggle") continue;
       b.addEventListener("click", () => switchTab(b.dataset.tab));
+    }
+    for (const button of document.querySelectorAll(".methods-tab")) {
+      button.setAttribute("role", "tab");
+      button.addEventListener("click", () => switchMethodsPanel(button.dataset.methodsTab));
+    }
+    for (const button of document.querySelectorAll("[data-methods-view]")) {
+      button.addEventListener("click", () => {
+        $("outcomes-help-modal").classList.remove("open");
+        switchTab("methods");
+        switchMethodsPanel(button.dataset.methodsView);
+        $("pane-methods").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     }
     $("thematic-toggle").addEventListener("click", e => {
       e.stopPropagation();
