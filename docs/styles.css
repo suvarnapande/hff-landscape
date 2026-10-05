@@ -303,7 +303,7 @@ main { padding: 1.4rem 1.5rem 2.5rem; max-width: 1500px; margin: 0 auto; }
   border-bottom: 1px solid var(--hff-line);
 }
 .overview-intro .hero-title {
-  max-width: 1100px;
+  max-width: 1800px;
   margin: 0 auto;
   color: var(--hff-ink);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -313,7 +313,7 @@ main { padding: 1.4rem 1.5rem 2.5rem; max-width: 1500px; margin: 0 auto; }
   text-align: center;
 }
 .overview-intro .hero-text {
-  max-width: 108ch;
+  max-width: 1800px;
   margin: 1rem auto 0;
   color: var(--hff-ink-soft);
   font-size: 1rem;
@@ -321,7 +321,7 @@ main { padding: 1.4rem 1.5rem 2.5rem; max-width: 1500px; margin: 0 auto; }
   text-align: center;
 }
 .overview-intro .hero-actions-copy {
-  max-width: 120ch;
+  max-width: 1800px;
   margin: .65rem auto 0;
   color: var(--hff-muted);
   font-size: .9rem;
