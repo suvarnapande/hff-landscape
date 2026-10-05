@@ -11,7 +11,7 @@
      versions with SHA-384 integrity hashes verified by double fetch. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" integrity="sha384-krui876Mk6M6Lq6uj1SQo+u4MoImxFwCfwzWNU982QBMNci3VMZ3FoYSdUakJD5I" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css" integrity="sha384-PSZaVsyG9jDu8hFaSJev5s/9poIJlX7cuxSGdqCgXRHpo2DzIaZAyCd2rG/DJJmV" crossorigin="anonymous">
-<link rel="stylesheet" href="styles.css?v=2026-10-01j">
+<link rel="stylesheet" href="styles.css?v=2026-10-05p">
 </head>
 <body>
 
@@ -31,6 +31,9 @@
     <button class="nav-link" data-tab="country">Country profile</button>
     <button class="nav-link" data-tab="methods">Methods</button>
   </div>
+  <a class="project-link" href="https://3ieimpact.org/our-work/systematic-mapping-global-research-health-systems-financing-and-health-economics-using"
+     target="_blank" rel="noopener" aria-label="Open the HSF Evidence Map project page"
+     title="Open the HSF project webpage">HSF project <span aria-hidden="true">↗</span></a>
   <span class="navbar-text" id="nav-built"></span>
 </nav>
 
@@ -41,12 +44,12 @@
     <div class="overview-intro">
       <h2 class="hero-title">See where health financing evidence is strong — and where important gaps remain</h2>
       <p class="hero-text">The Health Systems Financing (HSF) Evidence Map brings together more than 36,000 studies recently published since 2010, on how health systems raise, pool and spend money. Explore what has been studied, where evidence is concentrated, how the field is changing, and which countries and health financing priorities remain underexplored.</p>
-      <p class="hero-actions-copy">Use <strong>Thematic analysis</strong> to discover key patterns, the <strong>Explorer</strong> to investigate the evidence in detail, or <strong>Country landscape/profile</strong> to examine a specific setting.</p>
+      <p class="hero-actions-copy">Use <strong>Thematic analysis</strong> to discover key patterns, the <strong>Explorer</strong> to investigate the evidence in detail, or <strong>Country landscape/profile</strong> to examine a specific country setting.</p>
       <h2 class="glance-title">The evidence base at a glance</h2>
       <div class="grid-4" id="ov-tiles"></div>
     </div>
     <div class="card overview-trend-card">
-      <div class="card-header">Studies over time</div>
+      <div class="card-header">Cumulative growth</div>
       <div class="card-body"><div id="ov-trend" class="plot overview-trend-plot"></div></div>
     </div>
 
@@ -82,10 +85,6 @@
         </div>
       </div>
     </div>
-    <aside class="overview-data-note">
-      <div class="overview-data-note-title">About the data</div>
-      <p>This release analyses 36,495 records from the HSF extraction dated 29 September. Classification is LLM-assisted, and 35,737 records received at least one health financing function tag. See <strong>Methods</strong> for details.</p>
-    </aside>
   </section>
 
   <!-- ============ THEMATIC ANALYSIS ============ -->
@@ -445,17 +444,50 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="functions-help-modal">
+  <div class="modal-dialog info-modal-dialog" role="dialog" aria-modal="true"
+       aria-labelledby="functions-help-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="functions-help-title">Health financing functions covered</h3>
+        <button class="modal-close" id="functions-help-close" type="button">Close</button>
+      </div>
+      <div class="modal-body info-modal-body">
+        <p>Empirical evidence on health systems financing functions and their links to outcomes. Specifically, our focus is on recurrent financing of health services (revenue raising, pooling, purchasing, decisions on benefits and their rationing, and public financial management); capital financing to generate health system resources (e.g., infrastructure, human resources for health, and the production of health products); and supply chain financing.</p>
+        <a class="info-modal-link" href="https://3ieimpact.org/our-work/systematic-mapping-global-research-health-systems-financing-and-health-economics-using"
+           target="_blank" rel="noopener">Visit the project page ↗</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="outcomes-help-modal">
+  <div class="modal-dialog info-modal-dialog" role="dialog" aria-modal="true"
+       aria-labelledby="outcomes-help-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="outcomes-help-title">Outcome domains mapped</h3>
+        <button class="modal-close" id="outcomes-help-close" type="button">Close</button>
+      </div>
+      <div class="modal-body info-modal-body">
+        <p>Apart from the <strong>Economic development</strong> outcome domain, all definitions are drawn directly from, or use language from, the source below.</p>
+        <p><strong>WHO. <em>Health System Performance Assessment: A framework for policy analysis.</em></strong></p>
+        <a class="info-modal-link" href="https://iris.who.int/server/api/core/bitstreams/266443fd-e3c2-4c02-ad69-a5e7d99b5e3d/content"
+           target="_blank" rel="noopener">Open the WHO source ↗</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <footer class="site-footer">
-  Sources: HFF extraction pipeline (LLM-assisted classification, GLM/Sonnet/DeepSeek consensus)
-  · World Bank (income groups, population) · IHME GBD 2023 &amp; IHME Health Spending 1995–2022
-  (country-level reference)
+  <strong>About the data:</strong> This release analyses 36,495 records from the HSF extraction dated 29 September, 2026. Classification is LLM-assisted with rigorous human verification. See <strong>Methods</strong> for details. · <strong>Sources:</strong> HFF extraction pipeline (LLM-assisted classification, GLM/Sonnet/DeepSeek consensus) · <a href="https://www.who.int/publications/i/item/9789240042476" target="_blank" rel="noopener">WHO Health System Performance Assessment framework</a> · World Bank (income groups, population) · IHME GBD 2023 &amp; IHME Health Spending 1995–2022 (country-level reference)
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js" integrity="sha384-EcVTHT5RdDTvzbTIbNOtaNxNALeJYDgmv5Crp3NBmcdrCPrDnqp6I1+ETJ/FCFHI" crossorigin="anonymous"></script>
-<script type="module" src="app.js?v=2026-10-01j"></script>
+<script type="module" src="app.js?v=2026-10-05p"></script>
 
 </body>
 </html>

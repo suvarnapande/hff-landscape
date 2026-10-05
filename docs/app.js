@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-01j";
+const BUILD = "2026-10-05p";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -21,7 +21,11 @@ const OVERVIEW_TILE_COPY = {
   "Records analysed": { label: "Studies captured in the map", sub: null },
   "Years covered": { label: "Publication years covered", sub: null },
   "Countries studied": { label: "Countries covered by studies", sub: "Across the global evidence base" },
-  "Financing functions coded": { label: "Health financing functions covered", sub: null },
+  "Financing functions coded": {
+    label: "Health financing functions covered",
+    sub: "8 WHO outcome domains mapped",
+    help: true
+  },
   "Quantitative analysis": { label: "Studies using quantitative analysis", sub: null },
   "Has a recovered DOI": { label: "Studies with DOI/URL", sub: null },
   "Single-country studies": { label: "Studies focused on one country", sub: null }
@@ -1039,9 +1043,7 @@ if (typeof document !== "undefined") {
       p.classList.toggle("active", p.id === "pane-" + name);
     }
     if (name === "overview" && window.Plotly) {
-      for (const id of ["ov-trend"]) {
-        if ($(id).data) window.Plotly.Plots.resize($(id));
-      }
+      if ($("ov-trend").data) window.Plotly.Plots.resize($("ov-trend"));
     }
     if (name === "explorer" && state.result) {
       for (const id of ["x-trend", "x-map", "x-comp", "x-scatter"]) {
@@ -1062,7 +1064,7 @@ if (typeof document !== "undefined") {
 
   function renderOverview() {
     const m = db.dict.meta;
-    $("nav-built").textContent = "bundle " + m.built;
+    $("nav-built").textContent = "Last update " + m.built;
 
     // Glance tiles: final formatted strings from content.json;
     // sub === null means no footer line.
@@ -1071,11 +1073,53 @@ if (typeof document !== "undefined") {
     for (const t of db.content.glance_tiles) {
       const display = OVERVIEW_TILE_COPY[t.label] || t;
       const box = el("div", "value-box bg-" + t.theme);
+      if (display.label === "Health financing functions covered") {
+        box.classList.add("coverage-card");
+        const metrics = el("div", "coverage-metrics");
+        for (const [label, valueText, modalId] of [
+          ["Health financing functions covered", t.value, "functions-help-modal"],
+          ["Outcome domains mapped", "8", "outcomes-help-modal"]
+        ]) {
+          const metric = el("div", "coverage-metric");
+          const titleRow = el("div", "coverage-metric-title");
+          const metricTitle = el("div", "value-box-title");
+          metricTitle.textContent = label;
+          const help = el("button", "metric-help-button");
+          help.type = "button";
+          help.textContent = "?";
+          help.title = `Learn about ${label.toLowerCase()}`;
+          help.setAttribute("aria-label", `Explain ${label.toLowerCase()}`);
+          help.addEventListener("click", () => $(modalId).classList.add("open"));
+          const metricValue = el("div", "value-box-value");
+          metricValue.textContent = valueText;
+          titleRow.appendChild(metricTitle);
+          titleRow.appendChild(help);
+          metric.appendChild(titleRow);
+          metric.appendChild(metricValue);
+          metrics.appendChild(metric);
+        }
+        box.appendChild(metrics);
+        wrap.appendChild(box);
+        continue;
+      }
       const title = el("div", "value-box-title");
       title.textContent = display.label;
       const value = el("div", "value-box-value");
       value.textContent = t.value;
-      box.appendChild(title);
+      if (display.help) {
+        const titleRow = el("div", "value-box-title-row");
+        const help = el("button", "metric-help-button");
+        help.type = "button";
+        help.textContent = "?";
+        help.title = "What is covered?";
+        help.setAttribute("aria-label", "Explain the health financing functions covered");
+        help.addEventListener("click", () => $("functions-help-modal").classList.add("open"));
+        titleRow.appendChild(title);
+        titleRow.appendChild(help);
+        box.appendChild(titleRow);
+      } else {
+        box.appendChild(title);
+      }
       box.appendChild(value);
       if (display.sub != null) {
         const sub = el("div", "value-box-sub");
@@ -1087,28 +1131,27 @@ if (typeof document !== "undefined") {
 
   }
 
-  // Two small live charts replace HEE's pre-rendered hero images — computed
-  // via the same trendSeries/compCounts functions the Explorer uses, run once
-  // against the unfiltered dataset.
+  // Overview cumulative growth, computed from the unfiltered dataset.
   function renderOverviewCharts() {
-    if (!$('ov-trend')) return;
+    if (!$("ov-trend")) return;
     const flt = applyFilters(db, {});
     const ser = trendSeries(db, flt, "none");
-    const years = Object.keys(ser).map(Number);
+    const years = Object.keys(ser).map(Number).sort((a, b) => a - b);
+    let runningTotal = 0;
+    const cumulative = years.map(year => (runningTotal += ser[year]));
     window.Plotly.react("ov-trend", [{
-      x: years, y: years.map(y => ser[y]),
+      x: years, y: cumulative,
       mode: "lines", type: "scatter",
       line: { color: ACCENT, width: 3 },
-      hovertemplate: "%{x}: %{y} studies<extra></extra>"
+      hovertemplate: "%{x}: %{y:,} studies<extra></extra>"
     }], {
       font: BASE_FONT,
       margin: { t: 10, b: 40, l: 50, r: 20 },
       xaxis: { gridcolor: "#eeebe3" },
-      yaxis: { title: "studies", gridcolor: "#eeebe3" },
+      yaxis: { dtick: 10000, tickformat: ",d", showgrid: false, zeroline: false },
       plot_bgcolor: "rgba(0,0,0,0)",
       paper_bgcolor: "rgba(0,0,0,0)"
     }, PLOTLY_CFG);
-
   }
 
   function renderGalleryIndex() {
@@ -1953,8 +1996,22 @@ if (typeof document !== "undefined") {
     $("ov-funders-open").addEventListener("click", () => openModal("fig_funder_funders_treemap.png"));
     $("study-modal-close").addEventListener("click", closeStudyModal);
     $("study-modal").addEventListener("click", e => { if (e.target === $("study-modal")) closeStudyModal(); });
+    $("functions-help-close").addEventListener("click", () => $("functions-help-modal").classList.remove("open"));
+    $("functions-help-modal").addEventListener("click", e => {
+      if (e.target === $("functions-help-modal")) $("functions-help-modal").classList.remove("open");
+    });
+    $("outcomes-help-close").addEventListener("click", () => $("outcomes-help-modal").classList.remove("open"));
+    $("outcomes-help-modal").addEventListener("click", e => {
+      if (e.target === $("outcomes-help-modal")) $("outcomes-help-modal").classList.remove("open");
+    });
     document.addEventListener("keydown", e => {
-      if (e.key === "Escape") { closeModal(); closeStudyModal(); closeThematicMenu(); }
+      if (e.key === "Escape") {
+        closeModal();
+        closeStudyModal();
+        closeThematicMenu();
+        $("functions-help-modal").classList.remove("open");
+        $("outcomes-help-modal").classList.remove("open");
+      }
     });
     $("gal-back").addEventListener("click", hideSection);
     $("land-author-link").addEventListener("click", () => openModal("fig_map_authorship.png"));
