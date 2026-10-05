@@ -11,7 +11,7 @@
      versions with SHA-384 integrity hashes verified by double fetch. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" integrity="sha384-krui876Mk6M6Lq6uj1SQo+u4MoImxFwCfwzWNU982QBMNci3VMZ3FoYSdUakJD5I" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css" integrity="sha384-PSZaVsyG9jDu8hFaSJev5s/9poIJlX7cuxSGdqCgXRHpo2DzIaZAyCd2rG/DJJmV" crossorigin="anonymous">
-<link rel="stylesheet" href="styles.css?v=2026-10-05s">
+<link rel="stylesheet" href="styles.css?v=2026-10-05u">
 </head>
 <body>
 
@@ -464,10 +464,6 @@
           <div class="card-header">Outcome-domain definitions</div>
           <div class="card-body">
             <p>Seven definitions draw directly from, or use language from, the WHO Health System Performance Assessment framework. <strong>Economic development</strong> is defined specifically for this evidence map.</p>
-            <div class="methods-classification-note">
-              <p><strong>Other</strong> indicates an identifiable outcome that falls outside the eight predefined outcome domains.</p>
-              <p><strong>Unclear</strong> indicates that the available title and abstract did not provide enough information to classify the outcome confidently.</p>
-            </div>
             <table class="methods-table outcome-definitions-table">
               <thead><tr><th>Outcome domain</th><th>Definition and coding guidance</th></tr></thead>
               <tbody>
@@ -481,6 +477,10 @@
                 <tr><td><strong>Economic development</strong></td><td>The process by which the economic wellbeing and quality of life of a nation, region, local community or individual are improved according to targeted goals and objectives. Examples of impacts that health financing may have on economic development include, but are not limited to, labour-force opportunities, job creation, job mobility, business growth, investment decisions or macroeconomic growth. Goals, objectives or outcomes related only to the bottom line or financial health of a health-care organisation or private-sector entity are not classified as economic development.</td></tr>
               </tbody>
             </table>
+            <div class="methods-classification-note">
+              <p><strong>Other:</strong> When a record contains outcomes that do not fit any of the eight predefined domains, we classify them as Other and then analyse those outcomes thematically.</p>
+              <p><strong>Unclear:</strong> The available title and abstract do not provide enough information to classify the outcome confidently.</p>
+            </div>
             <p class="methods-note">Source: WHO, <a href="https://iris.who.int/server/api/core/bitstreams/266443fd-e3c2-4c02-ad69-a5e7d99b5e3d/content" target="_blank" rel="noopener"><em>Health System Performance Assessment: A framework for policy analysis</em> ↗</a></p>
           </div>
         </div>
@@ -531,8 +531,7 @@
       </div>
       <div class="modal-body info-modal-body">
         <p>Empirical evidence on health systems financing functions and their links to outcomes. Specifically, our focus is on recurrent financing of health services (revenue raising, pooling, purchasing, decisions on benefits and their rationing, and public financial management); capital financing to generate health system resources (e.g., infrastructure, human resources for health, and the production of health products); and supply chain financing.</p>
-        <a class="info-modal-link" href="https://3ieimpact.org/our-work/systematic-mapping-global-research-health-systems-financing-and-health-economics-using"
-           target="_blank" rel="noopener">Visit the project page ↗</a>
+        <button class="info-modal-link methods-jump-button" type="button" data-methods-view="topics">View financing topics</button>
       </div>
     </div>
   </div>
@@ -564,7 +563,7 @@
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js" integrity="sha384-EcVTHT5RdDTvzbTIbNOtaNxNALeJYDgmv5Crp3NBmcdrCPrDnqp6I1+ETJ/FCFHI" crossorigin="anonymous"></script>
-<script type="module" src="app.js?v=2026-10-05s"></script>
+<script type="module" src="app.js?v=2026-10-05u"></script>
 
 </body>
 </html>

@@ -649,10 +649,10 @@ ax.annotate(f"half of all {total_full:,} full-year records\npublished {half_year
 ax.plot([years[-1]], [cum[-1]], marker="o", color=ACCENT, markersize=6, zorder=4)
 ax.annotate(f"{years[-1]}\n(partial)", xy=(years[-1], cum[-1]), xytext=(-4, 8),
             textcoords="offset points", fontsize=9, color=INK, ha="right")
-set_headline(ax, "A young field, growing faster than linearly",
+set_headline(ax, "Publications growing faster than linearly",
              "Cumulative records analysed by publication year.",
              f"Volume grew {round(cum[-1] / max(cum[0], 1), 1)}× since {years[0]} — half of all "
-             f"{total_full:,} full-year records were published {half_year} or later.",
+             f"{total_full:,} records were published {half_year} or later.",
              "fig_growth.png")
 ax.set_ylabel("cumulative records")
 ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True, nbins=9))
@@ -660,8 +660,8 @@ ax.yaxis.set_major_formatter(mticker.StrMethodFormatter("{x:,.0f}"))
 ax.set_ylim(0, cum[-1] * 1.18)
 clean_axes(ax)
 ax.grid(axis="y", color="#e7e3da", linewidth=0.8, zorder=0)
-set_footnote(fig, f"Base: {total_full:,} records by publication year, analysis population, {years[0]}–{full_years[-1]}. "
-                   f"{years[-1]} is a partial year. Reference: cumulative growth at the {years[0]}–{years[2]} average annual rate.")
+set_footnote(fig, f"Base: {total_full:,} records by publication year between {years[0]}–{full_years[-1]}. "
+                   f"{years[-1]} data covers only part of the year. Reference: cumulative growth at the {years[0]}–{years[2]} average annual rate.")
 fig.tight_layout()
 fig.savefig(FIGS / "fig_growth.png", dpi=150, bbox_inches="tight")
 plt.close(fig)

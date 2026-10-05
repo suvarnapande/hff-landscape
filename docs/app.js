@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-05s";
+const BUILD = "2026-10-05u";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1991,6 +1991,7 @@ if (typeof document !== "undefined") {
     }
     for (const button of document.querySelectorAll("[data-methods-view]")) {
       button.addEventListener("click", () => {
+        $("functions-help-modal").classList.remove("open");
         $("outcomes-help-modal").classList.remove("open");
         switchTab("methods");
         switchMethodsPanel(button.dataset.methodsView);
