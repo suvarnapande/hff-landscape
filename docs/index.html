@@ -11,7 +11,7 @@
      versions with SHA-384 integrity hashes verified by double fetch. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" integrity="sha384-krui876Mk6M6Lq6uj1SQo+u4MoImxFwCfwzWNU982QBMNci3VMZ3FoYSdUakJD5I" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css" integrity="sha384-PSZaVsyG9jDu8hFaSJev5s/9poIJlX7cuxSGdqCgXRHpo2DzIaZAyCd2rG/DJJmV" crossorigin="anonymous">
-<link rel="stylesheet" href="styles.css?v=2026-10-05u">
+<link rel="stylesheet" href="styles.css?v=2026-10-06e">
 </head>
 <body>
 
@@ -27,8 +27,7 @@
       <div class="nav-dropdown-menu" id="thematic-menu" role="menu" hidden></div>
     </div>
     <button class="nav-link" data-tab="explorer">Explorer</button>
-    <button class="nav-link" data-tab="landscape">Country landscape</button>
-    <button class="nav-link" data-tab="country">Country profile</button>
+    <button class="nav-link" data-tab="countries">Countries</button>
     <button class="nav-link" data-tab="methods">Methods</button>
   </div>
   <a class="project-link" href="https://3ieimpact.org/our-work/systematic-mapping-global-research-health-systems-financing-and-health-economics-using"
@@ -44,7 +43,7 @@
     <div class="overview-intro">
       <h2 class="hero-title">See where health financing evidence is strong — and where important gaps remain</h2>
       <p class="hero-text">The Health Systems Financing (HSF) Evidence Map brings together more than 36,000 studies recently published since 2010, on how health systems raise, pool and spend money. Explore what has been studied, where evidence is concentrated, how the field is changing, and which countries and health financing priorities remain underexplored.</p>
-      <p class="hero-actions-copy">Use <strong>Thematic analysis</strong> to discover key patterns, the <strong>Explorer</strong> to investigate the evidence in detail, or <strong>Country landscape/profile</strong> to examine a specific country setting.</p>
+      <p class="hero-actions-copy">Use <strong>Thematic analysis</strong> to discover key patterns, the <strong>Explorer</strong> to investigate the evidence in detail, or <strong>Countries</strong> to compare settings and examine a specific country.</p>
       <h2 class="glance-title">The evidence base at a glance</h2>
       <div class="grid-4" id="ov-tiles"></div>
     </div>
@@ -231,6 +230,10 @@
 
   <!-- ============ COUNTRY LANDSCAPE ============ -->
   <section class="tab-pane" id="pane-landscape">
+    <div class="country-view-tabs" role="tablist" aria-label="Country views">
+      <button class="country-view-tab active" type="button" data-country-view="landscape" role="tab" aria-selected="true">Country landscape</button>
+      <button class="country-view-tab" type="button" data-country-view="profile" role="tab" aria-selected="false">Country profile</button>
+    </div>
     <div class="card">
       <div class="card-body">
         <p class="fig-caption">Every country by disease burden, health spending per person, and
@@ -273,6 +276,10 @@
 
   <!-- ============ COUNTRY PROFILE ============ -->
   <section class="tab-pane" id="pane-country">
+    <div class="country-view-tabs" role="tablist" aria-label="Country views">
+      <button class="country-view-tab" type="button" data-country-view="landscape" role="tab" aria-selected="false">Country landscape</button>
+      <button class="country-view-tab active" type="button" data-country-view="profile" role="tab" aria-selected="true">Country profile</button>
+    </div>
     <div class="explorer-layout">
       <aside class="sidebar">
         <h2 class="sidebar-title">Country</h2>
@@ -563,7 +570,7 @@
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js" integrity="sha384-EcVTHT5RdDTvzbTIbNOtaNxNALeJYDgmv5Crp3NBmcdrCPrDnqp6I1+ETJ/FCFHI" crossorigin="anonymous"></script>
-<script type="module" src="app.js?v=2026-10-05u"></script>
+<script type="module" src="app.js?v=2026-10-06g"></script>
 
 </body>
 </html>

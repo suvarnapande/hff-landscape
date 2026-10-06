@@ -773,6 +773,16 @@ export function countryFacts(db, iso3) {
 
 const ACCENT = "#1f5fa8";
 const GREY = "#adb5bd";
+const LANDSCAPE_INCOME_COLORS = {
+  "Low income": "#c96a4a",
+  "Lower middle income": "#d2a84a",
+  "Upper middle income": "#3b9b84",
+  "High income": "#356fa8"
+};
+const PROFILE_BLUE = ["#c9ddef", "#9fc4df", "#70a7cf", "#4288bb", "#1f659f"];
+const PROFILE_TEAL = ["#d8ebe4", "#add6c7", "#79bda6", "#48a087", "#217b68"];
+const PROFILE_LAVENDER = ["#e5ddec", "#cab9da", "#ad91c4", "#8c69aa", "#6d4d8e"];
+const PROFILE_PEER = ["#edf1f4", "#dfe6eb", "#ced9e1", "#bdcbd5", "#aabcc8"];
 
 if (typeof document !== "undefined") {
 
@@ -901,12 +911,17 @@ if (typeof document !== "undefined") {
 
   // Financing-function / outcome-domain mix bar, reused by the Country
   // landscape tab below.
-  function mixBarTrace(rows, color) {
+  function mixBarTrace(rows, colors) {
     const top = rows.slice(0, 10).slice().reverse();
+    const palette = Array.isArray(colors) ? colors : [colors];
+    const barColors = top.map((_, i) => palette[Math.min(
+      palette.length - 1,
+      Math.round(i * (palette.length - 1) / Math.max(1, top.length - 1))
+    )]);
     return [{
       type: "bar", orientation: "h",
       y: top.map(r => r.grp), x: top.map(r => r.pct),
-      marker: { color },
+      marker: { color: barColors, line: { color: "rgba(255,255,255,.75)", width: 0.5 } },
       text: top.map(r => fmtNum(r.n)),
       textposition: "outside",
       hovertemplate: "%{y}: %{x:.1f}%<extra></extra>"
@@ -930,7 +945,13 @@ if (typeof document !== "undefined") {
       z: ct.grid, x: ct.col_order, y: ct.row_order,
       text: ct.counts.map(row => row.map(n => "n=" + n)),
       hovertemplate: "%{y} × %{x}: %{z:.0f}%<br>%{text}<extra></extra>",
-      colorscale: [[0, "#eef5f5"], [1, "#123a40"]],
+      colorscale: [
+        [0, "#f5f3ee"],
+        [0.25, "#d7e8e5"],
+        [0.55, "#78b7ad"],
+        [0.78, "#347f86"],
+        [1, "#163b5c"]
+      ],
       showscale: true,
       colorbar: { title: "%", thickness: 12 }
     }];
@@ -964,8 +985,10 @@ if (typeof document !== "undefined") {
       " (" + fmtNum(mix.n_studies) + (mix.n_studies === 1 ? " study" : " studies") + ")";
     $("land-outcome-title").textContent = "Outcome-domain mix — " + mix.country;
     $("land-cross-title").textContent = "Outcome domain × financing function — " + mix.country;
-    window.Plotly.react("land-func-mix", mixBarTrace(mix.function_mix.rows, ACCENT), mixLayout(), PLOTLY_CFG);
-    window.Plotly.react("land-outcome-mix", mixBarTrace(mix.outcome_mix.rows, "#b08d3e"), mixLayout(), PLOTLY_CFG);
+    window.Plotly.react("land-func-mix", mixBarTrace(mix.function_mix.rows,
+      ["#c9ddef", "#a8c8e3", "#7faed3", "#568fc0", "#356fa8", "#1f5fa8"]), mixLayout(), PLOTLY_CFG);
+    window.Plotly.react("land-outcome-mix", mixBarTrace(mix.outcome_mix.rows,
+      ["#d8ebe4", "#b5d9ca", "#86c2ad", "#55a88f", "#2f8b73", "#176b58"]), mixLayout(), PLOTLY_CFG);
     window.Plotly.react("land-cross-heatmap", crossTabTrace(mix.cross_tab), crossTabLayout(), PLOTLY_CFG);
     landCrossIndex = { iso3: mix.iso3, cross_tab: mix.cross_tab };
 
@@ -1004,8 +1027,9 @@ if (typeof document !== "undefined") {
         text: sub.map(r => esc(r.country) + "<br>" + fmtNum(r.studies) + " studies — click for mix"),
         hoverinfo: "text",
         marker: {
-          color: db.palInc[inc], size: sub.map(r => bubbleSize(r.studies)), opacity: 0.75,
-          line: { color: "white", width: 0.5 }
+          color: LANDSCAPE_INCOME_COLORS[inc] || db.palInc[inc],
+          size: sub.map(r => bubbleSize(r.studies)), opacity: 0.78,
+          line: { color: "rgba(255,255,255,.9)", width: 0.8 }
         }
       };
     });
@@ -1034,7 +1058,59 @@ if (typeof document !== "undefined") {
     if (seed) showCountryMix(seed.iso3);
   }
 
+  function spreadPalette(colors, n) {
+    return Array.from({ length: n }, (_, i) => colors[Math.min(
+      colors.length - 1,
+      Math.round(i * (colors.length - 1) / Math.max(1, n - 1))
+    )]);
+  }
+
+  function updateCountryViewTabs(view) {
+    for (const button of document.querySelectorAll("[data-country-view]")) {
+      const active = button.dataset.countryView === view;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-selected", String(active));
+    }
+  }
+
+  function showCountryLandscape() {
+    closeThematicMenu();
+    for (const button of document.querySelectorAll(".navbar .nav-link")) {
+      button.classList.toggle("active", button.dataset.tab === "countries");
+    }
+    for (const pane of document.querySelectorAll(".tab-pane")) {
+      pane.classList.toggle("active", pane.id === "pane-landscape");
+    }
+    updateCountryViewTabs("landscape");
+    requestAnimationFrame(() => {
+      for (const id of ["land-scatter", "land-func-mix", "land-outcome-mix", "land-cross-heatmap"]) {
+        if (window.Plotly && $(id).data) window.Plotly.Plots.resize($(id));
+      }
+    });
+  }
+
+  function showCountryProfile() {
+    closeThematicMenu();
+    renderCountryAll();
+    for (const button of document.querySelectorAll(".navbar .nav-link")) {
+      button.classList.toggle("active", button.dataset.tab === "countries");
+    }
+    for (const pane of document.querySelectorAll(".tab-pane")) {
+      pane.classList.toggle("active", pane.id === "pane-country");
+    }
+    updateCountryViewTabs("profile");
+    requestAnimationFrame(() => {
+      for (const id of ["c-trend", "c-mix", "c-methods", "c-signals", "c-strip", "c-benchmark"]) {
+        if (window.Plotly && $(id).data) window.Plotly.Plots.resize($(id));
+      }
+    });
+  }
+
   function switchTab(name) {
+    if (name === "countries") {
+      showCountryLandscape();
+      return;
+    }
     if (name !== "gallery") closeThematicMenu();
     for (const b of document.querySelectorAll(".navbar .nav-link")) {
       b.classList.toggle("active", b.dataset.tab === name);
@@ -1741,7 +1817,7 @@ if (typeof document !== "undefined") {
       type: "heatmap",
       x: xLabels, y: cats, z,
       text, hoverinfo: "text",
-      colorscale: [[0, "#f4f2ec"], [0.001, "#cfe0f3"], [0.5, "#5590cc"], [1, "#0b3d78"]],
+      colorscale: [[0, "#f5f3ee"], [0.001, "#dce9f3"], [0.35, "#9fc4df"], [0.7, "#4d91bf"], [1, "#163b5c"]],
       hoverongaps: false,
       showscale: true,
       colorbar: { title: "studies", thickness: 12, len: 0.8 }
@@ -1820,13 +1896,13 @@ if (typeof document !== "undefined") {
       {
         x: cYears, y: cYears.map(y => ct.country[y]),
         mode: "lines", type: "scatter", name: "country",
-        line: { color: ACCENT, width: 3 },
+        line: { color: "#1f659f", width: 3 },
         hovertemplate: "%{x}: %{y} studies<extra>country</extra>"
       },
       {
         x: pYears, y: pYears.map(y => ct.peer[y]),
         mode: "lines", type: "scatter", name: "income-group mean",
-        line: { color: GREY, width: 3 },
+        line: { color: "#88a6b8", width: 2.5, dash: "dash" },
         hovertemplate: "%{x}: %{y:.2f} per country<extra>income-group mean</extra>"
       }
     ], {
@@ -1852,13 +1928,13 @@ if (typeof document !== "undefined") {
       {
         type: "bar", orientation: "h", name: "country",
         y: grps, x: grps.map(g => mix.country[g] != null ? mix.country[g] : null),
-        marker: { color: ACCENT },
+        marker: { color: spreadPalette(PROFILE_BLUE, grps.length) },
         hovertemplate: "%{y}: %{x:.1f}%<extra>country</extra>"
       },
       {
         type: "bar", orientation: "h", name: "income group",
         y: grps, x: grps.map(g => mix.peer[g] != null ? mix.peer[g] : null),
-        marker: { color: GREY },
+        marker: { color: spreadPalette(PROFILE_PEER, grps.length) },
         hovertemplate: "%{y}: %{x:.1f}%<extra>income group</extra>"
       }
     ], {
@@ -1883,13 +1959,13 @@ if (typeof document !== "undefined") {
       {
         type: "bar", orientation: "h", name: "country",
         y: yOrder, x: yOrder.map(t => methVal("country_share", t)),
-        marker: { color: ACCENT },
+        marker: { color: spreadPalette(PROFILE_TEAL, yOrder.length) },
         hovertemplate: "%{y}: %{x:.1f}%<extra>country</extra>"
       },
       {
         type: "bar", orientation: "h", name: "income group",
         y: yOrder, x: yOrder.map(t => methVal("peer_share", t)),
-        marker: { color: GREY },
+        marker: { color: spreadPalette(PROFILE_PEER, yOrder.length) },
         hovertemplate: "%{y}: %{x:.1f}%<extra>income group</extra>"
       }
     ], {
@@ -1913,13 +1989,13 @@ if (typeof document !== "undefined") {
       {
         type: "bar", orientation: "h", name: "country",
         y: sigCats, x: sigCats.map(m => sigVal("country_pct", m)),
-        marker: { color: ACCENT },
+        marker: { color: spreadPalette(PROFILE_LAVENDER, sigCats.length) },
         hovertemplate: "%{y}: %{x:.1f}%<extra>country</extra>"
       },
       {
         type: "bar", orientation: "h", name: "income group",
         y: sigCats, x: sigCats.map(m => sigVal("peer_pct", m)),
-        marker: { color: GREY },
+        marker: { color: spreadPalette(PROFILE_PEER, sigCats.length) },
         hovertemplate: "%{y}: %{x:.1f}%<extra>income group</extra>"
       }
     ], {
@@ -1954,12 +2030,12 @@ if (typeof document !== "undefined") {
       bmLayout.shapes = [{
         type: "line", xref: "paper", x0: 0, x1: 1,
         yref: "y", y0: bm.median_per100k, y1: bm.median_per100k,
-        line: { color: "#6b7280", width: 1, dash: "dash" }
+        line: { color: "#b08d3e", width: 1.25, dash: "dash" }
       }];
       bmLayout.annotations = [{
         text: "income-group median", xref: "paper", x: 0.99, xanchor: "right",
         yref: "y", y: bm.median_per100k, yanchor: "bottom", showarrow: false,
-        font: { size: 10, color: "#6b7280" }
+        font: { size: 10, color: "#8f702d" }
       }];
     }
     window.Plotly.react("c-benchmark", [
@@ -1967,13 +2043,13 @@ if (typeof document !== "undefined") {
         type: "scatter", mode: "markers", name: "income group", showlegend: false,
         x: bmPeers.map(x => x.dalys), y: bmPeers.map(x => x.per100k),
         text: bmPeers.map(hoverOf), hoverinfo: "text",
-        marker: { color: "#9aa7b5", size: 9, opacity: 0.8 }
+        marker: { color: "#9fb7c8", size: 9, opacity: 0.72, line: { color: "white", width: 0.5 } }
       },
       {
         type: "scatter", mode: "markers", name: "country", showlegend: false,
         x: bmSel.map(x => x.dalys), y: bmSel.map(x => x.per100k),
         text: bmSel.map(hoverOf), hoverinfo: "text",
-        marker: { color: "#b08d3e", size: 14 }
+        marker: { color: "#2f9b92", size: 15, line: { color: "#ffffff", width: 1.2 } }
       }
     ], bmLayout, PLOTLY_CFG);
 
@@ -1984,6 +2060,12 @@ if (typeof document !== "undefined") {
     for (const b of document.querySelectorAll(".navbar .nav-link")) {
       if (b.id === "thematic-toggle") continue;
       b.addEventListener("click", () => switchTab(b.dataset.tab));
+    }
+    for (const button of document.querySelectorAll("[data-country-view]")) {
+      button.addEventListener("click", () => {
+        if (button.dataset.countryView === "profile") showCountryProfile();
+        else showCountryLandscape();
+      });
     }
     for (const button of document.querySelectorAll(".methods-tab")) {
       button.setAttribute("role", "tab");

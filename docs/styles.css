@@ -926,6 +926,26 @@ table.dataTable tbody td {
 table.dataTable tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
 table.dataTable thead th.num { text-align: right; }
 
+/* ---- country views ---- */
+.country-view-tabs {
+  display: flex;
+  gap: .35rem;
+  margin: 0 0 1rem;
+  padding-bottom: .65rem;
+  border-bottom: 1px solid var(--hff-line);
+}
+.country-view-tab {
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--hff-muted);
+  cursor: pointer;
+  font: 600 .9rem/1.2 'Inter', system-ui, sans-serif;
+  padding: .62rem .9rem;
+}
+.country-view-tab:hover { background: #f2f5f7; color: var(--hff-ink); }
+.country-view-tab.active { background: var(--hff-ink); color: #fff; }
+
 /* ---- plotly ---- */
 .js-plotly-plot .plotly .main-svg { font-family: 'Inter', sans-serif !important; }
 
