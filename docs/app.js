@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-05u";
+const BUILD = "2026-10-07a";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -27,7 +27,7 @@ const OVERVIEW_TILE_COPY = {
     help: true
   },
   "Quantitative analysis": { label: "Studies using quantitative analysis", sub: null },
-  "Has a recovered DOI": { label: "Studies with DOI/URL", sub: null },
+  "Has a recovered DOI": { label: "Studies with a publication link", sub: "DOI or URL available" },
   "Single-country studies": { label: "Studies focused on one country", sub: null }
 };
 
@@ -1149,15 +1149,85 @@ if (typeof document !== "undefined") {
     }
   }
 
+  function openOverviewTheme(title) {
+    const index = GALLERY.findIndex(section => section.title === title);
+    if (index < 0) return;
+    switchTab("gallery");
+    showSection(index);
+  }
+
+  function makeOverviewCardInteractive(box, label) {
+    const actions = {
+      "Studies captured in the map": () => openOverviewTheme("Size & growth"),
+      "Publication years covered": () => openOverviewTheme("Size & growth"),
+      "Countries covered by studies": showCountryLandscape,
+      "Health financing functions covered": () => openOverviewTheme("Financing functions & outcomes"),
+      "Studies using quantitative analysis": () => openOverviewTheme("Methods & data"),
+      "Studies with a publication link": () => openOverviewTheme("Open access & author countries"),
+      "Studies focused on one country": () => switchTab("explorer")
+    };
+    const action = actions[label];
+    if (!action) return;
+    box.classList.add("overview-nav-card");
+    box.tabIndex = 0;
+    box.setAttribute("role", "link");
+    box.setAttribute("aria-label", label + ": open related analysis");
+    box.addEventListener("click", event => {
+      if (event.target.closest("button")) return;
+      action();
+    });
+    box.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        action();
+      }
+    });
+  }
+
+  function mostCommonCategory(junction, groups, excluded = new Set()) {
+    const studiesByGroup = groups.map(() => new Set());
+    for (let i = 0; i < junction.s.length; i++) {
+      if (studiesByGroup[junction.g[i]]) studiesByGroup[junction.g[i]].add(junction.s[i]);
+    }
+    return groups
+      .map((label, i) => ({ label, n: studiesByGroup[i].size }))
+      .filter(row => !excluded.has(row.label))
+      .sort((a, b) => b.n - a.n)[0]?.label || "Not available";
+  }
+
+  function leastCommonCategory(junction, groups, excluded = new Set()) {
+    const studiesByGroup = groups.map(() => new Set());
+    for (let i = 0; i < junction.s.length; i++) {
+      if (studiesByGroup[junction.g[i]]) studiesByGroup[junction.g[i]].add(junction.s[i]);
+    }
+    return groups
+      .map((label, i) => ({ label, n: studiesByGroup[i].size }))
+      .filter(row => row.n > 0 && !excluded.has(row.label))
+      .sort((a, b) => a.n - b.n)[0]?.label || "Not available";
+  }
+
   function renderOverview() {
     const m = db.dict.meta;
     $("nav-built").textContent = "Last update " + m.built;
+    $("overview-updated").textContent = "Evidence map updated " + m.built;
 
     // Glance tiles: final formatted strings from content.json;
     // sub === null means no footer line.
     const wrap = $("ov-tiles");
     wrap.textContent = "";
-    for (const t of db.content.glance_tiles) {
+    const tileOrder = [
+      "Records analysed",
+      "Years covered",
+      "Has a recovered DOI",
+      "Financing functions coded",
+      "Countries studied",
+      "Single-country studies",
+      "Quantitative analysis"
+    ];
+    const tileRank = new Map(tileOrder.map((label, i) => [label, i]));
+    const tiles = db.content.glance_tiles.slice()
+      .sort((a, b) => (tileRank.get(a.label) ?? 99) - (tileRank.get(b.label) ?? 99));
+    for (const t of tiles) {
       const display = OVERVIEW_TILE_COPY[t.label] || t;
       const box = el("div", "value-box bg-" + t.theme);
       if (display.label === "Health financing functions covered") {
@@ -1179,13 +1249,97 @@ if (typeof document !== "undefined") {
           help.addEventListener("click", () => $(modalId).classList.add("open"));
           const metricValue = el("div", "value-box-value");
           metricValue.textContent = valueText;
+          const insight = el("div", "coverage-metric-insight");
+          if (label.startsWith("Health financing")) {
+            insight.textContent = "Most studied: " + mostCommonCategory(db.function, db.function_grps, new Set(["Other", "Unclear"])) +
+              " · Least studied: " + leastCommonCategory(db.function, db.function_grps, new Set(["Other", "Unclear"]));
+          } else {
+            insight.textContent = "Most common named: " + mostCommonCategory(db.outcome, db.outcome_grps, new Set(["Other", "Unclear"]));
+          }
           titleRow.appendChild(metricTitle);
           titleRow.appendChild(help);
           metric.appendChild(titleRow);
           metric.appendChild(metricValue);
+          metric.appendChild(insight);
           metrics.appendChild(metric);
         }
         box.appendChild(metrics);
+        makeOverviewCardInteractive(box, display.label);
+        wrap.appendChild(box);
+        continue;
+      }
+      if (display.label === "Studies using quantitative analysis") {
+        box.classList.add("analysis-approach-card");
+        const title = el("div", "value-box-title");
+        title.textContent = "Type of analysis used in studies";
+        box.appendChild(title);
+
+        const levels = db.levels.type_of_analysis;
+        const counts = Array(levels.length).fill(0);
+        for (const code of db.studies.type_of_analysis) {
+          if (Number.isInteger(code) && code >= 0 && code < counts.length) counts[code]++;
+        }
+        const total = db.studies.type_of_analysis.length || 1;
+        const approaches = ["Quantitative", "Qualitative", "Mixed methods"].map(label => {
+          const i = levels.indexOf(label);
+          return { label, pct: i < 0 ? 0 : 100 * counts[i] / total };
+        });
+        const bar = el("div", "analysis-approach-bar");
+        const metrics = el("div", "analysis-approach-metrics");
+        for (const approach of approaches) {
+          const key = approach.label.toLowerCase().replace(" methods", "");
+          const segment = el("div", "analysis-approach-segment analysis-" + key);
+          segment.style.width = approach.pct + "%";
+          bar.appendChild(segment);
+          const metric = el("div", "analysis-approach-metric");
+          metric.classList.add("analysis-metric-" + key);
+          metric.style.flexBasis = approach.pct + "%";
+          const pct = el("strong");
+          pct.textContent = approach.pct.toFixed(1) + "%";
+          const label = el("span");
+          label.textContent = approach.label;
+          metric.append(pct, label);
+          metrics.appendChild(metric);
+        }
+        const unclearCode = levels.indexOf("Unclear");
+        const unclearPct = unclearCode < 0 ? 0 : 100 * counts[unclearCode] / total;
+        const note = el("div", "analysis-approach-note");
+        note.textContent = unclearPct.toFixed(1) + "% could not be classified.";
+        box.append(bar, metrics, note);
+        makeOverviewCardInteractive(box, display.label);
+        wrap.appendChild(box);
+        continue;
+      }
+      if (display.label === "Studies focused on one country") {
+        box.classList.add("geo-scope-card");
+        const title = el("div", "value-box-title");
+        title.textContent = "Geographic scope of studies";
+        box.appendChild(title);
+
+        const levels = db.levels.geo_scope;
+        const singleCode = levels.indexOf("Single country");
+        const scopes = db.studies.geo_scope;
+        const singleN = scopes.filter(code => code === singleCode).length;
+        const singlePct = 100 * singleN / Math.max(1, scopes.length);
+        const otherPct = 100 - singlePct;
+
+        const bar = el("div", "geo-scope-bar");
+        const single = el("div", "geo-scope-segment geo-scope-single");
+        single.style.width = singlePct + "%";
+        single.textContent = Math.round(singlePct) + "%";
+        const other = el("div", "geo-scope-segment geo-scope-other");
+        other.style.width = otherPct + "%";
+        other.textContent = Math.round(otherPct) + "%";
+        bar.append(single, other);
+
+        const labels = el("div", "geo-scope-labels");
+        const singleLabel = el("div");
+        singleLabel.innerHTML = "<strong>Single-country</strong><span>One country examined</span>";
+        const otherLabel = el("div");
+        otherLabel.innerHTML = "<strong>Other geographic scope</strong><span>14.2% multi-country or regional/global; 4.5% no country stated</span>";
+        labels.append(singleLabel, otherLabel);
+        box.append(bar, labels);
+        makeOverviewCardInteractive(box, display.label);
         wrap.appendChild(box);
         continue;
       }
@@ -1213,29 +1367,44 @@ if (typeof document !== "undefined") {
         sub.textContent = display.sub;
         box.appendChild(sub);
       }
+      makeOverviewCardInteractive(box, display.label);
       wrap.appendChild(box);
     }
 
   }
 
-  // Overview cumulative growth, computed from the unfiltered dataset.
+  // Annual publication trend for the unfiltered dataset. The fuller cumulative
+  // analysis remains available from the adjacent Thematic analysis link.
   function renderOverviewCharts() {
     if (!$("ov-trend")) return;
     const flt = applyFilters(db, {});
     const ser = trendSeries(db, flt, "none");
     const years = Object.keys(ser).map(Number).sort((a, b) => a - b);
-    let runningTotal = 0;
-    const cumulative = years.map(year => (runningTotal += ser[year]));
-    window.Plotly.react("ov-trend", [{
-      x: years, y: cumulative,
-      mode: "lines", type: "scatter",
-      line: { color: ACCENT, width: 3 },
+    const annual = years.map(year => ser[year]);
+    const traces = [{
+      x: years, y: annual,
+      mode: "lines+markers", type: "scatter", showlegend: false,
+      line: { color: ACCENT, width: 3, shape: "spline", smoothing: 0.45 },
+      marker: { color: ACCENT, size: 6, line: { color: "white", width: 1 } },
+      fill: "tozeroy", fillcolor: "rgba(31,95,168,.12)",
       hovertemplate: "%{x}: %{y:,} studies<extra></extra>"
-    }], {
+    }];
+    const partialIndex = years.indexOf(2026);
+    if (partialIndex >= 0) {
+      traces.push({
+        x: [2026], y: [annual[partialIndex]],
+        mode: "markers+text", type: "scatter", showlegend: false,
+        marker: { symbol: "triangle-up", color: "#b08d3e", size: 13, line: { color: "white", width: 1 } },
+        text: ["⚠ 2026 partial year"], textposition: "top left",
+        textfont: { color: "#8f702d", size: 11 },
+        hovertemplate: "2026: %{y:,} studies captured so far<br>Partial publication year<extra></extra>"
+      });
+    }
+    window.Plotly.react("ov-trend", traces, {
       font: BASE_FONT,
       margin: { t: 10, b: 40, l: 50, r: 20 },
       xaxis: { gridcolor: "#eeebe3" },
-      yaxis: { dtick: 10000, tickformat: ",d", showgrid: false, zeroline: false },
+      yaxis: { title: "studies", tickformat: ",d", gridcolor: "#eeebe3", zeroline: false },
       plot_bgcolor: "rgba(0,0,0,0)",
       paper_bgcolor: "rgba(0,0,0,0)"
     }, PLOTLY_CFG);
@@ -2098,6 +2267,7 @@ if (typeof document !== "undefined") {
     $("fig-modal-close").addEventListener("click", closeModal);
     $("fig-modal").addEventListener("click", e => { if (e.target === $("fig-modal")) closeModal(); });
     $("ov-worldmap-open").addEventListener("click", () => openModal("fig_worldmap.png"));
+    $("ov-growth-open").addEventListener("click", () => openModal("fig_growth.png"));
     $("ov-function-open").addEventListener("click", () => openModal("fig_function_bar.png"));
     $("ov-funders-open").addEventListener("click", () => openModal("fig_funder_funders_treemap.png"));
     $("study-modal-close").addEventListener("click", closeStudyModal);

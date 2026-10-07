@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HFF evidence map — interactive</title>
+<title>Health financing functions evidence map — interactive</title>
 <!-- The Google Fonts stylesheet (Inter/Newsreader) is loaded via @import in
      styles.css and deliberately carries NO SRI: the fonts.googleapis.com CSS
      response varies by user agent (woff2 vs ttf rules), so a fixed integrity
@@ -11,12 +11,12 @@
      versions with SHA-384 integrity hashes verified by double fetch. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" integrity="sha384-krui876Mk6M6Lq6uj1SQo+u4MoImxFwCfwzWNU982QBMNci3VMZ3FoYSdUakJD5I" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css" integrity="sha384-PSZaVsyG9jDu8hFaSJev5s/9poIJlX7cuxSGdqCgXRHpo2DzIaZAyCd2rG/DJJmV" crossorigin="anonymous">
-<link rel="stylesheet" href="styles.css?v=2026-10-06e">
+<link rel="stylesheet" href="styles.css?v=2026-10-07a">
 </head>
 <body>
 
 <nav class="navbar">
-  <a class="navbar-brand" href="#">HFF evidence map</a>
+  <a class="navbar-brand" href="#">Health financing functions evidence map</a>
   <div class="navbar-nav">
     <button class="nav-link active" data-tab="overview">Overview</button>
     <div class="nav-dropdown" id="thematic-nav">
@@ -28,7 +28,7 @@
     </div>
     <button class="nav-link" data-tab="explorer">Explorer</button>
     <button class="nav-link" data-tab="countries">Countries</button>
-    <button class="nav-link" data-tab="methods">Methods</button>
+    <button class="nav-link" data-tab="methods">Scope &amp; Methods</button>
   </div>
   <a class="project-link" href="https://3ieimpact.org/our-work/systematic-mapping-global-research-health-systems-financing-and-health-economics-using"
      target="_blank" rel="noopener" aria-label="Open the HSF Evidence Map project page"
@@ -41,15 +41,23 @@
   <!-- ============ OVERVIEW ============ -->
   <section class="tab-pane active" id="pane-overview">
     <div class="overview-intro">
+      <div class="overview-kicker">HSF project · Studies on health financing functions</div>
       <h2 class="hero-title">See where health financing evidence is strong — and where important gaps remain</h2>
-      <p class="hero-text">The Health Systems Financing (HSF) Evidence Map brings together more than 36,000 studies recently published since 2010, on how health systems raise, pool and spend money. Explore what has been studied, where evidence is concentrated, how the field is changing, and which countries and health financing priorities remain underexplored.</p>
+      <div class="overview-update" id="overview-updated"></div>
+      <p class="hero-text">Part of the Health Systems Financing (HSF) project, this evidence map brings together more than 36,000 studies published since 2010 that examine health financing functions — how health systems raise, pool and spend money. Explore what has been studied, where evidence is concentrated, how the field is changing, and which countries and health financing priorities remain underexplored.</p>
       <p class="hero-actions-copy">Use <strong>Thematic analysis</strong> to discover key patterns, the <strong>Explorer</strong> to investigate the evidence in detail, or <strong>Countries</strong> to compare settings and examine a specific country.</p>
       <h2 class="glance-title">The evidence base at a glance</h2>
       <div class="grid-4" id="ov-tiles"></div>
     </div>
     <div class="card overview-trend-card">
-      <div class="card-header">Cumulative growth</div>
-      <div class="card-body"><div id="ov-trend" class="plot overview-trend-plot"></div></div>
+      <div class="card-header overview-trend-header">
+        <span>Publication trends</span>
+        <button class="card-header-link" id="ov-growth-open" type="button">View cumulative growth &rarr;</button>
+      </div>
+      <div class="card-body">
+        <div id="ov-trend" class="plot overview-trend-plot"></div>
+        <p class="overview-trend-note">Annual studies by publication year; 2026 is a partial year.</p>
+      </div>
     </div>
 
     <div class="overview-analysis-grid">
@@ -335,13 +343,13 @@
     <div class="methods-wrap">
 
       <div class="methods-tabs" role="tablist" aria-label="Methods sections">
-        <button class="methods-tab active" type="button" data-methods-tab="methodology">Methodology</button>
-        <button class="methods-tab" type="button" data-methods-tab="eligibility">Eligibility criteria</button>
+        <button class="methods-tab active" type="button" data-methods-tab="eligibility">Eligibility criteria</button>
         <button class="methods-tab" type="button" data-methods-tab="topics">Financing topics</button>
         <button class="methods-tab" type="button" data-methods-tab="outcomes">Outcome domains</button>
+        <button class="methods-tab" type="button" data-methods-tab="methodology">Methodology</button>
       </div>
 
-      <div class="methods-panel active" data-methods-panel="methodology">
+      <div class="methods-panel" data-methods-panel="methodology">
 
       <div class="card">
         <div class="card-header">How this dataset is built</div>
@@ -427,7 +435,7 @@
 
       </div>
 
-      <div class="methods-panel" data-methods-panel="eligibility">
+      <div class="methods-panel active" data-methods-panel="eligibility">
         <div class="card">
           <div class="card-header">Summary of inclusion criteria</div>
           <div class="card-body">
@@ -570,7 +578,7 @@
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js" integrity="sha384-EcVTHT5RdDTvzbTIbNOtaNxNALeJYDgmv5Crp3NBmcdrCPrDnqp6I1+ETJ/FCFHI" crossorigin="anonymous"></script>
-<script type="module" src="app.js?v=2026-10-06g"></script>
+<script type="module" src="app.js?v=2026-10-07a"></script>
 
 </body>
 </html>
