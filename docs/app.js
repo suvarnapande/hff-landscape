@@ -2345,6 +2345,7 @@ if (typeof document !== "undefined") {
     $("ov-function-open").addEventListener("click", () => openModal("fig_function_bar.png"));
     $("ov-funders-open").addEventListener("click", () => openModal("fig_funder_funders_treemap.png"));
     $("ov-disease-method-open").addEventListener("click", () => openModal("fig_disease_method.png"));
+    $("ov-wellcome-open").addEventListener("click", () => openModal("fig_wellcome_priorities.png"));
     $("study-modal-close").addEventListener("click", closeStudyModal);
     $("study-modal").addEventListener("click", e => { if (e.target === $("study-modal")) closeStudyModal(); });
     $("functions-help-close").addEventListener("click", () => $("functions-help-modal").classList.remove("open"));

@@ -3240,7 +3240,8 @@ if have_topics:
     cluster_color = {c: cmap(i / max(N_TOP - 1, 1)) for i, c in enumerate(top_clusters)}
 
     other = topic_map[~topic_map["cluster"].isin(top_clusters)]
-    fig, ax = plt.subplots(figsize=(9, 7.6))
+    fig = plt.figure(figsize=(11, 8.2))
+    ax = fig.add_axes([0.06, 0.13, 0.55, 0.58])
     ax.scatter(other["x"], other["y"], s=3, color=GREY, alpha=0.35, linewidths=0, zorder=2,
                label=f"Other / unclustered ({len(other):,})")
     for c in top_clusters:
@@ -3248,20 +3249,32 @@ if have_topics:
         lbl = topic_labels.loc[c, "label"]
         ax.scatter(sub["x"], sub["y"], s=4, color=cluster_color[c], alpha=0.6, linewidths=0,
                    zorder=3, label=f"{lbl} ({len(sub):,})")
-    set_headline(ax, "A handful of themes dominate the thematic landscape",
-                 "Abstract embeddings, UMAP + HDBSCAN — each point is one study, positioned by similarity.",
-                 f"'{top_theme_label}' is the largest emergent theme at {top_theme_n:,} studies; the top 12 "
-                 f"themes shown here cover about {top_theme_share}% of all topic-embedded studies.",
-                 "fig_topicmap.png")
+    topic_headline = "A handful of themes dominate the thematic landscape"
+    topic_desc = "Abstract embeddings, UMAP + HDBSCAN - each point is one study, positioned by similarity."
+    topic_finding = (f"'{top_theme_label}' is the largest emergent theme at {top_theme_n:,} studies; "
+                     f"the top 12 themes shown here cover about {top_theme_share}% of all "
+                     f"topic-embedded studies.")
+    FIG_META["fig_topicmap.png"] = (topic_headline, topic_desc, topic_finding)
+    fig.text(0.04, 0.965, D(topic_headline), fontsize=16, fontweight="bold",
+             color=INK, ha="left", va="top")
+    fig.text(0.04, 0.91, D(topic_desc), fontsize=10.5, color=SUBHEAD_COLOR,
+             ha="left", va="top")
+    fig.text(0.04, 0.855, D("\n".join(textwrap.wrap(topic_finding, width=105))),
+             fontsize=10.5, fontweight="bold", color=INK, ha="left", va="top",
+             linespacing=1.25)
     ax.set_xticks([]); ax.set_yticks([])
     for spine in ax.spines.values():
         spine.set_visible(False)
-    ax.legend(loc="center left", bbox_to_anchor=(1.01, 0.5), fontsize=8, frameon=False,
-              markerscale=3, title=f"Top {N_TOP} themes")
-    set_footnote(fig, f"Base: {len(topic_map):,} studies with a topic embedding. Position = 2D UMAP projection of "
-                       f"sentence embeddings; colour = HDBSCAN cluster.")
-    fig.tight_layout()
-    fig.savefig(FIGS / "fig_topicmap.png", dpi=150, bbox_inches="tight")
+    ax.legend(loc="center left", bbox_to_anchor=(1.04, 0.5), fontsize=8.5,
+              frameon=False, markerscale=3, title=f"Top {N_TOP} themes",
+              title_fontsize=10.5)
+    topic_footnote = (f"Base: {len(topic_map):,} studies with a topic embedding. Position = 2D UMAP "
+                      "projection of sentence embeddings; colour = HDBSCAN cluster.")
+    fig.text(0.04, 0.055, D(topic_footnote), fontsize=8.5, color=SUBHEAD_COLOR,
+             ha="left", va="bottom")
+    fig.patch.set_facecolor(PAPER)
+    ax.set_facecolor(PAPER)
+    fig.savefig(FIGS / "fig_topicmap.png", dpi=150)
     plt.close(fig)
 
     theme_counts = {row["label"]: row["n"] for _, row in ranked.head(20).iterrows()}
@@ -3361,19 +3374,38 @@ if have_taxonomy:
         weight = 0.56 + 0.40 * np.sqrt(value / max_value)
         return tuple(1 - (1 - base) * weight)
 
-    N_BARS = 20
+    N_BARS = 40
     subfield_counts = tax["subfield"].value_counts()
     subfield_field = tax.groupby("subfield")["field"].agg(lambda s: s.mode()[0])
     top_subfields = subfield_counts.head(N_BARS)
     # Group contiguously by domain (biggest domain first), then by field within
     # domain, then by count within field — matches HEE's clustered layout.
-    bar_rows = list(reversed(list(top_subfields.items())))
-    bar_labels = ["\n".join(textwrap.wrap(name, width=38, break_long_words=False))
-                  for name, _ in bar_rows]
+    bar_rows = sorted(
+        top_subfields.items(),
+        key=lambda kv: (domain_order.index(field_domain[subfield_field[kv[0]]]),
+                        subfield_field[kv[0]], -kv[1])
+    )
+    bar_labels = [f"{name} {n:,}" for name, n in bar_rows]
     bar_values = [n for _, n in bar_rows]
     bar_domains = [field_domain[subfield_field[name]] for name, _ in bar_rows]
     bar_colors = [topic_color(d, v, int(top_subfields.iloc[0]))
                   for d, v in zip(bar_domains, bar_values)]
+
+    n_bars = len(bar_rows)
+    n_groups = len(set(bar_domains))
+    gap = np.radians(3.0)
+    total_gap = gap * n_groups
+    slot = (2 * np.pi - total_gap) / n_bars
+
+    theta = []
+    angle = 0.0
+    previous_domain = None
+    for domain in bar_domains:
+        if previous_domain is not None and domain != previous_domain:
+            angle += gap
+        theta.append(angle + slot / 2)
+        angle += slot
+        previous_domain = domain
 
     # bar_rows is sorted domain-then-field-then-count (for the chart's grouped
     # layout), NOT by count — the actual top subfield/domain come straight
@@ -3383,36 +3415,53 @@ if have_taxonomy:
     top_domain = domain_order[0]
     top_domain_n = int(domain_totals.iloc[0])
     headline = "One subfield dominates the topic taxonomy"
-    desc = "OpenAlex-style topic taxonomy - the 20 largest subfields, coloured by domain."
+    desc = "OpenAlex-style topic taxonomy - each radial bar is a subfield (length = studies), coloured by domain."
     finding = (f"'{top_subfield}' leads at {top_subfield_n:,} studies, {round(top_subfield_n / second_subfield_n, 1)}× "
                f"the next-largest ('{second_subfield}', {second_subfield_n:,}); {top_domain} accounts for "
                f"{top_domain_n:,} of {n_tax:,} studies with a topic label.")
     FIG_META["fig_topic_landscape.png"] = (headline, desc, finding)
 
-    fig, ax = plt.subplots(figsize=(12.8, 9.2))
-    y = np.arange(len(bar_rows))
-    ax.barh(y, bar_values, color=bar_colors, height=0.72, zorder=3)
-    ax.set_yticks(y, bar_labels)
-    ax.set_xlim(0, max(bar_values) * 1.16)
-    value_pad = max(bar_values) * 0.012
-    for row_y, value in zip(y, bar_values):
-        ax.text(value + value_pad, row_y, f"{value:,}", va="center", ha="left",
-                fontsize=8.8, color=INK, fontweight="bold")
-    ax.set_xlabel("studies")
-    ax.tick_params(axis="y", labelsize=8.8)
-    clean_axes(ax)
-    ax.grid(axis="y", visible=False)
-    ax.xaxis.set_major_formatter(mticker.StrMethodFormatter("{x:,.0f}"))
-    set_headline(ax, headline, desc, finding, "fig_topic_landscape.png")
+    fig = plt.figure(figsize=(11, 11.5))
+    ax = fig.add_axes([0.08, 0.06, 0.84, 0.76], projection="polar")
+    ax.set_theta_zero_location("N")
+    ax.set_theta_direction(-1)
+    inner_r = max(bar_values) * 0.18
+    ax.bar(theta, bar_values, width=slot * 0.85, bottom=inner_r,
+           color=bar_colors, edgecolor=PAPER, linewidth=0.6, zorder=3)
+    for angle, value, label in zip(theta, bar_values, bar_labels):
+        degrees = np.degrees(angle)
+        ha = "left" if degrees < 180 else "right"
+        rotation = 90 - degrees if degrees < 180 else 270 - degrees
+        ax.text(angle, inner_r + value + max(bar_values) * 0.02, label,
+                rotation=rotation, rotation_mode="anchor", ha=ha, va="center",
+                fontsize=7, color=INK)
+    ax.text(0, 0, f"{n_tax:,}\nstudies", ha="center", va="center",
+            fontsize=13, fontweight="bold", color=INK, transform=ax.transData)
+    ax.set_ylim(0, inner_r + max(bar_values) * 1.35)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.spines["polar"].set_visible(False)
+    ax.grid(False)
+
+    fig.text(0.02, 0.975, D(headline), fontsize=14.5, fontweight="bold",
+             color=INK, ha="left", va="top")
+    fig.text(0.02, 0.94, D(desc), fontsize=10.5, color=SUBHEAD_COLOR,
+             ha="left", va="top")
+    fig.text(0.02, 0.915, D(finding), fontsize=10.5, fontweight="bold",
+             color=INK, ha="left", va="top", wrap=True)
     shown_domains = [d for d in domain_order if d in bar_domains]
     legend_handles = [plt.Rectangle((0, 0), 1, 1, color=domain_palette[d]) for d in shown_domains]
-    ax.legend(legend_handles, shown_domains, loc="lower right", frameon=False,
-              fontsize=8.8, ncol=2)
-    set_footnote(fig, f"Base: {n_tax:,} studies with an ml_thematic_cluster label ({pct(n_tax, N)}% of the "
-                       f"analysis population). Top {N_BARS} subfields shown; colour identifies domain and "
-                       f"shade reflects study count.")
-    fig.subplots_adjust(left=0.31, right=0.96, top=0.78, bottom=0.12)
-    fig.savefig(FIGS / "fig_topic_landscape.png", dpi=150, bbox_inches="tight")
+    fig.legend(legend_handles, shown_domains, loc="lower center",
+               ncol=len(shown_domains), frameon=False, fontsize=9.5,
+               bbox_to_anchor=(0.5, 0.0))
+    fig.text(0.01, 0.035,
+             f"Base: {n_tax:,} studies with an ml_thematic_cluster label ({pct(n_tax, N)}% of the "
+             f"analysis population). Top {N_BARS} subfields shown, grouped and coloured by domain; "
+             f"shade reflects study count.",
+             fontsize=8.5, color=SUBHEAD_COLOR, ha="left", va="bottom")
+    fig.patch.set_facecolor(PAPER)
+    ax.set_facecolor(PAPER)
+    fig.savefig(FIGS / "fig_topic_landscape.png", dpi=150)
     plt.close(fig)
 
     # -----------------------------------------------------------------------
@@ -3875,11 +3924,11 @@ if have_taxonomy:
                        [outcome_palette_sk.get(o, "#7d8f9d") for o in out_list])
 
     sankey_fig = go.Figure(go.Sankey(
-        node=dict(label=[SHORT_FN.get(n, n) for n in node_labels], color=node_colors_sk, pad=14, thickness=14,
+        node=dict(label=[SHORT_FN.get(n, n) for n in node_labels], color=node_colors_sk, pad=16, thickness=18,
                   line=dict(color="white", width=0.5)),
         link=dict(source=sk_sources, target=sk_targets, value=sk_values, color=sk_colors)))
-    sankey_fig.update_layout(width=1700, height=1300, margin=dict(l=10, r=10, t=10, b=10),
-                              paper_bgcolor="rgba(0,0,0,0)", font=dict(size=12, color=INK))
+    sankey_fig.update_layout(width=1700, height=1300, margin=dict(l=20, r=20, t=15, b=15),
+                              paper_bgcolor="rgba(0,0,0,0)", font=dict(size=18, color=INK))
     tmp_sankey = FIGS / "_tmp_fig_alluvial.png"
     sankey_fig.write_image(str(tmp_sankey), scale=2)
 
@@ -3904,11 +3953,11 @@ if have_taxonomy:
     ax_sk.axis("off")
     ax_sk.set_facecolor(PAPER)
     fig.text(0.02, 0.975, D(al_headline), fontsize=16, fontweight="bold", color=INK, ha="left", va="top")
-    fig.text(0.02, 0.92, D(al_desc), fontsize=10, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
-    fig.text(0.02, 0.885, D(al_finding), fontsize=10, fontweight="bold", color=INK, ha="left", va="top",
+    fig.text(0.02, 0.92, D(al_desc), fontsize=11, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
+    fig.text(0.02, 0.885, D(al_finding), fontsize=11, fontweight="bold", color=INK, ha="left", va="top",
              wrap=True)
     fig.text(0.01, 0.02, f"Base: {len(sankey_rows):,} studies with a study design, a financing function and "
-                         f"an outcome domain classified.", fontsize=8, color=SUBHEAD_COLOR, ha="left",
+                         f"an outcome domain classified.", fontsize=10, color=SUBHEAD_COLOR, ha="left",
              va="bottom")
     fig.patch.set_facecolor(PAPER)
     fig.savefig(FIGS / "fig_alluvial.png", dpi=150)
@@ -5182,6 +5231,9 @@ gallery = [
             [fig_entry("fig_topicmap.png", "Thematic landscape"),
              fig_entry("fig_theme_rank.png", "Top 20 research themes"),
              fig_entry("fig_topicmap_income.png", "Themes by income skew")] if have_topics else []
+        ) + (
+            [fig_entry("fig_wellcome_priorities.png",
+                       "Funding and evidence across Wellcome priority themes")] if have_funders else []
         ),
     } if (have_topics or have_taxonomy) else None,
     {
@@ -5223,7 +5275,6 @@ gallery = [
         ) + ([
             fig_entry("fig_funder_funders.png", "The top research funders"),
             fig_entry("fig_funder_funders_treemap.png", "The top research funders (treemap option)"),
-            fig_entry("fig_wellcome_priorities.png", "Funding and evidence across Wellcome priority themes"),
             fig_entry("fig_funder_function_heatmap.png", "What each top funder pays for"),
             fig_entry("fig_funder_function_bubbles.png", "What each top funder pays for (bubble option)"),
             fig_entry("fig_funder_outcome_heatmap.png", "What each top funder's research finds"),
