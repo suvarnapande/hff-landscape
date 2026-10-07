@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-07a";
+const BUILD = "2026-10-07c";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1164,6 +1164,8 @@ if (typeof document !== "undefined") {
       "Health financing functions covered": () => openOverviewTheme("Financing functions & outcomes"),
       "Studies using quantitative analysis": () => openOverviewTheme("Methods & data"),
       "Studies with a publication link": () => openOverviewTheme("Open access & author countries"),
+      "Evidence available open access": () => openOverviewTheme("Open access & author countries"),
+      "Who funds the evidence?": () => openOverviewTheme("Funders, fragility & outcomes"),
       "Studies focused on one country": () => switchTab("explorer")
     };
     const action = actions[label];
@@ -1227,9 +1229,63 @@ if (typeof document !== "undefined") {
     const tileRank = new Map(tileOrder.map((label, i) => [label, i]));
     const tiles = db.content.glance_tiles.slice()
       .sort((a, b) => (tileRank.get(a.label) ?? 99) - (tileRank.get(b.label) ?? 99));
+    const oa = db.overviewMetrics.openAccess;
+    const funders = db.overviewMetrics.funderTypes;
+    tiles.push({ label: "Who funds the evidence?", value: "", theme: "secondary", sub: null });
     for (const t of tiles) {
       const display = OVERVIEW_TILE_COPY[t.label] || t;
       const box = el("div", "value-box bg-" + t.theme);
+      if (display.label === "Studies with a publication link") {
+        box.classList.add("publication-access-card");
+        const title = el("div", "value-box-title");
+        title.textContent = "Publication access";
+        const metrics = el("div", "publication-access-metrics");
+        for (const [label, valueText, note] of [
+          ["DOI or URL available", t.value, "Of all studies"],
+          ["Available open access", oa.oa_share_pct_of_doi.toFixed(1) + "%",
+           `Of ${fmtNum(oa.n_with_doi)} studies with a DOI`]
+        ]) {
+          const metric = el("div", "publication-access-metric");
+          const metricLabel = el("span");
+          metricLabel.textContent = label;
+          const metricValue = el("strong");
+          metricValue.textContent = valueText;
+          const metricNote = el("small");
+          metricNote.textContent = note;
+          metric.append(metricLabel, metricValue, metricNote);
+          metrics.appendChild(metric);
+        }
+        box.append(title, metrics);
+        makeOverviewCardInteractive(box, display.label);
+        wrap.appendChild(box);
+        continue;
+      }
+      if (display.label === "Who funds the evidence?") {
+        box.classList.add("funding-overview-card");
+        const title = el("div", "value-box-title");
+        title.textContent = display.label;
+        const chart = el("div", "funding-overview-chart");
+        const groups = funders.overview_funder_groups;
+        for (const label of ["Government and multilateral", "Academic and non-profit", "Private companies", "Unclassified"]) {
+          const row = el("div", "funding-overview-row");
+          const labelEl = el("span", "funding-overview-label");
+          labelEl.textContent = label;
+          const track = el("div", "funding-overview-track");
+          const fill = el("span", "funding-overview-fill");
+          fill.style.width = groups[label].share_of_funded_pct + "%";
+          track.appendChild(fill);
+          const value = el("strong");
+          value.textContent = groups[label].share_of_funded_pct.toFixed(1) + "%";
+          row.append(labelEl, track, value);
+          chart.appendChild(row);
+        }
+        const note = el("div", "funding-overview-note");
+        note.textContent = `Among ${fmtNum(funders.n_funded)} studies reporting a funder. Categories may overlap.`;
+        box.append(title, chart, note);
+        makeOverviewCardInteractive(box, display.label);
+        wrap.appendChild(box);
+        continue;
+      }
       if (display.label === "Health financing functions covered") {
         box.classList.add("coverage-card");
         const metrics = el("div", "coverage-metrics");
@@ -2298,9 +2354,11 @@ if (typeof document !== "undefined") {
       if (!r.ok) throw new Error("failed to load data/" + name + ".json: " + r.status);
       return r.json();
     };
-    const [dict, studies, geo, func, outcome, countries, content] = await Promise.all(
-      ["dict", "studies", "geo", "function", "outcome", "countries", "content"].map(get));
+    const [dict, studies, geo, func, outcome, countries, content, openAccess, funderTypes] = await Promise.all(
+      ["dict", "studies", "geo", "function", "outcome", "countries", "content",
+       "open_access_v5", "funder_types_v5"].map(get));
     db = loadData({ dict, studies, geo, func, outcome, countries, content });
+    db.overviewMetrics = { openAccess, funderTypes };
 
     GALLERY = db.content.gallery || [];
     FIG_INDEX = {};

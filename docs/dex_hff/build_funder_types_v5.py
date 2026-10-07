@@ -268,6 +268,14 @@ type_study_n = Counter()
 funder_rows = Counter()
 funder_type_of = {}
 unclassified_studies = 0
+private_company_studies = 0
+overview_group_types = {
+    "Government and multilateral": {NATGOV, SUBGOV, MULTI},
+    "Academic and non-profit": {ACADEMIC, NONPROFIT},
+    "Private companies": {PHARMA, PRIVATE},
+    "Unclassified": {OTHER},
+}
+overview_group_n = Counter()
 for fn in funded["research_funder"]:
     toks = funder_tokens(fn)
     types = set()
@@ -277,6 +285,11 @@ for fn in funded["research_funder"]:
         types.add(ft)
     for ft in types:
         type_study_n[ft] += 1
+    if types.intersection({PHARMA, PRIVATE}):
+        private_company_studies += 1
+    for group, members in overview_group_types.items():
+        if types.intersection(members):
+            overview_group_n[group] += 1
     if types == {OTHER}:
         unclassified_studies += 1
 
@@ -339,6 +352,12 @@ plt.close(fig)
 summary = {
     "source": "HSF extraction 29 Sept v5", "n_studies": N, "n_funded": N_FUNDED,
     "n_distinct_funder_strings": len(funder_rows),
+    "n_private_company_funded": private_company_studies,
+    "private_company_share_of_funded_pct": round(share(private_company_studies), 1),
+    "overview_funder_groups": {
+        group: {"n": overview_group_n[group], "share_of_funded_pct": round(share(overview_group_n[group]), 1)}
+        for group in overview_group_types
+    },
     "studies_by_type": {k: type_study_n[k] for k in order[::-1]},
     "share_of_funded_pct": {k: round(share(type_study_n[k]), 1) for k in order[::-1]},
     "figure": {"file": fname, "title": headline, "caption": f"{desc} {finding}"},

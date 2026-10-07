@@ -3,6 +3,14 @@
   "n_studies": 36495,
   "n_funded": 7380,
   "n_distinct_funder_strings": 5518,
+  "n_private_company_funded": 520,
+  "private_company_share_of_funded_pct": 7.0,
+  "overview_funder_groups": {
+    "Government and multilateral": {"n": 4491, "share_of_funded_pct": 60.9},
+    "Academic and non-profit": {"n": 2996, "share_of_funded_pct": 40.6},
+    "Private companies": {"n": 520, "share_of_funded_pct": 7.0},
+    "Unclassified": {"n": 1114, "share_of_funded_pct": 15.1}
+  },
   "studies_by_type": {
     "National governments": 3820,
     "Universities, hospitals & institutes": 1635,
