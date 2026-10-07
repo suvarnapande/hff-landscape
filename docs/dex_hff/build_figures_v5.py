@@ -1355,68 +1355,78 @@ fig.tight_layout()
 fig.savefig(FIGS / "fig_injustice.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
 
-# --- fig_funder_scorecard: burden/intensity scatter + ranked deficit bar, side
-# by side. Mirrors HEE's own fig_funder_scorecard: a shaded "high burden, low
-# evidence" priority zone and a global-rate reference line on the scatter,
-# labelled deficit countries, a top-anchored income legend, and a 15-country
-# (not 12) deficit bar to match that reference exactly. ---
+# --- fig_funder_scorecard: size-neutral research relative to burden. Absolute
+# study shortfalls strongly favour large countries, so rank the aligned share
+# ratio instead: (country study share) / (country DALY share). ---
+scorecard_pts = cdf_b[cdf_b["studies"] > 0].copy()
+scorecard_pts["research_to_burden"] = (
+    (scorecard_pts["studies"] / TOTAL_STUDIES_ALL) /
+    (scorecard_pts["dalys"] / TOTAL_DALY_ALL)
+)
+scorecard_pts["log2_research_to_burden"] = np.log2(scorecard_pts["research_to_burden"])
+zero_study_sc = cdf_b[cdf_b["studies"] == 0].copy()
+zero_study_names_sc = ", ".join(zero_study_sc["country"].tolist())
 TOP_N_DEFICIT_SC = 15
-top_deficit_sc = cdf_b.nsmallest(TOP_N_DEFICIT_SC, "deficit").sort_values("deficit", ascending=False)
+top_deficit_sc = scorecard_pts.nsmallest(TOP_N_DEFICIT_SC, "log2_research_to_burden")
 fig = plt.figure(figsize=(13.5, 7.4))
 ax1 = fig.add_axes([0.055, 0.12, 0.44, 0.58])
 for inc in INC_ORDER:
-    sub = burden_pts[burden_pts["income"] == inc]
-    ax1.scatter(sub["dalys"], sub["per100k"].clip(lower=0.005), s=(sub["pop"] / 3.5e5).clip(lower=12),
+    sub = scorecard_pts[scorecard_pts["income"] == inc]
+    ax1.scatter(sub["dalys"], sub["log2_research_to_burden"], s=42,
                 color=INC_COLORS[inc], alpha=0.75, edgecolors="white", linewidths=0.4, zorder=3)
 ax1.set_xscale("log")
-ax1.set_yscale("log")
-
-# Priority zone: the higher-burden half of countries, below the rate a
-# perfectly burden-proportional allocation would give every country alike.
-global_rate_100k = TOTAL_STUDIES_ALL / TOTAL_DALY_ALL * 1e5
-x_min_sc, x_max_sc = burden_pts["dalys"].min() * 0.8, burden_pts["dalys"].max() * 1.3
-y_min_sc, y_max_sc = burden_pts["per100k"].clip(lower=0.005).min() * 0.7, burden_pts["per100k"].max() * 1.4
+x_min_sc, x_max_sc = scorecard_pts["dalys"].min() * 0.8, scorecard_pts["dalys"].max() * 1.3
+y_pad_sc = 0.7
+y_min_sc = scorecard_pts["log2_research_to_burden"].min() - y_pad_sc
+y_max_sc = scorecard_pts["log2_research_to_burden"].max() + y_pad_sc
 ax1.set_xlim(x_min_sc, x_max_sc)
 ax1.set_ylim(y_min_sc, y_max_sc)
-zone_x0 = burden_pts["dalys"].median()
-ax1.axhline(global_rate_100k, color="#8a8272", linewidth=1, linestyle=(0, (4, 3)), zorder=2)
-ax1.add_patch(plt.Rectangle((zone_x0, y_min_sc), x_max_sc - zone_x0, global_rate_100k - y_min_sc,
-                             facecolor="#c0392b", alpha=0.08, edgecolor="none", zorder=1))
-zone_text_sc = "priority zone\nhigh burden, low evidence"
-zone_tx_sc, zone_ty_sc = zone_x0 * 2.2, y_min_sc * 2.6
-ax1.text(zone_tx_sc, zone_ty_sc, zone_text_sc,
-         ha="left", va="center", fontsize=8.5, fontweight="bold", color="#a13a2a", linespacing=1.4)
-
-label_rows_sc = burden_pts[burden_pts["country"].isin(top_deficit_sc["country"])].sort_values("dalys")
-declutter_labels(ax1, label_rows_sc, "dalys", "per100k", name_map=SHORT_COUNTRY,
-                  avoid=[(zone_tx_sc, zone_ty_sc, "left", zone_text_sc)])
+ax1.axhspan(y_min_sc, 0, color="#c0392b", alpha=0.06, zorder=1)
+ax1.axhline(0, color="#8a8272", linewidth=1.2, linestyle=(0, (4, 3)), zorder=2)
+ax1.text(x_min_sc * 1.15, 0.15, "Research proportional to burden", ha="left", va="bottom",
+         fontsize=8.5, color=SUBHEAD_COLOR)
+for _, row in top_deficit_sc.head(5).iterrows():
+    ax1.annotate(SHORT_COUNTRY.get(row["country"], row["country"]),
+                 xy=(row["dalys"], row["log2_research_to_burden"]), xytext=(5, -7),
+                 textcoords="offset points", fontsize=7.8, fontweight="bold", color=INK)
 
 ax1.set_xlabel("Disease burden (DALYs, 2023, log)")
-ax1.set_ylabel("Studies per 100,000 DALYs (log)")
+ax1.set_ylabel("Research relative to burden (log2 ratio)")
 clean_axes(ax1)
+ax1.grid(False)
+ax1.grid(axis="y", color="#e7e3da", linewidth=0.8, zorder=0)
 
 ax2 = fig.add_axes([0.58, 0.12, 0.4, 0.58])
-ax2.barh([SHORT_COUNTRY.get(c, c) for c in top_deficit_sc["country"]], -top_deficit_sc["deficit"],
+ax2.barh([SHORT_COUNTRY.get(c, c) for c in top_deficit_sc["country"]],
+         top_deficit_sc["log2_research_to_burden"],
          color=[INC_COLORS.get(i, GREY) for i in top_deficit_sc["income"]], zorder=3)
-for y, v in enumerate(-top_deficit_sc["deficit"]):
-    ax2.text(v, y, f" +{v:,.0f}", va="center", fontsize=8.5, color=INK)
-ax2.set_xlabel("studies short of a burden-proportional share")
-ax2.set_title(f"The {TOP_N_DEFICIT_SC} largest evidence deficits", fontsize=11, fontweight="bold",
+ax2.invert_yaxis()
+for y, (_, row) in enumerate(top_deficit_sc.iterrows()):
+    fold_below = 1 / row["research_to_burden"]
+    ax2.text(-0.12, y, f"{fold_below:.0f}x lower", va="center", ha="right",
+             fontsize=8.2, fontweight="bold", color="white")
+ax2.axvline(0, color="#8a8272", linewidth=1, linestyle=(0, (4, 3)), zorder=2)
+ax2.set_xlabel("research relative to burden (log2 ratio)")
+ax2.set_title(f"The {TOP_N_DEFICIT_SC} largest relative evidence gaps", fontsize=11, fontweight="bold",
               color=INK, loc="left")
 clean_axes(ax2)
 
-sc_headline = "Funding priority scorecard"
-sc_desc = (f"Where economic evidence is most absent relative to disease burden (left, shaded), and the "
-           f"{TOP_N_DEFICIT_SC} countries with the largest absolute shortfall (right).")
-sc_finding = (f"{biggest_deficit['country']} alone is {abs(round(biggest_deficit['deficit'])):,} studies short "
-              f"of a burden-proportional share — the largest gap of any country.")
+lowest_sc = top_deficit_sc.iloc[0]
+sc_headline = "Funding priority scorecard: research relative to burden"
+sc_desc = ("Country research share divided by disease-burden share. Zero on the log2 scale means proportional "
+           "coverage; negative values indicate less research relative to burden.")
+sc_finding = (f"{lowest_sc['country']} has the largest finite relative gap: its research share is "
+              f"{1 / lowest_sc['research_to_burden']:.0f}x smaller than its burden share. "
+              f"No identified studies: {zero_study_names_sc}.")
 FIG_META["fig_funder_scorecard.png"] = (sc_headline, sc_desc, sc_finding)
 fig.text(0.02, 0.965, D(sc_headline.upper()), fontsize=17, fontweight="bold", color=INK, ha="left", va="top")
 fig.text(0.02, 0.915, D(sc_desc), fontsize=10, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
 fig.text(0.02, 0.882, D(sc_finding), fontsize=10, fontweight="bold", color=INK, ha="left", va="top", wrap=True)
 income_legend(fig, loc="upper left", ncol=4, bbox_to_anchor=(0.02, 0.80))
-fig.text(0.01, 0.03, f"Base: {len(burden_pts):,} countries with GBD 2023 burden data and ≥1 study. Point "
-                     f"area ∝ population. Expected = study-country pairs × (country DALYs ÷ total DALYs).",
+fig.text(0.01, 0.03, f"Base: {len(cdf_b):,} countries with GBD 2023 burden data; {len(scorecard_pts):,} with ≥1 "
+                     f"identified study are plotted and ranked. Both shares use this same {len(cdf_b):,}-country "
+                     f"universe. Country research counts are study-country pairs, so a multi-country study counts "
+                     f"once per country. Points are equal size; population is not encoded.",
          fontsize=8, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
 fig.patch.set_facecolor(PAPER)
 ax1.set_facecolor(PAPER)
@@ -2266,9 +2276,9 @@ if have_funders:
     ]
     priority_order = ["Infectious Diseases", "Mental Health", "Climate & Health"]
     priority_colors = {
-        "Infectious Diseases": "#2f79b9",
-        "Mental Health": "#7965a8",
-        "Climate & Health": "#25835f",
+        "Infectious Diseases": "#2f6fb0",
+        "Mental Health": "#2a9d8f",
+        "Climate & Health": "#67a65b",
     }
     priorities_of_s = {}
     for row in priority_raw.itertuples(index=False):
@@ -2313,7 +2323,7 @@ if have_funders:
         f"{leading_donor} funds the largest number of priority-theme study links."
     )
     FIG_META["fig_wellcome_priorities.png"] = (
-        "Funding and evidence across Wellcome priority themes",
+        "Indicative mapping of studies to Wellcome priority themes",
         priority_desc,
         priority_finding,
     )
@@ -2322,7 +2332,7 @@ if have_funders:
     gs = fig.add_gridspec(1, 2, width_ratios=[0.82, 1.45], wspace=0.42)
     ax_a = fig.add_subplot(gs[0, 0])
     ax_b = fig.add_subplot(gs[0, 1])
-    fig.suptitle("Funding and evidence across Wellcome priority themes", x=0.055, y=0.965,
+    fig.suptitle("Indicative mapping of studies to Wellcome priority themes", x=0.055, y=0.965,
                  ha="left", fontsize=19, fontweight="bold", color=INK)
     fig.text(0.055, 0.905, priority_desc, ha="left", va="top", fontsize=10.5,
              color=SUBHEAD_COLOR)
@@ -2335,11 +2345,11 @@ if have_funders:
               height=0.58, zorder=3)
     ax_a.set_yticks(bar_y, priority_order)
     ax_a.invert_yaxis()
-    ax_a.set_xlabel("studies")
+    ax_a.set_xlabel(f"studies (share of all {N:,} studies)")
     ax_a.set_title("Panel A - How much evidence addresses\nWellcome priority themes?",
                    loc="left", fontsize=11.5, fontweight="bold", color=INK, pad=14)
     for y, value in zip(bar_y, bar_values):
-        ax_a.text(value, y, f"  {value:,}  ({100 * value / N:.1f}%)",
+        ax_a.text(value, y, f"  {value:,}  ({100 * value / N:.1f}% of all studies)",
                   va="center", ha="left", fontsize=9.5, fontweight="bold", color=INK)
     ax_a.set_xlim(0, max(bar_values) * 1.42 if bar_values else 1)
     clean_axes(ax_a)
@@ -2375,7 +2385,8 @@ if have_funders:
 
     fig.text(
         0.055, 0.025,
-        f"Base: all {N:,} studies. Themes are independent flags and may overlap. Infectious Diseases and "
+        f"Base and percentage denominator: all {N:,} studies in the evidence map. Themes are independent "
+        "flags and may overlap. Infectious Diseases and "
         "Mental Health use explicit disease/mental-health terms in existing MeSH-derived metadata; Climate "
         "& Health uses explicit climate/heat MeSH terms or the OpenAlex topic 'Climate Change and Health "
         "Impacts'. Panel B disaggregates the top 12 normalized funders overall; a multi-funder study "
@@ -5233,7 +5244,7 @@ gallery = [
              fig_entry("fig_topicmap_income.png", "Themes by income skew")] if have_topics else []
         ) + (
             [fig_entry("fig_wellcome_priorities.png",
-                       "Funding and evidence across Wellcome priority themes")] if have_funders else []
+                       "Indicative mapping of studies to Wellcome priority themes")] if have_funders else []
         ),
     } if (have_topics or have_taxonomy) else None,
     {

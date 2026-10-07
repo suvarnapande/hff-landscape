@@ -41,7 +41,6 @@
   <!-- ============ OVERVIEW ============ -->
   <section class="tab-pane active" id="pane-overview">
     <div class="overview-intro">
-      <div class="overview-kicker">HSF project · Studies on health financing functions</div>
       <h2 class="hero-title">See where health financing evidence is strong — and where important gaps remain</h2>
       <div class="overview-update" id="overview-updated"></div>
       <p class="hero-text">Part of the Health Systems Financing (HSF) project, this evidence map brings together more than 36,000 studies published since 2010 that examine health financing functions — how health systems raise, pool and spend money. Explore what has been studied, where evidence is concentrated, how the field is changing, and which countries and health financing priorities remain underexplored.</p>
@@ -82,6 +81,16 @@
         </div>
       </div>
       <div class="card overview-analysis-card">
+        <div class="card-header">What gets evaluated?</div>
+        <div class="card-body overview-analysis-body">
+          <button class="overview-figure-button" id="ov-disease-method-open" type="button"
+                  aria-label="Open the figure showing how each disease area is evaluated">
+            <img class="overview-analysis-figure" src="figures/fig_disease_method.png?v=2026-10-07e"
+                 alt="Heatmap showing the mix of financing functions evaluated within each disease area">
+          </button>
+        </div>
+      </div>
+      <div class="card overview-analysis-card">
         <div class="card-header">Top research funders</div>
         <div class="card-body overview-analysis-body">
           <button class="overview-figure-button" id="ov-funders-open" type="button"
@@ -92,17 +101,7 @@
         </div>
       </div>
       <div class="card overview-analysis-card overview-analysis-card-wide">
-        <div class="card-header">What gets evaluated?</div>
-        <div class="card-body overview-analysis-body overview-analysis-body-wide">
-          <button class="overview-figure-button" id="ov-disease-method-open" type="button"
-                  aria-label="Open the figure showing how each disease area is evaluated">
-            <img class="overview-analysis-figure" src="figures/fig_disease_method.png?v=2026-10-07e"
-                 alt="Heatmap showing the mix of financing functions evaluated within each disease area">
-          </button>
-        </div>
-      </div>
-      <div class="card overview-analysis-card overview-analysis-card-wide">
-        <div class="card-header">Funding and evidence across Wellcome priority themes</div>
+        <div class="card-header">Indicative mapping of studies to Wellcome priority themes</div>
         <div class="card-body overview-analysis-body overview-analysis-body-wide">
           <button class="overview-figure-button" id="ov-wellcome-open" type="button"
                   aria-label="Open the figure showing funding and evidence across Wellcome priority themes">
