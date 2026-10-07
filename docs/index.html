@@ -11,7 +11,7 @@
      versions with SHA-384 integrity hashes verified by double fetch. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" integrity="sha384-krui876Mk6M6Lq6uj1SQo+u4MoImxFwCfwzWNU982QBMNci3VMZ3FoYSdUakJD5I" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css" integrity="sha384-PSZaVsyG9jDu8hFaSJev5s/9poIJlX7cuxSGdqCgXRHpo2DzIaZAyCd2rG/DJJmV" crossorigin="anonymous">
-<link rel="stylesheet" href="styles.css?v=2026-10-07c">
+<link rel="stylesheet" href="styles.css?v=2026-10-07m">
 </head>
 <body>
 
@@ -76,7 +76,7 @@
         <div class="card-body overview-analysis-body">
           <button class="overview-figure-button" id="ov-function-open" type="button"
                   aria-label="Open the studies by financing function figure">
-            <img class="overview-analysis-figure" src="figures/fig_function_bar.png"
+            <img class="overview-analysis-figure" src="figures/fig_function_bar.png?v=2026-10-07i"
                  alt="Bar chart showing studies by health financing function">
           </button>
         </div>
@@ -88,6 +88,16 @@
                   aria-label="Open the top research funders figure">
             <img class="overview-analysis-figure" src="figures/fig_funder_funders_treemap.png"
                  alt="Treemap showing the most frequently named research funders">
+          </button>
+        </div>
+      </div>
+      <div class="card overview-analysis-card overview-analysis-card-wide">
+        <div class="card-header">What gets evaluated?</div>
+        <div class="card-body overview-analysis-body overview-analysis-body-wide">
+          <button class="overview-figure-button" id="ov-disease-method-open" type="button"
+                  aria-label="Open the figure showing how each disease area is evaluated">
+            <img class="overview-analysis-figure" src="figures/fig_disease_method.png?v=2026-10-07e"
+                 alt="Heatmap showing the mix of financing functions evaluated within each disease area">
           </button>
         </div>
       </div>
@@ -379,20 +389,35 @@
           <table class="methods-table">
             <thead><tr><th>Input</th><th>Source</th></tr></thead>
             <tbody>
-              <tr><td>Financing-function &amp; field classification</td>
-                  <td>LLM ensemble (GLM, Claude Sonnet, DeepSeek) with a per-field consensus
-                      step, run against title/abstract text</td></tr>
-              <tr><td>DOI recovery &amp; topic harvest</td>
-                  <td>CrossRef/OpenAlex/PubMed lookup; MeSH theme where a DOI resolves,
-                      OpenAlex fallback otherwise</td></tr>
-              <tr><td>Income groups &amp; UN region</td><td>World Bank classification (shared
-                  reference table)</td></tr>
-              <tr><td>Population</td>
-                  <td>World Bank SP.POP.TOTL (latest observation, mostly 2025)</td></tr>
-              <tr><td>Disease burden &amp; health spending</td>
-                  <td>IHME GBD 2023 DALYs and IHME Health Spending 1995–2022 — used only as
-                      country-level reference denominators, not as fields of the studies
-                      themselves</td></tr>
+              <tr><td>Health-financing framework and coding definitions</td>
+                  <td><a href="https://www.who.int/health-topics/health-financing/" target="_blank" rel="noopener">WHO health-financing framework</a>;
+                      <a href="https://www.who.int/publications/i/item/9789241564021" target="_blank" rel="noopener"><em>World Health Report 2010</em></a>;
+                      <a href="https://www.who.int/publications/i/item/9789240042476" target="_blank" rel="noopener"><em>Health System Performance Assessment</em></a>; and
+                      <a href="https://www.cgdev.org/sites/default/files/financing-healthcare-supply-chains-low-and-middle-income-countries-novel-conceptual.pdf" target="_blank" rel="noopener">CGD supply-chain financing framework</a>.</td></tr>
+              <tr><td>Evidence-map scope and eligibility criteria</td>
+                  <td><a href="https://doi.org/10.17605/OSF.IO/R3CFA" target="_blank" rel="noopener">Marion et al. (2026), <em>Systematic mapping of recent global research on health system financing using machine learning: Extended data</em></a>.</td></tr>
+              <tr><td>Outcome-domain framework</td>
+                  <td><a href="https://www.who.int/publications/i/item/9789240042476" target="_blank" rel="noopener">WHO and European Observatory, <em>Health System Performance Assessment: A Framework for Policy Analysis</em></a>. Economic development uses a project-specific definition.</td></tr>
+              <tr><td>Study classification process</td>
+                  <td>LLM-assisted extraction from titles and abstracts using GLM, Claude Sonnet and DeepSeek, with per-field consensus and human verification. This is the classification method, not the conceptual source of the financing framework.</td></tr>
+              <tr><td>Publication identifiers and links</td>
+                  <td><a href="https://www.crossref.org/documentation/retrieve-metadata/rest-api/" target="_blank" rel="noopener">Crossref REST API</a>,
+                      <a href="https://docs.openalex.org/" target="_blank" rel="noopener">OpenAlex</a> and
+                      <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener">PubMed</a>.</td></tr>
+              <tr><td>Research fields, topics and disease classifications</td>
+                  <td><a href="https://docs.openalex.org/api-entities/topics" target="_blank" rel="noopener">OpenAlex topic taxonomy</a> supplies domain, field and subfield classifications.
+                      <a href="https://www.nlm.nih.gov/mesh/meshhome.html" target="_blank" rel="noopener">PubMed Medical Subject Headings (MeSH)</a> supply disease and health-topic descriptors where available; OpenAlex topic metadata is used as fallback. These are external bibliographic classifications, not outputs of the LLM consensus process.</td></tr>
+              <tr><td>Country income groups, regions and population</td>
+                  <td><a href="https://datahelpdesk.worldbank.org/knowledgebase/articles/906519-world-bank-country-and-lending-groups" target="_blank" rel="noopener">World Bank country and lending groups</a>,
+                      <a href="https://unstats.un.org/unsd/methodology/m49/" target="_blank" rel="noopener">UN M49 regions</a> and
+                      <a href="https://data.worldbank.org/indicator/SP.POP.TOTL" target="_blank" rel="noopener">World Bank population data</a>.</td></tr>
+              <tr><td>Disease burden and health-financing context</td>
+                  <td><a href="https://www.healthdata.org/research-analysis/gbd" target="_blank" rel="noopener">IHME Global Burden of Disease 2023</a> and
+                      <a href="https://www.healthdata.org/data-tools-practices/interactive-visuals/financing-global-health" target="_blank" rel="noopener">IHME Financing Global Health</a>.</td></tr>
+              <tr><td>Open access and author affiliations</td>
+                  <td><a href="https://docs.openalex.org/api-entities/works/work-object" target="_blank" rel="noopener">OpenAlex work, open-access and authorship metadata</a>, matched through recovered DOIs.</td></tr>
+              <tr><td>Research funders</td>
+                  <td>Funder acknowledgements extracted from publication metadata and name-normalized within this project; figures state their analytical base and multi-funder counting convention.</td></tr>
             </tbody>
           </table>
         </div>
@@ -555,10 +580,22 @@
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title" id="fig-modal-title"></h3>
-        <button class="modal-close" id="fig-modal-close">Close</button>
+        <div class="figure-modal-actions">
+          <div class="figure-zoom-controls" aria-label="Figure zoom controls">
+            <button class="figure-zoom-button" id="fig-zoom-out" type="button"
+                    title="Zoom out" aria-label="Zoom out">−</button>
+            <button class="figure-zoom-level" id="fig-zoom-reset" type="button"
+                    title="Reset zoom" aria-label="Reset zoom">100%</button>
+            <button class="figure-zoom-button" id="fig-zoom-in" type="button"
+                    title="Zoom in" aria-label="Zoom in">+</button>
+          </div>
+          <button class="modal-close" id="fig-modal-close">Close</button>
+        </div>
       </div>
       <div class="modal-body">
-        <img class="modal-fig" id="fig-modal-img" src="" alt="">
+        <div class="figure-zoom-viewport" id="fig-zoom-viewport">
+          <img class="modal-fig" id="fig-modal-img" src="" alt="">
+        </div>
         <p class="fig-caption" id="fig-modal-caption" style="margin-top:.6rem"></p>
         <div class="fig-footnote other-outcome-note" id="fig-modal-specific-note"></div>
       </div>
@@ -622,7 +659,7 @@
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js" integrity="sha384-EcVTHT5RdDTvzbTIbNOtaNxNALeJYDgmv5Crp3NBmcdrCPrDnqp6I1+ETJ/FCFHI" crossorigin="anonymous"></script>
-<script type="module" src="app.js?v=2026-10-07c"></script>
+<script type="module" src="app.js?v=2026-10-07m"></script>
 
 </body>
 </html>

@@ -680,8 +680,13 @@ mean_func = sum(func_counts.values()) / len(func_counts)
 items = sorted(func_counts.items(), key=lambda kv: kv[1])
 flabels, fvalues = [k for k, _ in items], [v for _, v in items]
 flabels_wrapped = ["\n".join(textwrap.wrap(lbl, width=42, break_long_words=False)) for lbl in flabels]
-fig, ax = plt.subplots(figsize=(10.2, 5.8))
-bar_colors = [ACCENT if v >= mean_func else "#b7c6de" for v in fvalues]
+fig, ax = plt.subplots(figsize=(13.2, 7.2))
+func_norm = mcolors.PowerNorm(gamma=0.58, vmin=min(fvalues), vmax=max(fvalues))
+func_cmap = mcolors.LinearSegmentedColormap.from_list(
+    "financing_function_gradient",
+    ["#d9edf0", "#9fd3d4", "#58b8b3", "#258f91", "#2f79b9", "#1f5fa8"],
+)
+bar_colors = [func_cmap(func_norm(value)) for value in fvalues]
 ax.barh(flabels_wrapped, fvalues, color=bar_colors, zorder=3)
 xmax = max(fvalues) * 1.14
 ax.set_xlim(0, xmax)
@@ -699,12 +704,12 @@ set_headline(ax, f"{n_above} of {len(func_counts)} financing functions punch abo
              f"{second_func}'s {second_func_n:,}; capital-investment financing trails furthest behind.",
              "fig_function_bar.png")
 ax.set_xlabel("studies")
-ax.tick_params(axis="y", labelsize=9.5)
+ax.tick_params(axis="y", labelsize=10.5)
 clean_axes(ax)
 ax.xaxis.set_major_formatter(mticker.StrMethodFormatter("{x:,.0f}"))
 set_footnote(fig, f"Base: {sum(func_counts.values()):,} financing-function tags across {N:,} studies "
                    f"(a study can carry more than one tag).")
-fig.subplots_adjust(left=0.39, right=0.95, top=0.78, bottom=0.16)
+fig.subplots_adjust(left=0.31, right=0.96, top=0.78, bottom=0.14)
 fig.savefig(FIGS / "fig_function_bar.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
 
@@ -1286,40 +1291,66 @@ fig.tight_layout()
 fig.savefig(FIGS / "fig_inequality.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
 
-# --- fig_injustice: raw study counts vs. burden, with a proportionality reference line ---
+# --- fig_injustice: country research-to-burden ratio by income group ---
 inj_pts = burden_pts.copy()
-ref_slope = TOTAL_STUDIES_ALL / TOTAL_DALY_ALL
-inj_pts["log_ratio"] = np.log(inj_pts["studies"].clip(lower=0.5) / (inj_pts["dalys"] * ref_slope))
+INJ_TOTAL_STUDY_COUNTRY_PAIRS = inj_pts["studies"].sum()
+INJ_TOTAL_DALYS = inj_pts["dalys"].sum()
+inj_pts["research_to_burden"] = (
+    (inj_pts["studies"] / INJ_TOTAL_STUDY_COUNTRY_PAIRS) /
+    (inj_pts["dalys"] / INJ_TOTAL_DALYS)
+)
+inj_pts["log2_research_to_burden"] = np.log2(inj_pts["research_to_burden"])
+
 fig, ax = plt.subplots(figsize=(9.5, 6.8))
+income_x = {inc: i for i, inc in enumerate(INC_ORDER)}
+rng = np.random.default_rng(20261007)
+inj_pts["plot_x"] = [income_x[inc] + rng.uniform(-0.16, 0.16) for inc in inj_pts["income"]]
 for inc in INC_ORDER:
     sub = inj_pts[inj_pts["income"] == inc]
-    ax.scatter(sub["dalys"], sub["studies"].clip(lower=0.5), s=(sub["pop"] / 3e5).clip(lower=15),
-               color=INC_COLORS[inc], alpha=0.75, edgecolors="white", linewidths=0.4, zorder=3, label=inc)
-xs_r = np.array([inj_pts["dalys"].min(), inj_pts["dalys"].max()])
-ax.plot(xs_r, xs_r * ref_slope, color="#8a8272", linewidth=1.2, linestyle=(0, (4, 3)), zorder=2)
-worst = inj_pts.nsmallest(5, "log_ratio")
-for _, r in worst.iterrows():
-    ax.annotate(r["country"], xy=(r["dalys"], max(r["studies"], 0.5)), xytext=(5, -9),
+    ax.scatter(sub["plot_x"], sub["log2_research_to_burden"], s=38,
+               color=INC_COLORS[inc], alpha=0.72, edgecolors="white", linewidths=0.45, zorder=3)
+    median = sub["log2_research_to_burden"].median()
+    ax.scatter(income_x[inc], median, marker="_", s=520, linewidths=3, color=INK, zorder=5)
+
+ax.axhline(0, color="#8a8272", linewidth=1.2, linestyle=(0, (4, 3)), zorder=2)
+ax.text(3.42, 0.12, "Proportional to burden", ha="right", va="bottom",
+        fontsize=8.5, color=SUBHEAD_COLOR)
+
+label_rows = pd.concat([
+    inj_pts[inj_pts["income"] == "Low income"].nsmallest(1, "log2_research_to_burden"),
+    inj_pts[inj_pts["income"] == "Lower middle income"].nsmallest(1, "log2_research_to_burden"),
+    inj_pts.nlargest(1, "log2_research_to_burden"),
+]).drop_duplicates(subset="country")
+for _, r in label_rows.iterrows():
+    offset_y = -11 if r["log2_research_to_burden"] < 0 else 6
+    ax.annotate(r["country"], xy=(r["plot_x"], r["log2_research_to_burden"]), xytext=(5, offset_y),
                 textcoords="offset points", fontsize=8, fontweight="bold", color=INK)
-for _, r in inj_pts.nlargest(2, "dalys").iterrows():
-    ax.annotate(r["country"], xy=(r["dalys"], max(r["studies"], 0.5)), xytext=(5, 4),
-                textcoords="offset points", fontsize=8, color=INK)
-ax.set_xscale("log")
-ax.set_yscale("log")
-n_below = int((inj_pts["log_ratio"] < 0).sum())
-below = inj_pts[inj_pts["log_ratio"] < 0]
+
+n_below = int((inj_pts["research_to_burden"] < 1).sum())
+below = inj_pts[inj_pts["research_to_burden"] < 1]
 pct_low_below = round(100 * below["income"].isin(["Low income", "Lower middle income"]).mean())
-set_headline(ax, "High burden, low research in poorer countries",
-             "Each point is a country. The dashed line marks research in proportion to disease burden.",
-             f"{n_below} of {len(inj_pts)} countries sit below the proportionality line; {pct_low_below}% of "
-             f"those are low- or lower-middle-income.",
+set_headline(ax, "Research is less abundant relative to disease burden in poorer countries",
+             "Each point is a country. Values below zero indicate a smaller share of HFF studies than the "
+             "country's share of global disease burden.",
+             f"{n_below} of {len(inj_pts)} countries have a smaller research share than burden share; "
+             f"{pct_low_below}% of these are low- or lower-middle-income.",
              "fig_injustice.png")
-ax.set_xlabel("Total disease burden (DALYs, 2023, log scale)")
-ax.set_ylabel("HFF studies (log scale)")
+ax.set_xticks(range(len(INC_ORDER)), INC_ORDER)
+ax.set_xlim(-0.45, len(INC_ORDER) - 0.55)
+ax.set_xlabel("World Bank income group")
+ax.set_ylabel("Research relative to disease burden (log2 ratio)")
+ax.yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
 clean_axes(ax)
-income_legend_below(ax)
-set_footnote(fig, f"Base: {len(inj_pts):,} countries with GBD 2023 burden data and ≥1 study. Point area "
-                   f"∝ population.")
+ax.grid(False)
+ax.grid(axis="y", color="#e7e3da", linewidth=0.8, zorder=0)
+ax.text(0.01, 0.98, "More research than burden share", transform=ax.transAxes,
+        ha="left", va="top", fontsize=8.5, color=SUBHEAD_COLOR)
+ax.text(0.01, 0.02, "Less research than burden share", transform=ax.transAxes,
+        ha="left", va="bottom", fontsize=8.5, color=SUBHEAD_COLOR)
+set_footnote(fig, f"Base: {len(inj_pts):,} countries with GBD 2023 burden data and ≥1 study; shares use this same "
+                   f"country universe. GBD 2023 all-cause DALYs (IHME).\nCountry research counts are study-country "
+                   f"pairs: a multi-country study counts once per country. Equatorial Guinea and Djibouti have "
+                   f"burden data but no identified studies and are not plotted. Horizontal markers show medians.")
 fig.tight_layout()
 fig.savefig(FIGS / "fig_injustice.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
@@ -2215,6 +2246,146 @@ if have_funders:
 
     # Additional treemap option — editorial card style with tight gutters,
     # rounded tiles, contrast-aware typography, and automatic font fitting.
+    # --- fig_wellcome_priorities: evidence and funders across Wellcome themes ---
+    # These are independent flags rather than a partition: one study may address
+    # several priority themes. The rules deliberately reuse existing metadata.
+    priority_raw = pd.read_csv(
+        RAW_CSV,
+        usecols=["record_id", "mesh_theme", "ml_topics"],
+    )
+    priority_raw = priority_raw[priority_raw["record_id"].isin(ID_TO_IDX)]
+    infectious_keywords = MESH_DISEASE_KEYWORDS[0][1]
+    mental_keywords = [
+        "mental disorder", "mental health", "depress", "anxiety disorder",
+        "schizophrenia", "bipolar disorder", "substance-related disorder",
+        "substance abuse", "psychiatric", "autis", "attention deficit",
+    ]
+    climate_mesh_keywords = [
+        "climate change", "global warming", "extreme heat", "heat stress",
+        "hot temperature", "heatwave",
+    ]
+    priority_order = ["Infectious Diseases", "Mental Health", "Climate & Health"]
+    priority_colors = {
+        "Infectious Diseases": "#2f79b9",
+        "Mental Health": "#7965a8",
+        "Climate & Health": "#25835f",
+    }
+    priorities_of_s = {}
+    for row in priority_raw.itertuples(index=False):
+        mesh_text = str(row.mesh_theme).lower() if pd.notna(row.mesh_theme) else ""
+        topic_text = str(row.ml_topics).lower() if pd.notna(row.ml_topics) else ""
+        tags = set()
+        if any(keyword in mesh_text for keyword in infectious_keywords):
+            tags.add("Infectious Diseases")
+        if any(keyword in mesh_text for keyword in mental_keywords):
+            tags.add("Mental Health")
+        if (any(keyword in mesh_text for keyword in climate_mesh_keywords)
+                or "climate change and health impacts" in topic_text):
+            tags.add("Climate & Health")
+        if tags:
+            priorities_of_s[ID_TO_IDX[row.record_id]] = tags
+
+    priority_counts = Counter(
+        theme for themes in priorities_of_s.values() for theme in themes
+    )
+    donor_priority_counts = defaultdict(Counter)
+    for study_idx, themes in priorities_of_s.items():
+        for funder_key in funders_of_s.get(study_idx, set()):
+            donor = funder_display_name[funder_key]
+            for theme in themes:
+                donor_priority_counts[donor][theme] += 1
+
+    top_priority_donors = [name for name, _ in top_funders[:12]]
+    priority_matrix = np.array([
+        [donor_priority_counts[donor][theme] for theme in priority_order]
+        for donor in top_priority_donors
+    ])
+    leading_theme = max(priority_order, key=lambda theme: priority_counts[theme])
+    leading_donor = (max(top_priority_donors,
+                         key=lambda donor: sum(donor_priority_counts[donor].values()))
+                     if top_priority_donors else "No named funder")
+    priority_desc = (
+        "Panel A shows studies classified to each Wellcome priority theme; Panel B shows the top "
+        "funders of those studies by theme. Categories are not mutually exclusive."
+    )
+    priority_finding = (
+        f"{leading_theme} has the largest evidence base ({priority_counts[leading_theme]:,} studies); "
+        f"{leading_donor} funds the largest number of priority-theme study links."
+    )
+    FIG_META["fig_wellcome_priorities.png"] = (
+        "Funding and evidence across Wellcome priority themes",
+        priority_desc,
+        priority_finding,
+    )
+
+    fig = plt.figure(figsize=(14.2, 8.4))
+    gs = fig.add_gridspec(1, 2, width_ratios=[0.82, 1.45], wspace=0.42)
+    ax_a = fig.add_subplot(gs[0, 0])
+    ax_b = fig.add_subplot(gs[0, 1])
+    fig.suptitle("Funding and evidence across Wellcome priority themes", x=0.055, y=0.965,
+                 ha="left", fontsize=19, fontweight="bold", color=INK)
+    fig.text(0.055, 0.905, priority_desc, ha="left", va="top", fontsize=10.5,
+             color=SUBHEAD_COLOR)
+    fig.text(0.055, 0.852, priority_finding, ha="left", va="top", fontsize=11,
+             fontweight="bold", color=INK)
+
+    bar_values = [priority_counts[theme] for theme in priority_order]
+    bar_y = np.arange(len(priority_order))
+    ax_a.barh(bar_y, bar_values, color=[priority_colors[t] for t in priority_order],
+              height=0.58, zorder=3)
+    ax_a.set_yticks(bar_y, priority_order)
+    ax_a.invert_yaxis()
+    ax_a.set_xlabel("studies")
+    ax_a.set_title("Panel A - How much evidence addresses\nWellcome priority themes?",
+                   loc="left", fontsize=11.5, fontweight="bold", color=INK, pad=14)
+    for y, value in zip(bar_y, bar_values):
+        ax_a.text(value, y, f"  {value:,}  ({100 * value / N:.1f}%)",
+                  va="center", ha="left", fontsize=9.5, fontweight="bold", color=INK)
+    ax_a.set_xlim(0, max(bar_values) * 1.42 if bar_values else 1)
+    clean_axes(ax_a)
+    ax_a.grid(axis="y", visible=False)
+
+    vmax = max(int(priority_matrix.max()), 1) if priority_matrix.size else 1
+    cmap = mcolors.LinearSegmentedColormap.from_list(
+        "priority_funding", ["#f3f7f5", "#b7d9ce", "#25835f", "#114c3d"]
+    )
+    image = ax_b.imshow(priority_matrix, aspect="auto", cmap=cmap, vmin=0, vmax=vmax)
+    ax_b.set_xticks(np.arange(len(priority_order)), priority_order)
+    ax_b.set_yticks(
+        np.arange(len(top_priority_donors)),
+        ["\n".join(textwrap.wrap(name, width=28, break_long_words=False))
+         for name in top_priority_donors],
+    )
+    ax_b.set_title("Panel B - Which donors fund research\nin each priority theme?",
+                   loc="left", fontsize=11.5, fontweight="bold", color=INK, pad=14)
+    ax_b.tick_params(axis="x", rotation=0, labelsize=9)
+    ax_b.tick_params(axis="y", labelsize=8.5, length=0)
+    for row_idx in range(priority_matrix.shape[0]):
+        for col_idx in range(priority_matrix.shape[1]):
+            value = int(priority_matrix[row_idx, col_idx])
+            ax_b.text(col_idx, row_idx, f"{value:,}", ha="center", va="center",
+                      fontsize=8.5, fontweight="bold",
+                      color="white" if value > vmax * 0.55 else INK)
+    for spine in ax_b.spines.values():
+        spine.set_visible(False)
+    colorbar = fig.colorbar(image, ax=ax_b, fraction=0.035, pad=0.025)
+    colorbar.set_label("funded studies", fontsize=9, color=SUBHEAD_COLOR)
+    colorbar.ax.tick_params(labelsize=8)
+    colorbar.outline.set_visible(False)
+
+    fig.text(
+        0.055, 0.025,
+        f"Base: all {N:,} studies. Themes are independent flags and may overlap. Infectious Diseases and "
+        "Mental Health use explicit disease/mental-health terms in existing MeSH-derived metadata; Climate "
+        "& Health uses explicit climate/heat MeSH terms or the OpenAlex topic 'Climate Change and Health "
+        "Impacts'. Panel B disaggregates the top 12 normalized funders overall; a multi-funder study "
+        "counts once for each named funder.",
+        ha="left", va="bottom", fontsize=8.2, color=SUBHEAD_COLOR, wrap=True,
+    )
+    fig.subplots_adjust(left=0.055, right=0.97, top=0.73, bottom=0.16)
+    fig.savefig(FIGS / "fig_wellcome_priorities.png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
     treemap_vals = [v for _, v in top_funders]
     scaled_vals = [v / sum(treemap_vals) * (100 * 100) for v in treemap_vals]
     rects = squarify_treemap_balanced(scaled_vals, 0, 0, 100, 100)
@@ -3179,39 +3350,30 @@ if have_taxonomy:
     field_domain = tax.groupby("field")["domain"].agg(lambda s: s.mode()[0])
     domain_totals = tax["domain"].value_counts()
     domain_order = domain_totals.index.tolist()
-    domain_palette = dict(zip(domain_order, [ACCENT, GOLD, "#1baf7a", "#8a5fb0", GREY]))
+    domain_palette = dict(zip(
+        domain_order,
+        ["#2f6fb0", "#2a9d8f", "#67a65b", "#7c6ca8", "#cf6f61"],
+    ))
 
-    N_BARS = 40
+    def topic_color(domain, value, max_value):
+        """Use a shared domain hue, darkening smoothly with study count."""
+        base = np.array(mcolors.to_rgb(domain_palette[domain]))
+        weight = 0.56 + 0.40 * np.sqrt(value / max_value)
+        return tuple(1 - (1 - base) * weight)
+
+    N_BARS = 20
     subfield_counts = tax["subfield"].value_counts()
     subfield_field = tax.groupby("subfield")["field"].agg(lambda s: s.mode()[0])
     top_subfields = subfield_counts.head(N_BARS)
     # Group contiguously by domain (biggest domain first), then by field within
     # domain, then by count within field — matches HEE's clustered layout.
-    bar_rows = sorted(
-        top_subfields.items(),
-        key=lambda kv: (domain_order.index(field_domain[subfield_field[kv[0]]]),
-                         subfield_field[kv[0]], -kv[1])
-    )
-    bar_labels = [f"{name} {n:,}" for name, n in bar_rows]
+    bar_rows = list(reversed(list(top_subfields.items())))
+    bar_labels = ["\n".join(textwrap.wrap(name, width=38, break_long_words=False))
+                  for name, _ in bar_rows]
     bar_values = [n for _, n in bar_rows]
     bar_domains = [field_domain[subfield_field[name]] for name, _ in bar_rows]
-    bar_colors = [domain_palette[d] for d in bar_domains]
-
-    n_bars = len(bar_rows)
-    n_groups = len(set(bar_domains))
-    gap = np.radians(3.0)
-    total_gap = gap * n_groups
-    slot = (2 * np.pi - total_gap) / n_bars
-
-    theta = []
-    a = 0.0
-    prev_domain = None
-    for d in bar_domains:
-        if prev_domain is not None and d != prev_domain:
-            a += gap
-        theta.append(a + slot / 2)
-        a += slot
-        prev_domain = d
+    bar_colors = [topic_color(d, v, int(top_subfields.iloc[0]))
+                  for d, v in zip(bar_domains, bar_values)]
 
     # bar_rows is sorted domain-then-field-then-count (for the chart's grouped
     # layout), NOT by count — the actual top subfield/domain come straight
@@ -3221,43 +3383,36 @@ if have_taxonomy:
     top_domain = domain_order[0]
     top_domain_n = int(domain_totals.iloc[0])
     headline = "One subfield dominates the topic taxonomy"
-    desc = "OpenAlex-style topic taxonomy — each bar is a subfield (length = studies), coloured by field."
+    desc = "OpenAlex-style topic taxonomy - the 20 largest subfields, coloured by domain."
     finding = (f"'{top_subfield}' leads at {top_subfield_n:,} studies, {round(top_subfield_n / second_subfield_n, 1)}× "
                f"the next-largest ('{second_subfield}', {second_subfield_n:,}); {top_domain} accounts for "
                f"{top_domain_n:,} of {n_tax:,} studies with a topic label.")
     FIG_META["fig_topic_landscape.png"] = (headline, desc, finding)
 
-    fig = plt.figure(figsize=(11, 11.5))
-    ax = fig.add_axes([0.08, 0.06, 0.84, 0.76], projection="polar")
-    ax.set_theta_zero_location("N")
-    ax.set_theta_direction(-1)
-    inner_r = max(bar_values) * 0.18
-    ax.bar(theta, bar_values, width=slot * 0.85, bottom=inner_r, color=bar_colors,
-           edgecolor=PAPER, linewidth=0.6, zorder=3)
-    for t, v, lbl in zip(theta, bar_values, bar_labels):
-        deg = np.degrees(t)
-        ha = "left" if deg < 180 else "right"
-        ax.text(t, inner_r + v + max(bar_values) * 0.02, lbl, rotation=90 - deg if deg < 180 else 270 - deg,
-                rotation_mode="anchor", ha=ha, va="center", fontsize=7, color=INK)
-    ax.text(0, 0, f"{n_tax:,}\nstudies", ha="center", va="center", fontsize=13, fontweight="bold",
-            color=INK, transform=ax.transData)
-    ax.set_ylim(0, inner_r + max(bar_values) * 1.35)
-    ax.set_xticks([]); ax.set_yticks([])
-    ax.spines["polar"].set_visible(False)
-    ax.grid(False)
-
-    fig.text(0.02, 0.975, D(headline), fontsize=14.5, fontweight="bold", color=INK, ha="left", va="top")
-    fig.text(0.02, 0.94, D(desc), fontsize=10.5, color=SUBHEAD_COLOR, ha="left", va="top")
-    fig.text(0.02, 0.915, D(finding), fontsize=10.5, fontweight="bold", color=INK, ha="left", va="top", wrap=True)
-    legend_handles = [plt.Rectangle((0, 0), 1, 1, color=domain_palette[d]) for d in domain_order]
-    fig.legend(legend_handles, domain_order, loc="lower center", ncol=len(domain_order), frameon=False,
-               fontsize=9.5, bbox_to_anchor=(0.5, 0.0))
-    fig.text(0.01, 0.035, f"Base: {n_tax:,} studies with an ml_thematic_cluster label ({pct(n_tax, N)}% of the "
-                          f"analysis population). Top {N_BARS} subfields shown, grouped and coloured by field/domain.",
-             fontsize=8.5, color=SUBHEAD_COLOR, ha="left", va="bottom")
-    fig.patch.set_facecolor(PAPER)
-    ax.set_facecolor(PAPER)
-    fig.savefig(FIGS / "fig_topic_landscape.png", dpi=150)
+    fig, ax = plt.subplots(figsize=(12.8, 9.2))
+    y = np.arange(len(bar_rows))
+    ax.barh(y, bar_values, color=bar_colors, height=0.72, zorder=3)
+    ax.set_yticks(y, bar_labels)
+    ax.set_xlim(0, max(bar_values) * 1.16)
+    value_pad = max(bar_values) * 0.012
+    for row_y, value in zip(y, bar_values):
+        ax.text(value + value_pad, row_y, f"{value:,}", va="center", ha="left",
+                fontsize=8.8, color=INK, fontweight="bold")
+    ax.set_xlabel("studies")
+    ax.tick_params(axis="y", labelsize=8.8)
+    clean_axes(ax)
+    ax.grid(axis="y", visible=False)
+    ax.xaxis.set_major_formatter(mticker.StrMethodFormatter("{x:,.0f}"))
+    set_headline(ax, headline, desc, finding, "fig_topic_landscape.png")
+    shown_domains = [d for d in domain_order if d in bar_domains]
+    legend_handles = [plt.Rectangle((0, 0), 1, 1, color=domain_palette[d]) for d in shown_domains]
+    ax.legend(legend_handles, shown_domains, loc="lower right", frameon=False,
+              fontsize=8.8, ncol=2)
+    set_footnote(fig, f"Base: {n_tax:,} studies with an ml_thematic_cluster label ({pct(n_tax, N)}% of the "
+                       f"analysis population). Top {N_BARS} subfields shown; colour identifies domain and "
+                       f"shade reflects study count.")
+    fig.subplots_adjust(left=0.31, right=0.96, top=0.78, bottom=0.12)
+    fig.savefig(FIGS / "fig_topic_landscape.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
     # -----------------------------------------------------------------------
@@ -3284,42 +3439,51 @@ if have_taxonomy:
     # of the top-16 total) still forces most other cells into slivers. This
     # trades exact area-proportionality for legibility (disclosed in the
     # footnote); the circular chart above remains the linearly-accurate view.
-    TM_N = 16
+    TM_N = 12
     tm_subfields = subfield_counts.head(TM_N)
     tm_items = [(name, int(n), field_domain[subfield_field[name]]) for name, n in tm_subfields.items()]
     tm_total = sum(n for _, n, _ in tm_items)
 
-    TM_W, TM_H = 100.0, 56.0
-    weighted = [np.sqrt(n) for _, n, _ in tm_items]
-    w_total = sum(weighted)
-    scaled = [w / w_total * (TM_W * TM_H) for w in weighted]
-    rects = squarify_treemap(scaled, 0, 0, TM_W, TM_H)
+    TM_W, TM_H = 100.0, 62.0
+    scaled = [n / tm_total * (TM_W * TM_H) for _, n, _ in tm_items]
+    rects = squarify_treemap_balanced(scaled, 0, 0, TM_W, TM_H)
 
     tm_rects, tm_labels, tm_colors, tm_values = [], [], [], []
     for (name, v, d), r in zip(tm_items, rects):
         tm_rects.append(r)
-        tm_labels.append(name.split(" ", 1)[0] if len(name) > 24 else name)
-        tm_colors.append(domain_palette[d])
+        tm_labels.append(name)
+        tm_colors.append(topic_color(d, v, top_subfield_n))
         tm_values.append(v)
     tm_domains = sorted({d for _, _, d in tm_items}, key=lambda d: -sum(n for _, n, dd in tm_items if dd == d))
 
     tm_headline = f"'{top_subfield}' alone accounts for a quarter of the topic taxonomy"
-    tm_desc = ("Same OpenAlex-style topic taxonomy as the circular chart, laid out as a treemap — "
+    tm_desc = ("Same OpenAlex-style topic taxonomy as the ranked chart, laid out as a treemap — "
                "each rectangle is a subfield (area = studies), grouped and coloured by field/domain.")
     tm_finding = (f"'{top_subfield}' is {round(top_subfield_n / n_tax * 100)}% of {n_tax:,} tagged "
                   f"studies on its own, {round(top_subfield_n / second_subfield_n, 1)}× the next-largest "
-                  f"subfield ('{second_subfield}', {second_subfield_n:,}) — area makes that skew legible "
-                  f"instead of one spoke dwarfing the rest.")
+                  f"subfield ('{second_subfield}', {second_subfield_n:,}) — proportional area makes that "
+                  f"concentration immediately visible.")
     FIG_META["fig_topic_landscape_treemap.png"] = (tm_headline, tm_desc, tm_finding)
 
-    fig = plt.figure(figsize=(11, 8.3))
-    ax = fig.add_axes([0.035, 0.155, 0.93, 0.575])
+    fig = plt.figure(figsize=(12.8, 8.6))
+    ax = fig.add_axes([0.035, 0.155, 0.93, 0.585])
     for (x, y, w, h), color, label, v in zip(tm_rects, tm_colors, tm_labels, tm_values):
-        ax.add_patch(plt.Rectangle((x, y), w, h, facecolor=color, edgecolor=PAPER, linewidth=1.4, zorder=3))
-        if w > 6 and h > 4:
-            fs = 9 if (w > 14 and h > 7) else 7.5
-            ax.text(x + w / 2, y + h / 2, f"{label}\n{int(v):,}", ha="center", va="center",
-                    fontsize=fs, color="white", fontweight="bold", linespacing=1.3, zorder=4)
+        patch = FancyBboxPatch(
+            (x, y), w, h,
+            boxstyle="round,pad=0.01,rounding_size=0.35",
+            facecolor=color, edgecolor=PAPER, linewidth=1.8, zorder=3,
+        )
+        ax.add_patch(patch)
+        if w * h > 95 and w > 7 and h > 6:
+            wrap_width = max(10, min(30, int(w * 0.72)))
+            wrapped = "\n".join(textwrap.wrap(label, width=wrap_width, break_long_words=False))
+            fs = 10 if w * h > 450 else 8.2
+            luminance = np.dot(np.array(color), [0.2126, 0.7152, 0.0722])
+            text_color = "white" if luminance < 0.58 else INK
+            txt = ax.text(x + w / 2, y + h / 2, f"{wrapped}\n{int(v):,}",
+                          ha="center", va="center", fontsize=fs, color=text_color,
+                          fontweight="bold", linespacing=1.18, zorder=4)
+            txt.set_clip_path(patch)
     ax.set_xlim(0, TM_W)
     ax.set_ylim(0, TM_H)
     ax.invert_yaxis()
@@ -3334,9 +3498,8 @@ if have_taxonomy:
     fig.legend(legend_handles, tm_domains, loc="lower center", ncol=len(tm_domains), frameon=False,
                fontsize=9.5, bbox_to_anchor=(0.5, 0.095))
     fig.text(0.01, 0.06, f"Base: top {TM_N} subfields by study count (of {n_tax:,} studies with an "
-                         f"ml_thematic_cluster label). Cell area ∝ √(studies), not studies directly "
-                         f"— the linear scale is so dominated by 'Economics and Econometrics' that most "
-                         f"other cells would collapse to slivers; see the circular chart for exact proportions.",
+                         f"ml_thematic_cluster label). Cell area is directly proportional to study count; "
+                         f"colour identifies the broader domain and shade reflects study count.",
              fontsize=8, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
     fig.patch.set_facecolor(PAPER)
     ax.set_facecolor(PAPER)
@@ -3685,20 +3848,31 @@ if have_taxonomy:
                  [("out", o) for o in out_list])
     idx_of = {k: i for i, k in enumerate(node_keys)}
     node_labels = [k[1] for k in node_keys]
-    design_palette_sk = dict(zip(design_list,
-        [ACCENT, GOLD, "#1baf7a", "#8a5fb0", "#c0392b", "#2a9d8f", "#e07b39", "#6b7280"]))
+    design_palette_sk = dict(zip(design_list, [
+        "#2f6fb0", "#2a9d8f", "#5aa9b8", "#7c6ca8",
+        "#4d8c74", "#7a9cc6", "#8aa6a3", "#6f7f92",
+    ]))
+    outcome_palette_sk = dict(zip(out_list, [
+        "#315f8c", "#397f8b", "#4f9c8c", "#6aa7a3", "#718db8",
+        "#806fa5", "#9a7fa8", "#5e7b73", "#7d8f9d", "#a1adb7",
+    ]))
+
+    def sankey_rgba(hex_color, alpha):
+        red, green, blue = [round(channel * 255) for channel in mcolors.to_rgb(hex_color)]
+        return f"rgba({red},{green},{blue},{alpha})"
 
     link1 = Counter((r[0], r[1]) for r in sankey_rows)
     link2 = Counter((r[1], r[2]) for r in sankey_rows)
     sk_sources, sk_targets, sk_values, sk_colors = [], [], [], []
     for (d, f), v in link1.items():
         sk_sources.append(idx_of[("design", d)]); sk_targets.append(idx_of[("func", f)]); sk_values.append(v)
-        sk_colors.append(design_palette_sk.get(d, "#adb5bd"))
+        sk_colors.append(sankey_rgba(design_palette_sk.get(d, "#8aa6a3"), 0.34))
     for (f, o), v in link2.items():
         sk_sources.append(idx_of[("func", f)]); sk_targets.append(idx_of[("out", o)]); sk_values.append(v)
-        sk_colors.append("rgba(150,150,150,0.35)")
+        sk_colors.append(sankey_rgba(FUNCTION_COLORS.get(f, "#7a9cc6"), 0.28))
     node_colors_sk = ([design_palette_sk[d] for d in design_list] +
-                       ["#5a6472"] * (len(func_list) + len(out_list)))
+                       [FUNCTION_COLORS.get(f, "#7a9cc6") for f in func_list] +
+                       [outcome_palette_sk.get(o, "#7d8f9d") for o in out_list])
 
     sankey_fig = go.Figure(go.Sankey(
         node=dict(label=[SHORT_FN.get(n, n) for n in node_labels], color=node_colors_sk, pad=14, thickness=14,
@@ -4984,8 +5158,7 @@ gallery = [
             fig_entry("fig_function_time.png", "Financing-function mix over time"),
             fig_entry("fig_function_time_lines.png", "Financing-function mix over time (line option)"),
             fig_entry("fig_method_stream.png", "Financing-function output over time"),
-            fig_entry("fig_outcome_bar.png", "Outcome domain"),
-            fig_entry("fig_outcome_lollipop.png", "Outcome domain (lollipop option)"),
+            fig_entry("fig_outcome_lollipop.png", "Outcome domain"),
             fig_entry("fig_function_outcome_heatmap.png", "Function vs. outcome"),
         ],
     },
@@ -5034,7 +5207,7 @@ gallery = [
             fig_entry("fig_deficit.png", "Studies vs. a burden-proportional share"),
             fig_entry("fig_equity_time.png", "LMIC research share over time"),
             fig_entry("fig_inequality.png", "Evidence concentration among LMICs"),
-            fig_entry("fig_injustice.png", "High burden, low research"),
+            fig_entry("fig_injustice.png", "Research relative to disease burden"),
             fig_entry("fig_funder_scorecard.png", "Funding priority scorecard"),
             fig_entry("fig_reach_time.png", "When evidence reached each income group"),
             fig_entry("fig_top_producers.png", "Biggest producers vs. best-served"),
@@ -5050,6 +5223,7 @@ gallery = [
         ) + ([
             fig_entry("fig_funder_funders.png", "The top research funders"),
             fig_entry("fig_funder_funders_treemap.png", "The top research funders (treemap option)"),
+            fig_entry("fig_wellcome_priorities.png", "Funding and evidence across Wellcome priority themes"),
             fig_entry("fig_funder_function_heatmap.png", "What each top funder pays for"),
             fig_entry("fig_funder_function_bubbles.png", "What each top funder pays for (bubble option)"),
             fig_entry("fig_funder_outcome_heatmap.png", "What each top funder's research finds"),

@@ -42,10 +42,19 @@ n_extracted = len(df)  # every record in the v5 file
 pop = df.reset_index(drop=True)
 n_studies = len(pop)
 
+
+def has_usable_value(series):
+    values = series.fillna("").astype(str).str.strip().str.lower()
+    missing_markers = {"", "nan", "none", "could not find", "not found", "n/a", "na"}
+    return ~values.isin(missing_markers)
+
 # Funnel counted from the v5 file itself: (label, count). Label prefixes follow the
 # v2 Stage Funnel sheet so the indent/strong logic below formats them the same way.
 n_ff = int(pop["financing_function_final"].notna().sum())
-n_doi = int(pop["doi"].notna().sum())
+has_doi = has_usable_value(pop["doi"]).astype(int)
+has_url = has_usable_value(pop["url"]).astype(int)
+has_publication_link = ((has_doi == 1) | (has_url == 1)).astype(int)
+n_doi = int(has_doi.sum())
 mesh = pop["mesh_source"].fillna("none")
 funnel_rows_raw = [
     (f"Stage 0 input ({SOURCE_NAME})", n_extracted),
@@ -73,7 +82,6 @@ type_of_analysis = fill_unclear(pop["type_of_analysis_deduced_final"])
 data_type = fill_unclear(pop["data_type_final"])
 data_source = fill_unclear(pop["data_source_final"])
 unit_of_observation = fill_unclear(pop["unit_of_observation_final"])
-has_doi = pop["doi"].notna().astype(int)
 year = pop["year"].astype(int)
 
 
@@ -265,6 +273,7 @@ studies_json = {
     "geo_scope": [code_of["geo_scope"][v] for v in geo_scope],
     "era": [code_of["era"][v] for v in era],
     "has_doi": has_doi.tolist(),
+    "has_publication_link": has_publication_link.tolist(),
 }
 
 function_json = {"s": func_s, "g": func_g}
@@ -277,7 +286,7 @@ geo_json = {"s": geo_s, "c": geo_c, "y": geo_y}
 existing_dict = json.loads((DATA / "dict.json").read_text(encoding="utf-8"))
 
 pct_quant = round(100 * (type_of_analysis == "Quantitative").mean(), 1)
-pct_doi = round(100 * has_doi.mean(), 1)
+pct_link = round(100 * has_publication_link.mean(), 1)
 pct_single = round(100 * (geo_scope == "Single country").mean(), 1)
 
 dict_json = {
@@ -351,7 +360,7 @@ glance_tiles = [
     {"label": "Health financing functions covered", "value": fmt(len(function_grps)), "theme": "secondary",
      "sub": "8 WHO outcome domains mapped"},
     {"label": "Studies using quantitative analysis", "value": f"{pct_quant:.0f}%", "theme": "success", "sub": None},
-    {"label": "Studies with DOI/URL", "value": f"{pct_doi:.0f}%", "theme": "info", "sub": None},
+    {"label": "Studies with DOI/URL", "value": f"{pct_link:.0f}%", "theme": "info", "sub": None},
     {"label": "Studies focused on one country", "value": f"{pct_single:.0f}%", "theme": "secondary", "sub": None},
 ]
 

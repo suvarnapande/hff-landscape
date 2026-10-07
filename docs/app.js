@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-07c";
+const BUILD = "2026-10-07m";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -28,6 +28,7 @@ const OVERVIEW_TILE_COPY = {
   },
   "Quantitative analysis": { label: "Studies using quantitative analysis", sub: null },
   "Has a recovered DOI": { label: "Studies with a publication link", sub: "DOI or URL available" },
+  "Studies with DOI/URL": { label: "Studies with a publication link", sub: "DOI or URL available" },
   "Single-country studies": { label: "Studies focused on one country", sub: null }
 };
 
@@ -834,12 +835,22 @@ if (typeof document !== "undefined") {
     }
   }
 
+  let figureZoom = 1;
+
+  function setFigureZoom(nextZoom) {
+    figureZoom = Math.min(3, Math.max(0.5, nextZoom));
+    $("fig-modal-img").style.width = (figureZoom * 100) + "%";
+    $("fig-zoom-reset").textContent = Math.round(figureZoom * 100) + "%";
+    $("fig-zoom-out").disabled = figureZoom <= 0.5;
+    $("fig-zoom-in").disabled = figureZoom >= 3;
+  }
+
   function openModal(file) {
     const f = FIG_INDEX[file];
     if (!f) return;
     $("fig-modal-title").textContent = f.title;
     const img = $("fig-modal-img");
-    img.src = "figures/" + f.file;
+    img.src = "figures/" + f.file + "?v=" + BUILD;
     img.alt = f.title;
     const footnote = OTHER_OUTCOME_NOTE_FIGURES.has(f.file)
       ? OUTCOME_CATEGORY_NOTE
@@ -848,12 +859,15 @@ if (typeof document !== "undefined") {
     $("fig-modal-specific-note").textContent = OTHER_OUTCOME_NOTE_FIGURES.has(f.file)
       ? OTHER_OUTCOME_NOTE
       : "";
+    setFigureZoom(1);
+    $("fig-zoom-viewport").scrollTo(0, 0);
     $("fig-modal").classList.add("open");
   }
 
   function closeModal() {
     $("fig-modal").classList.remove("open");
     $("fig-modal-img").src = "";
+    setFigureZoom(1);
   }
 
   // Study title/abstract modal — opens every study in one (country, function,
@@ -1227,6 +1241,7 @@ if (typeof document !== "undefined") {
       "Quantitative analysis"
     ];
     const tileRank = new Map(tileOrder.map((label, i) => [label, i]));
+    tileRank.set("Studies with DOI/URL", tileRank.get("Has a recovered DOI"));
     const tiles = db.content.glance_tiles.slice()
       .sort((a, b) => (tileRank.get(a.label) ?? 99) - (tileRank.get(b.label) ?? 99));
     const oa = db.overviewMetrics.openAccess;
@@ -1349,7 +1364,7 @@ if (typeof document !== "undefined") {
           bar.appendChild(segment);
           const metric = el("div", "analysis-approach-metric");
           metric.classList.add("analysis-metric-" + key);
-          metric.style.flexBasis = approach.pct + "%";
+          metric.style.width = approach.pct + "%";
           const pct = el("strong");
           pct.textContent = approach.pct.toFixed(1) + "%";
           const label = el("span");
@@ -1475,7 +1490,7 @@ if (typeof document !== "undefined") {
       const card = el("button", "thematic-card");
       card.type = "button";
       const img = el("img", "thematic-card-image");
-      img.src = "figures/" + sec.figs[0].file;
+      img.src = "figures/" + sec.figs[0].file + "?v=" + BUILD;
       img.alt = "";
       img.loading = "lazy";
       const body = el("div", "thematic-card-body");
@@ -1526,7 +1541,7 @@ if (typeof document !== "undefined") {
     for (const f of sec.figs) {
       const card = el("div", "fig-card");
       const img = el("img");
-      img.src = "figures/" + f.file;
+      img.src = "figures/" + f.file + "?v=" + BUILD;
       img.alt = f.title;
       img.loading = "lazy";
       img.addEventListener("click", () => openModal(f.file));
@@ -2322,10 +2337,14 @@ if (typeof document !== "undefined") {
     });
     $("fig-modal-close").addEventListener("click", closeModal);
     $("fig-modal").addEventListener("click", e => { if (e.target === $("fig-modal")) closeModal(); });
+    $("fig-zoom-out").addEventListener("click", () => setFigureZoom(figureZoom - 0.25));
+    $("fig-zoom-reset").addEventListener("click", () => setFigureZoom(1));
+    $("fig-zoom-in").addEventListener("click", () => setFigureZoom(figureZoom + 0.25));
     $("ov-worldmap-open").addEventListener("click", () => openModal("fig_worldmap.png"));
     $("ov-growth-open").addEventListener("click", () => openModal("fig_growth.png"));
     $("ov-function-open").addEventListener("click", () => openModal("fig_function_bar.png"));
     $("ov-funders-open").addEventListener("click", () => openModal("fig_funder_funders_treemap.png"));
+    $("ov-disease-method-open").addEventListener("click", () => openModal("fig_disease_method.png"));
     $("study-modal-close").addEventListener("click", closeStudyModal);
     $("study-modal").addEventListener("click", e => { if (e.target === $("study-modal")) closeStudyModal(); });
     $("functions-help-close").addEventListener("click", () => $("functions-help-modal").classList.remove("open"));
