@@ -642,10 +642,6 @@ ax.plot(years, ref_line, color=SUBHEAD_COLOR, linewidth=1.4, linestyle=(0, (4, 3
 ax.text(years[int(len(years) * 0.55)], ref_line[int(len(years) * 0.55)],
         "if annual output had\nstayed at its 2010–12 rate", color=SUBHEAD_COLOR, fontsize=8.5,
         rotation=18, ha="left", va="bottom")
-ax.axvline(half_year, color="#8a8272", linewidth=0.9, linestyle=":", zorder=2)
-ax.annotate(f"half of all {total_full:,} full-year records\npublished {half_year} or later",
-            xy=(half_year, total_full * 0.5), xytext=(half_year - 0.3, total_full * 0.62),
-            fontsize=9.5, fontweight="bold", color=INK, ha="right")
 ax.plot([years[-1]], [cum[-1]], marker="o", color=ACCENT, markersize=6, zorder=4)
 ax.annotate(f"{years[-1]}\n(partial)", xy=(years[-1], cum[-1]), xytext=(-4, 8),
             textcoords="offset points", fontsize=9, color=INK, ha="right")
@@ -3320,7 +3316,7 @@ if have_topics:
     cluster_lmic_share = known_ti.groupby("cluster")["income"].apply(lambda s: (s != "High income").mean())
     overall_lmic_share = (known_ti["income"] != "High income").mean()
 
-    ti_cmap = mcolors.LinearSegmentedColormap.from_list("ti", ["#2a5ea8", "#c9c3b3", "#e0752f"])
+    ti_cmap = mcolors.LinearSegmentedColormap.from_list("ti", ["#315f8c", "#b8c7c5", "#1fa77a"])
     ti_norm = mcolors.Normalize(vmin=0, vmax=1)
     point_lmic = topic_map_ti["cluster"].map(cluster_lmic_share)
     colored_pts = topic_map_ti[point_lmic.notna()]
@@ -3332,28 +3328,40 @@ if have_topics:
     most_lmic_label = topic_labels.loc[most_lmic_cluster, "label"]
     most_hic_label = topic_labels.loc[most_hic_cluster, "label"]
 
-    fig, ax = plt.subplots(figsize=(9.5, 8))
+    fig = plt.figure(figsize=(10.8, 8.2))
+    ax = fig.add_axes([0.06, 0.12, 0.70, 0.60])
     ax.scatter(grey_pts["x"], grey_pts["y"], s=3, color=GREY, alpha=0.25, linewidths=0, zorder=2)
     sc = ax.scatter(colored_pts["x"], colored_pts["y"], s=4, c=colored_vals, cmap=ti_cmap, norm=ti_norm,
                      alpha=0.7, linewidths=0, zorder=3)
-    cb = fig.colorbar(sc, ax=ax, fraction=0.04, pad=0.02)
+    colorbar_ax = fig.add_axes([0.79, 0.19, 0.025, 0.46])
+    cb = fig.colorbar(sc, cax=colorbar_ax)
     cb.set_label("share about LMICs", fontsize=9, color=SUBHEAD_COLOR)
     cb.ax.tick_params(labelsize=8)
     cb.outline.set_visible(False)
-    set_headline(ax, "Research about poor and rich countries sits in different themes",
-                 f"The emergent theme map, each theme coloured by the share of its single-country studies "
-                 f"about LMICs (overall {overall_lmic_share:.0%}).",
-                 f"'{most_lmic_label}' skews most LMIC ({cluster_lmic_share[most_lmic_cluster]:.0%}); "
-                 f"'{most_hic_label}' skews most high-income "
-                 f"({1 - cluster_lmic_share[most_hic_cluster]:.0%} high-income).",
-                 "fig_topicmap_income.png")
+    ti_headline = "Research about poor and rich countries sits in different themes"
+    ti_desc = (f"The emergent theme map, each theme coloured by the share of its single-country studies "
+               f"about LMICs (overall {overall_lmic_share:.0%}).")
+    ti_finding = (f"'{most_lmic_label}' skews most LMIC "
+                  f"({cluster_lmic_share[most_lmic_cluster]:.0%}); '{most_hic_label}' skews most high-income "
+                  f"({1 - cluster_lmic_share[most_hic_cluster]:.0%} high-income).")
+    FIG_META["fig_topicmap_income.png"] = (ti_headline, ti_desc, ti_finding)
+    fig.text(0.04, 0.965, D(ti_headline), fontsize=16, fontweight="bold",
+             color=INK, ha="left", va="top")
+    fig.text(0.04, 0.91, D("\n".join(textwrap.wrap(ti_desc, width=105))),
+             fontsize=10.5, color=SUBHEAD_COLOR, ha="left", va="top", linespacing=1.25)
+    fig.text(0.04, 0.845, D("\n".join(textwrap.wrap(ti_finding, width=105))),
+             fontsize=10.5, fontweight="bold", color=INK, ha="left", va="top",
+             linespacing=1.25)
     ax.set_xticks([]); ax.set_yticks([])
     for spine in ax.spines.values():
         spine.set_visible(False)
-    set_footnote(fig, f"Base: {len(known_ti):,} single-country studies with a known income group and a topic "
-                       f"embedding, across {len(cluster_lmic_share)} emergent themes.")
-    fig.tight_layout()
-    fig.savefig(FIGS / "fig_topicmap_income.png", dpi=150, bbox_inches="tight")
+    fig.text(0.04, 0.055,
+             f"Base: {len(known_ti):,} single-country studies with a known income group and a topic "
+             f"embedding, across {len(cluster_lmic_share)} emergent themes.",
+             fontsize=8.5, color=SUBHEAD_COLOR, ha="left", va="bottom")
+    fig.patch.set_facecolor(PAPER)
+    ax.set_facecolor(PAPER)
+    fig.savefig(FIGS / "fig_topicmap_income.png", dpi=150)
     plt.close(fig)
 
 # ---------------------------------------------------------------------------
@@ -3751,7 +3759,10 @@ if have_taxonomy:
         cnt = disease_income[d]
         tot = sum(cnt.values())
         fc_lmic.append(100 * (tot - cnt.get("High income", 0)) / tot if tot else 50.0)
-    skew_cmap = mcolors.LinearSegmentedColormap.from_list("skew", ["#2a5ea8", "#c9c3b3", "#e0752f"])
+    skew_cmap = mcolors.LinearSegmentedColormap.from_list(
+        "skew",
+        ["#315f8c", "#b8c7c5", "#1fa77a"],
+    )
     skew_norm = mcolors.Normalize(vmin=0, vmax=100)
     fc_colors = [skew_cmap(skew_norm(v)) for v in fc_lmic]
 
@@ -5205,14 +5216,14 @@ for f in sorted(FIGS.glob("*.png")):
 gallery = [
     {
         "title": "Size & growth",
-        "blurb": f"How much research is there? {N:,} records in the {SOURCE_NAME} (2010–2026).",
+        "blurb": "See how the health financing evidence base has grown since 2010 and how quickly new "
+                 "research is being published.",
         "figs": [fig_entry("fig_growth.png", "Cumulative growth")],
     },
     {
         "title": "Financing functions & outcomes",
-        "blurb": "The core classification: which health-financing function(s) each study addresses, "
-                 "and which health-system outcome domain(s) it investigates. A study can carry more "
-                 "than one of each, so it is counted in every one it's tagged with.",
+        "blurb": "Explore which parts of health financing are studied most, which outcomes they are linked "
+                 "to, and where important evidence gaps remain.",
         "figs": [
             fig_entry("fig_function_bar.png", "Financing function"),
             fig_entry("fig_function_time.png", "Financing-function mix over time"),
@@ -5224,10 +5235,8 @@ gallery = [
     },
     {
         "title": "Topics & themes",
-        "blurb": "What the research is actually about, beyond the financing-function labels: an "
-                 "OpenAlex-style field/subfield taxonomy, plus an emergent theme model over the "
-                 "abstract text (sentence embeddings → UMAP → HDBSCAN) — the same "
-                 "techniques HEE used for its topic-landscape figures.",
+        "blurb": "Discover the health issues, disease areas and wider research themes covered by the "
+                 "evidence, including which topics receive the most or least attention.",
         "figs": (
             [fig_entry("fig_topic_landscape.png", "Topic landscape"),
              fig_entry("fig_topic_landscape_treemap.png", "Topic landscape (treemap)"),
@@ -5249,8 +5258,8 @@ gallery = [
     } if (have_topics or have_taxonomy) else None,
     {
         "title": "Methods & data",
-        "blurb": "How the research was done: study design, whether the analysis is quantitative, "
-                 "qualitative or mixed, and what kind of data it draws on.",
+        "blurb": "See how studies were designed, whether they used quantitative, qualitative or mixed "
+                 "methods, and what kinds of data they analysed.",
         "figs": [
             fig_entry("fig_design_bar.png", "Study design"),
             fig_entry("fig_analysis_bar.png", "Type of analysis"),
@@ -5260,8 +5269,8 @@ gallery = [
     },
     {
         "title": "Geography",
-        "blurb": f"Where the research is about. {n_countries} countries are named in the extracted "
-                 f"geography.",
+        "blurb": "Explore where health financing research is concentrated, how coverage differs between "
+                 "countries and income groups, and where evidence remains limited.",
         "figs": [
             fig_entry("fig_top_countries.png", "Top 20 countries"),
             fig_entry("fig_income_bar.png", "Study-country pairs by income group"),
@@ -5306,10 +5315,8 @@ gallery = [
     },
     {
         "title": "Global financing context",
-        "blurb": "The real-world backdrop for the Revenue Raising financing function: how much "
-                 "development assistance for health (DAH) actually flows, who provides it, and how "
-                 "unequally countries fund their own health spending. Source: IHME, Financing Global "
-                 "Health 2025: Cuts in Aid and Future Outlook.",
+        "blurb": "Compare the research landscape with global health financing trends, including development "
+                 "assistance, national health spending and differences between countries.",
         "figs": (
             [
                 fig_entry("fig_dah_trend.png", "Development assistance for health, 1990–2030"),
@@ -5336,9 +5343,8 @@ gallery = [
     } if have_ihme else None,
     {
         "title": "Pipeline",
-        "blurb": f"What the {SOURCE_NAME} file contains — from classification to DOI and "
-                 "topic-theme recovery. See the Methods tab for the full stage-by-stage "
-                 "funnel and what each stage means.",
+        "blurb": "Understand what information is available for the studies in this map and how completely "
+                 "key details, publication links and research themes were identified.",
         "figs": [fig_entry("fig_funnel.png", "Pipeline funnel")],
     },
 ]

@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-07m";
+const BUILD = "2026-10-07o";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -855,7 +855,9 @@ if (typeof document !== "undefined") {
     const footnote = OTHER_OUTCOME_NOTE_FIGURES.has(f.file)
       ? OUTCOME_CATEGORY_NOTE
       : UNCLEAR_FOOTNOTE_SECTIONS.has(f.sectionTitle) ? UNCLEAR_FOOTNOTE : "";
-    $("fig-modal-caption").textContent = footnote ? `${f.caption} ${footnote}` : f.caption;
+    const modalCaption = $("fig-modal-caption");
+    modalCaption.hidden = !footnote;
+    modalCaption.textContent = footnote;
     $("fig-modal-specific-note").textContent = OTHER_OUTCOME_NOTE_FIGURES.has(f.file)
       ? OTHER_OUTCOME_NOTE
       : "";
