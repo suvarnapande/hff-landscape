@@ -371,7 +371,7 @@ content_json = {
     "registries": {
         "trend_vars": [
             {"label": "Income group", "column": "income"},
-            {"label": "UN region", "column": "un_region"},
+            {"label": "Region", "column": "un_region"},
             {"label": "Financing function", "column": "func_grp"},
             {"label": "Outcome domain", "column": "outcome_grp"},
             {"label": "Study design", "column": "study_design"},

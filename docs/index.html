@@ -11,7 +11,7 @@
      versions with SHA-384 integrity hashes verified by double fetch. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" integrity="sha384-krui876Mk6M6Lq6uj1SQo+u4MoImxFwCfwzWNU982QBMNci3VMZ3FoYSdUakJD5I" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css" integrity="sha384-PSZaVsyG9jDu8hFaSJev5s/9poIJlX7cuxSGdqCgXRHpo2DzIaZAyCd2rG/DJJmV" crossorigin="anonymous">
-<link rel="stylesheet" href="styles.css?v=2026-10-09o">
+<link rel="stylesheet" href="styles.css?v=2026-10-10f">
 </head>
 <body>
 
@@ -74,7 +74,10 @@
 
     <div class="overview-analysis-grid">
       <div class="card overview-analysis-card">
-        <div class="card-header">Where the evidence is about</div>
+        <div class="card-header overview-card-head">
+          <span>Where the evidence is about</span>
+          <button class="card-header-link" type="button" data-open-group="Geography">More on geography &rarr;</button>
+        </div>
         <div class="card-body overview-analysis-body">
           <button class="overview-figure-button" id="ov-worldmap-open" type="button"
                   aria-label="Open the figure showing where the evidence is about">
@@ -84,7 +87,10 @@
         </div>
       </div>
       <div class="card overview-analysis-card">
-        <div class="card-header">Studies by financing function</div>
+        <div class="card-header overview-card-head">
+          <span>Studies by financing function</span>
+          <button class="card-header-link" type="button" data-open-section="Financing functions & outcomes">More on financing functions &rarr;</button>
+        </div>
         <div class="card-body overview-analysis-body">
           <button class="overview-figure-button" id="ov-function-open" type="button"
                   aria-label="Open the studies by financing function figure">
@@ -94,7 +100,10 @@
         </div>
       </div>
       <div class="card overview-analysis-card">
-        <div class="card-header">What gets evaluated?</div>
+        <div class="card-header overview-card-head">
+          <span>What gets evaluated?</span>
+          <button class="card-header-link" type="button" data-open-section="Disease focus">More on disease focus &rarr;</button>
+        </div>
         <div class="card-body overview-analysis-body">
           <button class="overview-figure-button" id="ov-disease-method-open" type="button"
                   aria-label="Open the figure showing how each disease area is evaluated">
@@ -104,7 +113,10 @@
         </div>
       </div>
       <div class="card overview-analysis-card">
-        <div class="card-header">Top research funders</div>
+        <div class="card-header overview-card-head">
+          <span>Top research funders</span>
+          <button class="card-header-link" type="button" data-open-section="Research funding">More on research funding &rarr;</button>
+        </div>
         <div class="card-body overview-analysis-body">
           <button class="overview-figure-button" id="ov-funders-open" type="button"
                   aria-label="Open the top research funders figure">
@@ -157,7 +169,7 @@
   <section class="tab-pane" id="pane-explorer">
     <div class="explorer-layout">
       <aside class="sidebar">
-        <h2 class="sidebar-title">Filter the corpus</h2>
+        <h2 class="sidebar-title">Filter the studies</h2>
 
         <div class="control-group">
           <label class="control-label" for="x-years">Publication years</label>
@@ -170,7 +182,7 @@
           <select id="x-income" multiple placeholder="All groups"></select>
         </div>
         <div class="control-group">
-          <label class="control-label" for="x-region">UN region</label>
+          <label class="control-label" for="x-region">Region</label>
           <select id="x-region" multiple placeholder="All regions"></select>
         </div>
         <div class="control-group">
@@ -231,7 +243,7 @@
             </div>
           </div>
           <div class="card">
-            <div class="card-header">Map — intensity by country</div>
+            <div class="card-header">Where the studies are</div>
             <div class="card-body">
               <div class="chart-toolbar">
                 <div class="tb-field"><label for="x-map-metric">Metric</label><select id="x-map-metric" class="form-select"></select></div>
@@ -240,7 +252,7 @@
             </div>
           </div>
           <div class="card">
-            <div class="card-header">Composition of the filtered corpus</div>
+            <div class="card-header">What the selected studies cover</div>
             <div class="card-body">
               <div class="chart-toolbar">
                 <div class="tb-field wide"><label for="x-comp-var">Variable</label><select id="x-comp-var" class="form-select"></select></div>
@@ -251,7 +263,7 @@
             </div>
           </div>
           <div class="card">
-            <div class="card-header">Countries — any two variables (bubble size = studies)</div>
+            <div class="card-header">Compare countries on any two measures (bubble size = studies)</div>
             <div class="card-body">
               <div class="chart-toolbar">
                 <div class="tb-field wide"><label for="x-scatter-x">X axis</label><select id="x-scatter-x" class="form-select"></select></div>
@@ -263,7 +275,7 @@
         </div>
 
         <div class="card">
-          <div class="card-header">Top countries in this view</div>
+          <div class="card-header">Countries with the most studies</div>
           <div class="card-body">
             <div class="table-wrap"><table class="dataTable" id="x-table"></table></div>
           </div>
@@ -287,21 +299,21 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-header">Disease burden &times; health spending &times; income group</div>
+      <div class="card-header">Disease burden and health spending, by country and income group</div>
       <div class="card-body"><div id="land-scatter" class="plot" style="height:440px"></div></div>
     </div>
     <div class="grid-2">
       <div class="card">
-        <div class="card-header" id="land-func-title">Financing-function mix</div>
+        <div class="card-header" id="land-func-title">Which financing functions are studied</div>
         <div class="card-body"><div id="land-func-mix" class="plot" style="height:340px"></div></div>
       </div>
       <div class="card">
-        <div class="card-header" id="land-outcome-title">Outcome-domain mix</div>
+        <div class="card-header" id="land-outcome-title">Which outcomes are measured</div>
         <div class="card-body"><div id="land-outcome-mix" class="plot" style="height:340px"></div></div>
       </div>
     </div>
     <div class="card">
-      <div class="card-header" id="land-cross-title">Outcome domain &times; financing function</div>
+      <div class="card-header" id="land-cross-title">Outcomes measured for each financing function</div>
       <div class="card-body">
         <p class="fig-caption">Row shares: of this country's studies reporting each outcome
           domain, the share that also carry each financing-function tag. A study can carry more
@@ -341,24 +353,24 @@
         </div>
         <div class="grid-2">
           <div class="card">
-            <div class="card-header">Output over time — country vs income-group mean</div>
+            <div class="card-header">Studies per year: this country vs. similar-income countries</div>
             <div class="card-body"><div id="c-trend" class="plot" style="height:320px"></div></div>
           </div>
           <div class="card">
-            <div class="card-header">Financing-function mix — country vs income group</div>
+            <div class="card-header">Financing functions studied: this country vs. similar-income countries</div>
             <div class="card-body"><div id="c-mix" class="plot" style="height:320px"></div></div>
           </div>
           <div class="card">
-            <div class="card-header">Study design mix — country vs income group</div>
+            <div class="card-header">Study designs: this country vs. similar-income countries</div>
             <div class="card-body"><div id="c-methods" class="plot" style="height:320px"></div></div>
           </div>
           <div class="card">
-            <div class="card-header">Approach & reporting — country vs income group</div>
+            <div class="card-header">How studies are done and reported: this country vs. similar-income countries</div>
             <div class="card-body"><div id="c-signals" class="plot" style="height:320px"></div></div>
           </div>
         </div>
         <div class="card">
-          <div class="card-header">Studies — click a cell to read every abstract together</div>
+          <div class="card-header">Read the studies (click a cell to see their abstracts)</div>
           <div class="card-body">
             <p class="fig-caption">Grid of study counts by financing function and year. Click a
               cell to open all of that country's studies for that function and year at once.
@@ -367,7 +379,7 @@
           </div>
         </div>
         <div class="card">
-          <div class="card-header">Where the country sits among its income peers</div>
+          <div class="card-header">How this country compares with similar-income countries</div>
           <div class="card-body"><div id="c-benchmark" class="plot" style="height:380px"></div></div>
         </div>
       </div>
@@ -706,7 +718,7 @@
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js" integrity="sha384-EcVTHT5RdDTvzbTIbNOtaNxNALeJYDgmv5Crp3NBmcdrCPrDnqp6I1+ETJ/FCFHI" crossorigin="anonymous"></script>
-<script type="module" src="app.js?v=2026-10-09y"></script>
+<script type="module" src="app.js?v=2026-10-10h"></script>
 
 </body>
 </html>

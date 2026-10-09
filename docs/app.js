@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-09s";
+const BUILD = "2026-10-10i";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -138,6 +138,8 @@ export function loadData({ dict, studies, geo, func, outcome, countries, content
   const palInc = {};
   if (Array.isArray(pal)) dict.meta.inc_lv.forEach((lv, i) => { palInc[lv] = pal[i]; });
   else Object.assign(palInc, pal);
+  // Softer income colours, shared with the Country landscape.
+  Object.assign(palInc, LANDSCAPE_INCOME_COLORS);
   const functionSets = dict.financing_function_grps.map(() => new Set());
   for (let i = 0; i < func.s.length; i++) functionSets[func.g[i]].add(func.s[i]);
   const outcomeSets = dict.outcome_domain_grps.map(() => new Set());
@@ -763,7 +765,7 @@ export function countryFacts(db, iso3) {
   const pop = num(r.pop), dalys = num(r.dalys), spend = num(r.total_spend_bn);
   const pairs = [
     ["Income group", r.income],
-    ["UN region", r.un_region == null ? "—" : r.un_region]
+    ["Region (UN M49)", r.un_region == null ? "—" : r.un_region]
   ];
   if (pop != null) pairs.push(["Population", fmtNum(rRound(pop / 1e6)) + " M"]);
   if (dalys != null) pairs.push(["Disease burden", fmtNum(rRound(dalys / 1e6)) + " M DALYs (2023)"]);
@@ -785,6 +787,37 @@ const LANDSCAPE_INCOME_COLORS = {
   "High income": "#356fa8"
 };
 const PROFILE_BLUE = ["#c9ddef", "#9fc4df", "#70a7cf", "#4288bb", "#1f659f"];
+// Default series colours for interactive charts (same family as the gallery figures).
+const SOFT_COLORWAY = ["#1764C0", "#2F9B92", "#63B0BC", "#93A3D0", "#D2B06B", "#88B7A8",
+  "#B79BCB", "#7E94B1", "#C98F7A", "#9FB7C8"];
+// Light-to-strong blue-teal ramp used for single-series bars and maps.
+const SOFT_RAMP = ["#dcecf3", "#bddbe7", "#8fc7cf", "#5eb2ba", "#2f8f9d", "#1f5fa8"];
+
+function rampColor(t) {
+  const stops = SOFT_RAMP.map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)));
+  const x = Math.min(1, Math.max(0, t)) * (stops.length - 1);
+  const i = Math.min(stops.length - 2, Math.floor(x));
+  const f = x - i;
+  const c = stops[i].map((v, k) => Math.round(v + (stops[i + 1][k] - v) * f));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
+// Breaks a long axis label into lines of about `width` characters.
+function wrapLabel(text, width = 24) {
+  const words = String(text).split(" ");
+  const lines = [];
+  let line = "";
+  for (const w of words) {
+    if (line && (line + " " + w).length > width) {
+      lines.push(line);
+      line = w;
+    } else {
+      line = line ? line + " " + w : w;
+    }
+  }
+  if (line) lines.push(line);
+  return lines.join("<br>");
+}
 const PROFILE_TEAL = ["#d8ebe4", "#add6c7", "#79bda6", "#48a087", "#217b68"];
 const PROFILE_LAVENDER = ["#e5ddec", "#cab9da", "#ad91c4", "#8c69aa", "#6d4d8e"];
 const PROFILE_PEER = ["#edf1f4", "#dfe6eb", "#ced9e1", "#bdcbd5", "#aabcc8"];
@@ -1101,10 +1134,10 @@ if (typeof document !== "undefined") {
   function showCountryMix(iso3) {
     const mix = functionOutcomeMix(db, iso3, null);
     if (!mix) return;
-    $("land-func-title").textContent = "Financing-function mix — " + mix.country +
+    $("land-func-title").textContent = "Which financing functions are studied — " + mix.country +
       " (" + fmtNum(mix.n_studies) + (mix.n_studies === 1 ? " study" : " studies") + ")";
-    $("land-outcome-title").textContent = "Outcome-domain mix — " + mix.country;
-    $("land-cross-title").textContent = "Outcome domain × financing function — " + mix.country;
+    $("land-outcome-title").textContent = "Which outcomes are measured — " + mix.country;
+    $("land-cross-title").textContent = "Outcomes measured for each financing function — " + mix.country;
     window.Plotly.react("land-func-mix", mixBarTrace(mix.function_mix.rows,
       ["#c9ddef", "#a8c8e3", "#7faed3", "#568fc0", "#356fa8", "#1f5fa8"]), mixLayout(), PLOTLY_CFG);
     window.Plotly.react("land-outcome-mix", mixBarTrace(mix.outcome_mix.rows,
@@ -1266,7 +1299,14 @@ if (typeof document !== "undefined") {
     switchTab("methods");
     switchMethodsPanel(name);
     const back = $("scope-back");
-    if (back && fromSection) {
+    if (back && fromSection === "overview") {
+      back.hidden = false;
+      back.innerHTML = "&larr; Back to Overview";
+      back.onclick = () => {
+        switchTab("overview");
+        $("ov-tiles").scrollIntoView({ block: "center" });
+      };
+    } else if (back && fromSection) {
       back.hidden = false;
       back.innerHTML = "&larr; Back to " + fromSection;
       back.onclick = () => {
@@ -1325,7 +1365,10 @@ if (typeof document !== "undefined") {
     "Research funding": "Who funds the evidence?"
   };
 
-  function cloneOverviewTile(label) {
+  // Sections that already link to the definitions, so their tile copy needs no "?" buttons.
+  const SECTION_COPIES_WITHOUT_HELP = new Set(["Financing functions & outcomes"]);
+
+  function cloneOverviewTile(label, withHelp = true) {
     const src = document.querySelector(`#ov-tiles [data-tile="${CSS.escape(label)}"]`);
     if (!src) return null;
     const box = src.cloneNode(true);
@@ -1336,22 +1379,28 @@ if (typeof document !== "undefined") {
     box.style.setProperty("--tile-accent", cs.getPropertyValue("--tile-accent"));
     box.style.setProperty("--tile-bg", cs.getPropertyValue("--tile-bg"));
     for (const help of box.querySelectorAll("[data-modal]")) {
-      help.addEventListener("click", () => $(help.dataset.modal).classList.add("open"));
+      if (withHelp) help.addEventListener("click", () => $(help.dataset.modal).classList.add("open"));
+      else help.remove();
     }
     return box;
   }
 
   // Sections shown together under one card on the Thematic analysis index.
   const SECTION_GROUPS = [{
+    title: "Authorship & access",
+    blurb: "Who writes health financing research about different settings, how authors collaborate "
+      + "across income groups, and how much of their work is freely available.",
+    members: ["Research ownership & collaboration", "Open access & author countries"]
+  }, {
     title: "Topics & themes",
     blurb: "What health financing studies are about: topics found from the studies' own text, and "
       + "the disease areas they address.",
     members: ["Topic clusters", "Disease focus"]
   }, {
     title: "Geography",
-    blurb: "Where health financing research is concentrated, and whether it is distributed in "
-      + "proportion to health needs.",
-    members: ["Geographic coverage", "Geographic inequalities"]
+    blurb: "Where health financing research is concentrated, whether it is distributed in "
+      + "proportion to health needs, and how it covers fragile and conflict-affected settings.",
+    members: ["Geographic coverage", "Geographic inequalities", "Fragile & conflict-affected settings"]
   }];
 
   function groupOf(sectionTitle) {
@@ -1363,6 +1412,56 @@ if (typeof document !== "undefined") {
     if (!group) return;
     switchTab("gallery");
     showGroup(group, "overview");
+  }
+
+  // "?" explanations next to Explorer filter labels (shown inline under the label).
+  const FILTER_HELP = {
+    "x-income": '<p>Countries are grouped by the <a href="https://datahelpdesk.worldbank.org/knowledgebase/articles/906519-world-bank-country-and-lending-groups" target="_blank" rel="noopener">World Bank country and lending groups</a> classification: low, lower-middle, upper-middle and high income. A study counts in every income group of the countries it examines.</p>',
+    "x-region": '<p>Regions follow the United Nations <a href="https://unstats.un.org/unsd/methodology/m49/" target="_blank" rel="noopener">M49 standard</a> geographic sub-regions (for example, Sub-Saharan Africa or Southern Asia). A study counts in every region of the countries it examines.</p>',
+    "x-datatype": '<p>The kind of data a study analysed, as described in its title and abstract:</p><ul>'
+      + '<li><strong>Cross-sectional:</strong> observations at a single point in time.</li>'
+      + '<li><strong>Time-series / longitudinal:</strong> observations repeated over time.</li>'
+      + '<li><strong>Panel:</strong> the same units (people, facilities, countries) followed over time.</li>'
+      + '<li><strong>Qualitative:</strong> interviews, focus groups, documents or observation.</li>'
+      + '<li><strong>Mixed data types:</strong> a combination of quantitative and qualitative data.</li>'
+      + '<li><strong>Unclear:</strong> the record did not give enough information.</li></ul>',
+    "x-datasource": '<p>Where a study\'s data came from, as described in its title and abstract:</p><ul>'
+      + '<li><strong>Administrative:</strong> routine records such as claims, registries or budgets.</li>'
+      + '<li><strong>Primary survey:</strong> data collected by the study team.</li>'
+      + '<li><strong>National / international surveys:</strong> existing large surveys, such as household surveys.</li>'
+      + '<li><strong>Financial / accounting:</strong> budgets, expenditure records or accounts.</li>'
+      + '<li><strong>Programme / project:</strong> monitoring data from a programme or project.</li>'
+      + '<li><strong>Clinical / patient records</strong>, <strong>price / market</strong>, <strong>web / digital</strong> and <strong>geospatial / remote-sensing</strong> data.</li>'
+      + '<li><strong>Unclear:</strong> the record did not give enough information.</li></ul>',
+    "x-scope": '<p>How many countries a study examines, based on the locations recorded for it:</p><ul>'
+      + '<li><strong>Single country:</strong> one country identified.</li>'
+      + '<li><strong>Multi-country:</strong> two or more countries identified.</li>'
+      + '<li><strong>Region/global:</strong> a location is recorded, but it is a region or "global" rather than specific countries.</li>'
+      + '<li><strong>No country stated:</strong> no study location is recorded.</li></ul>'
+  };
+
+  function setupFilterHelp() {
+    for (const [id, html] of Object.entries(FILTER_HELP)) {
+      const label = document.querySelector(`label.control-label[for="${id}"]`);
+      if (!label || label.querySelector(".filter-help-button")) continue;
+      const btn = el("button", "metric-help-button filter-help-button");
+      btn.type = "button";
+      btn.textContent = "?";
+      btn.setAttribute("aria-expanded", "false");
+      btn.setAttribute("aria-label", "About " + label.textContent.trim().toLowerCase());
+      const box = el("div", "filter-help");
+      box.hidden = true;
+      box.innerHTML = html;
+      btn.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        const open = box.hidden;
+        box.hidden = !open;
+        btn.setAttribute("aria-expanded", String(open));
+      });
+      label.appendChild(btn);
+      label.insertAdjacentElement("afterend", box);
+    }
   }
 
   function openOverviewTheme(title) {
@@ -2030,7 +2129,7 @@ if (typeof document !== "undefined") {
       extra.appendChild(box);
     }
     if (SECTION_TILE_COPIES[sec.title]) {
-      const copy = cloneOverviewTile(SECTION_TILE_COPIES[sec.title]);
+      const copy = cloneOverviewTile(SECTION_TILE_COPIES[sec.title], !SECTION_COPIES_WITHOUT_HELP.has(sec.title));
       if (copy) extra.appendChild(copy);
     }
     if (sec.title === "Financing functions & outcomes") {
@@ -2082,11 +2181,9 @@ if (typeof document !== "undefined") {
     files: ["fig_outcome_trend_v5.png", "fig_outcome_other_themes_v5.png"],
     tabs: ["Outcome trends", "'Other' outcome themes"]
   }, {
-    files: ["fig_funder_function_heatmap.png", "fig_funder_function_mix.png"],
-    tabs: ["Top 12 funders (heatmap)", "Top 8 funders (bars)"]
-  }, {
-    files: ["fig_funder_outcome_heatmap.png", "fig_funder_trend.png", "fig_funder_authorship_alluvial.png"],
-    tabs: ["Outcomes measured", "Funders over time", "Funding to authorship"]
+    // Same top funders and the same heatmap layout, so switching changes content only.
+    files: ["fig_funder_function_heatmap.png", "fig_funder_outcome_heatmap.png"],
+    tabs: ["Financing functions", "Outcomes measured"]
   }];
 
   function renderTabbedFigureCard(group, figs, grid) {
@@ -2114,19 +2211,32 @@ if (typeof document !== "undefined") {
       img.alt = f.title;
       ft.textContent = f.title;
       fc.textContent = f.caption.replace(/\s+/g, " ").trim();
-      for (const b of tabs.children) {
+      for (const b of tabs.querySelectorAll(".fig-tab")) {
         const on = b.dataset.file === f.file;
         b.classList.toggle("active", on);
         b.setAttribute("aria-selected", String(on));
       }
     };
-    figs.forEach(f => {
+    // A visible "N views" label so readers can tell the tabs switch the figure.
+    const label = el("span", "fig-tabs-label");
+    label.innerHTML = '<span aria-hidden="true">&#8644;</span> ' + figs.length + " views:";
+    tabs.appendChild(label);
+    figs.forEach((f, i) => {
       const b = el("button", "fig-tab");
       b.type = "button";
       b.dataset.file = f.file;
       b.setAttribute("role", "tab");
+      b.title = "Show this view";
       b.textContent = group.tabs[group.files.indexOf(f.file)] || f.title;
       b.addEventListener("click", () => show(f));
+      // Left/right arrow keys move between views.
+      b.addEventListener("keydown", event => {
+        if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+        event.preventDefault();
+        const next = (i + (event.key === "ArrowRight" ? 1 : figs.length - 1)) % figs.length;
+        show(figs[next]);
+        tabs.querySelectorAll(".fig-tab")[next].focus();
+      });
       tabs.appendChild(b);
     });
     img.addEventListener("click", () => openModal(current.file));
@@ -2139,12 +2249,69 @@ if (typeof document !== "undefined") {
     show(figs[0]);
   }
 
+  // Original figures shown side by side in one full-width card: each row lists the
+  // figures that sit next to each other.
+  const FIGURE_PANEL_GROUPS = [{
+    title: "Financing functions and outcomes studied",
+    rows: [["fig_function_bar.png", "fig_outcome_lollipop.png"], ["fig_function_outcome_heatmap.png"]]
+  }];
+
+  function renderPanelFigureCard(group, figsByFile, sec, grid) {
+    const card = el("div", "fig-card fig-card-panels");
+    const head = el("div", "fig-panels-head");
+    const title = el("div", "fig-title");
+    title.textContent = group.title;
+    head.appendChild(title);
+    card.appendChild(head);
+    for (const row of group.rows) {
+      const rowEl = el("div", "fig-panels-row");
+      for (const file of row) {
+        const f = figsByFile[file];
+        if (!f) continue;
+        const panel = el("div", "fig-panel");
+        const img = el("img");
+        img.src = "figures/" + f.file + "?v=" + BUILD;
+        img.alt = f.title;
+        img.loading = "lazy";
+        img.title = "Click to enlarge";
+        img.addEventListener("click", () => openModal(f.file));
+        const foot = el("div", "fig-panel-foot");
+        const name = el("span", "fig-panel-name");
+        name.textContent = f.title;
+        const dl = downloadButton(f.file, f.title);
+        dl.classList.add("fig-download-small");
+        foot.append(name, dl);
+        panel.append(img, foot);
+        rowEl.appendChild(panel);
+      }
+      card.appendChild(rowEl);
+    }
+    if (UNCLEAR_FOOTNOTE_SECTIONS.has(sec.title)) {
+      const body = el("div", "fig-body");
+      const note = el("div", "fig-footnote");
+      note.textContent = OUTCOME_CATEGORY_NOTE;
+      const other = el("div", "fig-footnote other-outcome-note");
+      other.textContent = OTHER_OUTCOME_NOTE;
+      body.append(note, other);
+      card.appendChild(body);
+    }
+    grid.appendChild(card);
+  }
+
   function renderFigureGrid(sec, grid) {
     grid.textContent = "";
     // A lone figure (e.g. the combined Methods & data figure) gets the full width.
     grid.classList.toggle("fig-grid-single", sec.figs.length === 1);
     const doneGroups = new Set();
     for (const f of sec.figs) {
+      const panelGroup = FIGURE_PANEL_GROUPS.find(g => g.rows.some(r => r.includes(f.file)));
+      if (panelGroup) {
+        if (doneGroups.has(panelGroup)) continue;
+        doneGroups.add(panelGroup);
+        const figsByFile = Object.fromEntries(sec.figs.map(x => [x.file, x]));
+        renderPanelFigureCard(panelGroup, figsByFile, sec, grid);
+        continue;
+      }
       const group = FIGURE_TAB_GROUPS.find(g => g.files.includes(f.file));
       if (group) {
         if (doneGroups.has(group)) continue;
@@ -2478,8 +2645,8 @@ if (typeof document !== "undefined") {
       : esc(r.country) + "<br>" + fmtNum(r.studies) + " studies<br>" +
         (r[m] == null ? "NA" : rRound(r[m], 2)) + " " + esc(label.toLowerCase()));
     const colorscale = isCounts
-      ? [[0, "#f1f3f5"], [0.0001, "#c6dbef"], [0.5, "#2a78d6"], [1, "#08306b"]]
-      : [[0, "#f7fbff"], [0.5, "#6baed6"], [1, "#08306b"]];
+      ? [[0, "#f1f3f5"], [0.0001, SOFT_RAMP[0]]].concat(SOFT_RAMP.slice(1).map((c, i) => [(i + 1) / (SOFT_RAMP.length - 1), c]))
+      : SOFT_RAMP.map((c, i) => [i / (SOFT_RAMP.length - 1), c]);
     const colorbar = isCounts
       ? {
           title: "studies<br>(log)",
@@ -2525,21 +2692,22 @@ if (typeof document !== "undefined") {
     if (res.type === "simple") {
       const desc = res.rows;
       const bottomUp = desc.slice().reverse();
+      const maxV = Math.max(1, ...desc.map(r => r.v));
       traces = [{
         type: "bar", orientation: "h",
-        y: desc.map(r => r.x),
+        y: desc.map(r => wrapLabel(r.x)),
         x: desc.map(r => r.v),
-        marker: { color: ACCENT },
+        marker: { color: desc.map(r => rampColor(0.15 + 0.85 * Math.sqrt(r.v / maxV))) },
         hovertemplate: "%{y}: %{x}<extra></extra>"
       }];
       layout = {
         yaxis: {
           categoryorder: "array",
-          categoryarray: bottomUp.map(r => r.x),
+          categoryarray: bottomUp.map(r => wrapLabel(r.x)),
           automargin: true
         },
         xaxis: {
-          title: res.pct ? "share of filtered studies (%)" : "studies",
+          title: res.pct ? "share of selected studies (%)" : "studies",
           gridcolor: "#eeebe3",
           ticksuffix: res.pct ? "%" : ""
         }
@@ -2549,7 +2717,7 @@ if (typeof document !== "undefined") {
       traces = res.stacks.map(k => ({
         type: "bar", orientation: "h",
         name: k,
-        y: res.catOrder,
+        y: res.catOrder.map(c => wrapLabel(c)),
         x: res.catOrder.map(c => res.values[c][k] != null ? res.values[c][k] : 0),
         // k comes from dict levels (developer-curated); escaped anyway —
         // Plotly renders hovertemplate output as HTML.
@@ -2559,7 +2727,7 @@ if (typeof document !== "undefined") {
         barmode: "stack",
         yaxis: {
           categoryorder: "array",
-          categoryarray: bottomUp,
+          categoryarray: bottomUp.map(c => wrapLabel(c)),
           automargin: true
         },
         xaxis: {
@@ -2572,7 +2740,7 @@ if (typeof document !== "undefined") {
     }
     window.Plotly.react("x-comp", traces, Object.assign({
       font: BASE_FONT,
-      margin: { t: 30, b: 70, l: 170, r: 20 },
+      margin: { t: 30, b: 70, l: 20, r: 20 },
       legend: hLegend(-0.22),
       plot_bgcolor: "rgba(0,0,0,0)",
       paper_bgcolor: "rgba(0,0,0,0)",
@@ -2967,8 +3135,14 @@ if (typeof document !== "undefined") {
       button.setAttribute("role", "tab");
       button.addEventListener("click", () => switchMethodsPanel(button.dataset.methodsTab));
     }
+    // Help pop-up links to Scope remember where the reader came from (for the back link).
     for (const button of document.querySelectorAll("[data-methods-view]")) {
-      button.addEventListener("click", () => openScopePanel(button.dataset.methodsView));
+      button.addEventListener("click", () => {
+        const from = $("pane-overview").classList.contains("active") ? "overview"
+          : $("pane-gallery").classList.contains("active") && $("gal-section").style.display === "block"
+            ? $("gal-sec-title").textContent : null;
+        openScopePanel(button.dataset.methodsView, from);
+      });
     }
     $("thematic-toggle").addEventListener("click", e => {
       e.stopPropagation();
@@ -3026,6 +3200,14 @@ if (typeof document !== "undefined") {
       }
     });
     $("gal-back").addEventListener("click", goBackFromSection);
+    setupFilterHelp();
+    // Overview figure cards: "More on ..." links to the matching Thematic analysis theme.
+    for (const b of document.querySelectorAll("[data-open-section]")) {
+      b.addEventListener("click", () => openOverviewTheme(b.dataset.openSection));
+    }
+    for (const b of document.querySelectorAll("[data-open-group]")) {
+      b.addEventListener("click", () => openOverviewGroup(b.dataset.openGroup));
+    }
     $("fig-download").addEventListener("click", async () => {
       if (!modalFigure) return;
       $("fig-download").disabled = true;
@@ -3053,6 +3235,12 @@ if (typeof document !== "undefined") {
     });
     $("land-author-link").addEventListener("click", () => openModal("fig_map_authorship.png"));
 
+    if (window.Plotly && !window.Plotly.__softColorway) {
+      const react = window.Plotly.react;
+      window.Plotly.react = (gd, data, layout = {}, cfg) =>
+        react.call(window.Plotly, gd, data, Object.assign({ colorway: SOFT_COLORWAY }, layout), cfg);
+      window.Plotly.__softColorway = true;
+    }
     const get = async name => {
       // ?v=BUILD cache-buster; BUILD is stamped at publish time (see top).
       const r = await fetch("data/" + name + ".json?v=" + BUILD);

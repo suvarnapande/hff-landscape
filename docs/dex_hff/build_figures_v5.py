@@ -5414,13 +5414,20 @@ gallery = [
         "blurb": "Explore which parts of health financing are studied most, which outcomes they are linked "
                  "to, and where important evidence gaps remain.",
         "figs": [
-            fig_entry("fig_functions_outcomes.png", "Financing functions and outcomes studied"),
+            # The original three figures, shown together as one panel card (2 + 1 layout;
+            # FIGURE_PANEL_GROUPS in app.js). fig_functions_outcomes.png (a redrawn combined
+            # version) is still built but hidden.
+            fig_entry("fig_function_bar.png", "Financing function"),
+            fig_entry("fig_outcome_lollipop.png", "Outcome domain"),
+            fig_entry("fig_function_outcome_heatmap.png", "Function vs. outcome"),
+        ] + ([
+            # Study design -> financing function -> outcome (moved from Methods & data).
+            fig_entry("fig_alluvial.png", "Evidence flow: design to function to outcome"),
+        ] if have_taxonomy else []) + [
             # The two trend figures are shown as one tabbed card (FIGURE_TAB_GROUPS in app.js).
             fig_entry("fig_function_time_lines.png", "Financing-function mix over time"),
             fig_entry("fig_method_stream.png", "Financing-function output over time"),
-            # Still built but hidden (combined into fig_functions_outcomes.png): fig_function_bar.png
-            # (also used by the Overview), fig_outcome_lollipop.png, fig_function_outcome_heatmap.png.
-            # fig_function_time.png (stacked-area mix) is also hidden.
+            # fig_function_time.png (stacked-area mix) is still built but hidden.
         ],
     },
     # "Topics & themes" is shown as a group card (SECTION_GROUPS in app.js) holding
@@ -5461,10 +5468,8 @@ gallery = [
         "figs": [
             fig_entry("fig_methods_characteristics.png",
                       "Methodological characteristics of included studies"),
-        ] + ([
-            # Moved here from Topics & themes: it traces study design -> function -> outcome.
-            fig_entry("fig_alluvial.png", "Evidence flow: design to function to outcome"),
-        ] if have_taxonomy else []),
+        ],
+        # fig_alluvial.png (evidence flow) is shown under Financing functions & outcomes.
     },
     # Geography is split into three questions; funding figures go to the
     # "Research funding" section (build_fcas_outcomes_v5.py adds funder types to it).
@@ -5535,11 +5540,14 @@ gallery = [
         "title": "Research funding",
         "blurb": "Who funds health financing research, what they prioritise, and how funding "
                  "patterns are changing.",
+        # Grouped by question: who funds (types + treemap), what they support (two
+        # heatmaps, tabbed in app.js), how funding is changing, funding to authorship.
+        # Still built but hidden: fig_funder_funders.png (bar version of the treemap) and
+        # fig_funder_function_mix.png (repeats the functions heatmap for fewer funders).
         "figs": [
-            fig_entry("fig_funder_funders.png", "The top research funders"),
+            fig_entry("fig_funder_funders_treemap.png", "The top research funders"),
             fig_entry("fig_funder_function_heatmap.png", "What each top funder pays for"),
             fig_entry("fig_funder_outcome_heatmap.png", "What each top funder's research finds"),
-            fig_entry("fig_funder_function_mix.png", "Financing-function mix by top funder"),
             fig_entry("fig_funder_trend.png", "Which funders are gaining ground"),
         ] + ([
             fig_entry("fig_funder_authorship_alluvial.png",
