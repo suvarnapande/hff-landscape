@@ -281,7 +281,7 @@ footnote(fig, f"Base: {N_AUTH:,} studies with a DOI and known author-affiliation
 save(fig, fname)
 summary["oa_by_author_country"] = {NAME_OF_ISO3.get(c, ISO3_NAMES_EXTRA.get(c, c)): {"n": cc_n[c], "oa_share_pct": round(100 * cc_oa[c] / cc_n[c], 1)}
                                    for c in rows[::-1]}
-summary["income_group_mean_of_top_countries_pct"] = {"LMIC": None if lmic_mean is None else round(lmic_mean, 1),
+summary["income_group_mean_of_top_countries_pct"] = {"L&MICs": None if lmic_mean is None else round(lmic_mean, 1),
                                                     "HIC": None if hic_mean is None else round(hic_mean, 1)}
 
 # ---------------------------------------------------------------- 3. OA by author income group and team make-up
@@ -295,11 +295,11 @@ inc_share = {g: 100 * known.loc[known["incs"].map(lambda s, g=g: g in s), "oa"].
 def team(s):
     has_h = "High income" in s
     has_l = bool(s - {"High income"})
-    return "High-income authors only" if has_h and not has_l else ("Mixed high-income and LMIC team" if has_h else "LMIC authors only")
+    return "High-income authors only" if has_h and not has_l else ("Mixed high-income and L&MICs team" if has_h else "L&MICs authors only")
 
 
 known["team"] = known["incs"].map(team)
-TEAM_ORDER = ["High-income authors only", "Mixed high-income and LMIC team", "LMIC authors only"]
+TEAM_ORDER = ["High-income authors only", "Mixed high-income and L&MICs team", "L&MICs authors only"]
 team_n = known["team"].value_counts().reindex(TEAM_ORDER).fillna(0).astype(int)
 team_share = known.groupby("team")["oa"].mean().reindex(TEAM_ORDER) * 100
 
@@ -326,11 +326,11 @@ a2.tick_params(axis="y", labelsize=9.5)
 ho, mx, lo_ = (team_share[t] for t in TEAM_ORDER)
 header(fig, "Research with lower-income authors is more often open access",
        "Open-access share by where a study's authors are based (dashed line: all studies).",
-       f"{lo_:.0f}% of LMIC-only author teams publish open access and {mx:.0f}% of mixed teams, vs {ho:.0f}% "
+       f"{lo_:.0f}% of L&MICs-only author teams publish open access and {mx:.0f}% of mixed teams, vs {ho:.0f}% "
        f"of teams based only in high-income countries.", fname)
 footnote(fig, f"Base: {N_KNOWN:,} studies with a DOI whose author countries all have an income group in the site's country "
               f"reference ({SOURCE}; OpenAlex).\nLeft: a study counts in every income group its authors come from. "
-              f"LMIC = low- and middle-income. {N_AUTH - N_KNOWN:,} studies with an author in a country missing from the "
+              f"L&MICs = low- and middle-income. {N_AUTH - N_KNOWN:,} studies with an author in a country missing from the "
               f"reference\n(e.g. Taiwan, Israel) are left out.", y=0.07)
 save(fig, fname)
 summary["oa_by_author_income_pct"] = {g: {"n": inc_n[g], "oa_share_pct": round(inc_share[g], 1)} for g in INC_ORDER}

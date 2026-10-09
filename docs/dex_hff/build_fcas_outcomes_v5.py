@@ -6,7 +6,7 @@ without it.
 
 v5 fields used:
   fcas                  geo countries on the WB FCAS list in the publication year ('; '-sep)
-  income_level          WB income group per geo country (LIC / LMIC / MIC = upper-middle / HIC)
+  income_level          WB income group per geo country (LIC / L&MICs / MIC = upper-middle / HIC)
   outcome_domain_final  multi-label outcome domains ('; '-sep)
   outcome_other_theme   non-LLM theme for studies tagged 'Other' ('; '-sep)
 
@@ -78,7 +78,7 @@ COUNTRY_ALIASES = {"Democratic Republic of Congo": "Democratic Republic of the C
                    "Occupied Palestinian Territory": "Palestine",
                    "West Bank and Gaza": "Palestine"}
 SHORT_COUNTRY = {"Democratic Republic of the Congo": "DR Congo", "Central African Republic": "CAR"}
-INCOME_LABEL = {"LIC": "Low income", "LMIC": "Lower-middle", "MIC": "Upper-middle", "HIC": "High income"}
+INCOME_LABEL = {"LIC": "Low income", "L&MICs": "Lower-middle", "MIC": "Upper-middle", "HIC": "High income"}
 
 FIG_META = {}
 
@@ -338,7 +338,7 @@ summary["outcome_share_2010_vs_2025_pct"] = {k: [round(a, 1), round(b, 1)] for k
 
 # ---------------------------------------------------------------- OUTCOME x CONTEXT heatmap
 groups = [("FCAS", df["is_fcas"])] + [
-    (INCOME_LABEL[g], df["income_list"].map(lambda l, g=g: g in l)) for g in ("LIC", "LMIC", "MIC", "HIC")]
+    (INCOME_LABEL[g], df["income_list"].map(lambda l, g=g: g in l)) for g in ("LIC", "L&MICs", "MIC", "HIC")]
 rows = named_order
 mat = np.array([[100 * df.loc[m, "outcomes"].map(lambda l, k=k: k in l).mean() for _, m in groups] for k in rows])
 ns = [int(m.sum()) for _, m in groups]
@@ -396,20 +396,34 @@ order = ["fig_outcome_by_context_v5.png", "fig_funder_types_v5.png", "fig_fcas_c
          "fig_outcome_trend_v5.png"]
 cpath = DATA / "content.json"
 content = json.loads(cpath.read_text(encoding="utf-8"))
-gallery = [s for s in content["gallery"] if s["title"] != SECTION]
+gallery = content["gallery"]
+own = [{"file": f, "title": metas[f]["title"], "caption": metas[f]["caption"]} for f in order]
+own_files = set(order)
+# build_figures_v5.py writes the funding figures into a section of the same title;
+# merge into it (keeping its position) rather than replacing it. Funder types
+# leads, then the funding figures, then the FCAS and outcome figures.
+pos = next((i for i, s in enumerate(gallery) if s["title"] == SECTION), None)
+existing = [f for f in gallery[pos]["figs"] if f["file"] not in own_files] if pos is not None else []
+funder_types = [f for f in own if f["file"] == "fig_funder_types_v5.png"]
+rest = [f for f in own if f["file"] != "fig_funder_types_v5.png"]
 section = {
     "title": SECTION,
-    "blurb": ("Who funds the research, how it covers fragile and conflict-affected (FCAS) settings, and "
-              "which outcomes studies measure. Built from the v5 fields added by the World Bank lookups "
-              "(income group, region, FCAS) and the non-LLM themes for 'Other' outcomes."),
-    "figs": [{"file": f, "title": metas[f]["title"], "caption": metas[f]["caption"]} for f in order],
+    "blurb": ("Who funds health financing research and what they prioritise, how research covers fragile "
+              "and conflict-affected (FCAS) settings, and which outcomes studies measure. FCAS figures use "
+              "the v5 fields added by the World Bank lookups (income group, region, FCAS) and the non-LLM "
+              "themes for 'Other' outcomes."),
+    "figs": funder_types + existing + rest,
 }
-# Before the Pipeline section, so the dataset-provenance section stays last.
-pos = next((i for i, s in enumerate(gallery) if s["title"] == "Pipeline"), len(gallery))
-gallery.insert(pos, section)
+if pos is not None:
+    gallery[pos] = section
+else:
+    # Before the Pipeline section, so the dataset-provenance section stays last.
+    pos = next((i for i, s in enumerate(gallery) if s["title"] == "Pipeline"), len(gallery))
+    gallery.insert(pos, section)
 content["gallery"] = gallery
 cpath.write_text(json.dumps(content, allow_nan=False, ensure_ascii=False), encoding="utf-8")
-print(f"gallery section '{SECTION}' written with {len(order)} figures")
+print(f"gallery section '{SECTION}' written with {len(section['figs'])} figures "
+      f"({len(existing)} from build_figures_v5.py)")
 for m in FIG_META.values():
     print(f"{m['file']}\n  {m['title']}\n  {m['caption']}\n")
 print(json.dumps({k: summary[k] for k in ("n_fcas", "n_country_level", "last_year_with_wb_lookup", "context_n")}, indent=2))

@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-09a";
+const BUILD = "2026-10-09f";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -287,16 +287,18 @@ export function valueBoxes(db, flt) {
   const cs = new Set();
   for (const i of flt.geoRows) cs.add(db.geo.c[i]);
   const qCode = db.codeOf.type_of_analysis.get("Quantitative");
-  let q = 0, doi = 0;
+  let q = 0, doi = 0, link = 0;
   for (const s of flt.studies) {
     if (db.studies.type_of_analysis[s] === qCode) q++;
     if (db.studies.has_doi[s] === 1) doi++;
+    if (db.studies.has_publication_link[s] === 1) link++;
   }
   return {
     v_studies: n,
     v_countries: cs.size,
     v_quant_pct: n ? rRound(100 * q / n) : null,
-    v_doi_pct: n ? rRound(100 * doi / n) : null
+    v_doi_pct: n ? rRound(100 * doi / n) : null,
+    v_link_pct: n ? rRound(100 * link / n) : null
   };
 }
 
@@ -1154,6 +1156,15 @@ if (typeof document !== "undefined") {
     }
   }
 
+  // Open a sub-tab of the Scope page (e.g. "topics", "outcomes").
+  function openScopePanel(name) {
+    $("functions-help-modal").classList.remove("open");
+    $("outcomes-help-modal").classList.remove("open");
+    switchTab("methods");
+    switchMethodsPanel(name);
+    $("pane-methods").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   function switchMethodsPanel(name) {
     for (const button of document.querySelectorAll(".methods-tab")) {
       const active = button.dataset.methodsTab === name;
@@ -1169,7 +1180,7 @@ if (typeof document !== "undefined") {
     const index = GALLERY.findIndex(section => section.title === title);
     if (index < 0) return;
     switchTab("gallery");
-    showSection(index);
+    showSection(index, "overview");
   }
 
   function makeOverviewCardInteractive(box, label) {
@@ -1195,6 +1206,7 @@ if (typeof document !== "undefined") {
       action();
     });
     box.addEventListener("keydown", event => {
+      if (event.target !== box) return;
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         action();
@@ -1226,7 +1238,7 @@ if (typeof document !== "undefined") {
 
   // "Type of analysis used in studies" card: shared by the Overview tile and the
   // Methods & data section of Thematic analysis.
-  function fillAnalysisApproachCard(box) {
+  function fillAnalysisApproachCard(box, studyIdx = null) {
     box.classList.add("analysis-approach-card");
     const title = el("div", "value-box-title");
     title.textContent = "Type of analysis used in studies";
@@ -1234,10 +1246,13 @@ if (typeof document !== "undefined") {
 
     const levels = db.levels.type_of_analysis;
     const counts = Array(levels.length).fill(0);
-    for (const code of db.studies.type_of_analysis) {
+    const codes = studyIdx
+      ? Array.from(studyIdx, s => db.studies.type_of_analysis[s])
+      : db.studies.type_of_analysis;
+    for (const code of codes) {
       if (Number.isInteger(code) && code >= 0 && code < counts.length) counts[code]++;
     }
-    const total = db.studies.type_of_analysis.length || 1;
+    const total = codes.length || 1;
     const approaches = ["Quantitative", "Qualitative", "Mixed methods"].map(label => {
       const i = levels.indexOf(label);
       return { label, pct: i < 0 ? 0 : 100 * counts[i] / total };
@@ -1268,7 +1283,8 @@ if (typeof document !== "undefined") {
 
   function renderOverview() {
     const m = db.dict.meta;
-    $("nav-built").textContent = "Last update " + m.built;
+    const built = $("nav-built");
+    if (built) built.textContent = "Last update " + m.built;
     const updated = $("overview-updated");
     if (updated) updated.textContent = "Evidence map updated " + m.built;
 
@@ -1306,8 +1322,17 @@ if (typeof document !== "undefined") {
            `Of ${fmtNum(oa.n_with_doi)} studies with a DOI`]
         ]) {
           const metric = el("div", "publication-access-metric");
-          const metricLabel = el("span");
+          const metricLabel = el("span", "publication-access-label");
           metricLabel.textContent = label;
+          if (label === "Available open access") {
+            const help = el("button", "metric-help-button");
+            help.type = "button";
+            help.textContent = "?";
+            help.title = "What does open access mean?";
+            help.setAttribute("aria-label", "Explain what open access means");
+            help.addEventListener("click", () => $("oa-help-modal").classList.add("open"));
+            metricLabel.appendChild(help);
+          }
           const metricValue = el("strong");
           metricValue.textContent = valueText;
           const metricNote = el("small");
@@ -1453,8 +1478,21 @@ if (typeof document !== "undefined") {
 
   }
 
-  // Annual publication trend for the unfiltered dataset. The fuller cumulative
-  // analysis remains available from the adjacent Thematic analysis link.
+  // Overview publication trend for the unfiltered dataset, with a
+  // "Per year | Cumulative" switch. The cumulative view keeps the key messages of
+  // fig_growth.png (same definitions as build_figures_v5.py).
+  let overviewTrendMode = "annual";
+
+  function setOverviewTrendMode(mode) {
+    overviewTrendMode = mode;
+    for (const b of document.querySelectorAll("[data-trend-mode]")) {
+      const on = b.dataset.trendMode === mode;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-pressed", String(on));
+    }
+    renderOverviewCharts();
+  }
+
   function renderOverviewCharts() {
     if (!$("ov-trend")) return;
     const flt = applyFilters(db, {});
@@ -1468,6 +1506,18 @@ if (typeof document !== "undefined") {
       const t = (year - years[0]) / span;
       return `rgb(${lerp(126, 26, t)},${lerp(166, 78, t)},${lerp(212, 138, t)})`;
     });
+    const partialIndex = years.indexOf(2026);
+    const chips = $("ov-trend-chips");
+    const note = $("ov-trend-note");
+
+    if (overviewTrendMode === "cumulative") {
+      renderCumulativeTrend(years, annual, markerColors, partialIndex, chips, note);
+      return;
+    }
+    if (chips) chips.hidden = true;
+    if (note) note.textContent = "Annual studies by publication year. 2026 is a partial year: the literature " +
+      "searches were run in mid-2026, so only studies published before then are included.";
+
     const traces = [{
       x: years, y: annual,
       mode: "lines+markers", type: "scatter", showlegend: false,
@@ -1487,12 +1537,12 @@ if (typeof document !== "undefined") {
         x: [2026], y: [annual[partialIndex]],
         mode: "markers", type: "scatter", showlegend: false, cliponaxis: false,
         marker: { symbol: "triangle-up", color: "#b08d3e", size: 13, line: { color: "white", width: 1 } },
-        hovertemplate: "2026: %{y:,} studies captured so far<br>Partial publication year<extra></extra>"
+        hovertemplate: "2026: %{y:,} studies<br>Partial year: searches were run in mid-2026<extra></extra>"
       });
       // Label sits to the right of the last point, clear of the line.
       annotations.push({
         x: 2026, y: annual[partialIndex], xref: "x", yref: "y",
-        text: "<b>2026: partial year</b><br>studies still being added",
+        text: "<b>2026: partial year</b><br>searches run mid-2026",
         showarrow: true, arrowhead: 0, arrowwidth: 1.2, arrowcolor: "#c9a85f",
         ax: 22, ay: 0, xanchor: "left", align: "left",
         font: { color: "#6f5420", size: 12.5 },
@@ -1506,6 +1556,115 @@ if (typeof document !== "undefined") {
       // Plot area ends just past the last year so gridlines stop there.
       xaxis: { showgrid: false, range: [years[0] - 0.4, years[years.length - 1] + 0.3], dtick: 2 },
       yaxis: { title: "studies", tickformat: ",d", dtick: 1000, gridcolor: "#eeebe3", zeroline: false, rangemode: "tozero" },
+      plot_bgcolor: "rgba(0,0,0,0)",
+      paper_bgcolor: "rgba(0,0,0,0)"
+    }, PLOTLY_CFG);
+  }
+
+  function renderCumulativeTrend(years, annual, markerColors, partialIndex, chips, note) {
+    const cum = [];
+    let running = 0;
+    for (const n of annual) cum.push(running += n);
+    const total = cum[cum.length - 1];
+    // Same definitions as fig_growth.png: the half-way year uses complete years
+    // only; the reference continues the first three years' average annual output.
+    const fullIdx = years.map((y, i) => i).filter(i => years[i] !== 2026);
+    const lastFull = fullIdx[fullIdx.length - 1];
+    const totalFull = cum[lastFull];
+    const halfIdx = cum.findIndex(c => c >= totalFull / 2);
+    const halfYear = years[halfIdx];
+    const earlyRate = (annual[0] + annual[1] + annual[2]) / 3;
+    const ref = years.map((y, i) => earlyRate * (i + 1));
+    const growth = total / Math.max(1, cum[0]);
+    const vsRef = totalFull / ref[lastFull];
+    const earlySpan = `${years[0]}–${String(years[2]).slice(2)}`;
+
+    if (chips) {
+      chips.hidden = false;
+      chips.textContent = "";
+      for (const [value, text] of [
+        [growth.toFixed(1) + "×", `growth in cumulative studies since ${years[0]}`],
+        [String(halfYear), `half of all ${years[0]}–${String(years[lastFull]).slice(2)} studies were published in ${halfYear} or later`],
+        [vsRef.toFixed(1) + "×", `more studies by ${years[lastFull]} than if output had stayed at its ${earlySpan} rate`]
+      ]) {
+        const chip = el("div", "trend-chip");
+        const v = el("strong");
+        v.textContent = value;
+        const t = el("span");
+        t.textContent = text;
+        chip.append(v, t);
+        chips.appendChild(chip);
+      }
+    }
+    if (note) note.textContent = "Running total of studies by publication year. Dashed line: where the total " +
+      `would be if yearly output had stayed at its ${earlySpan} average. 2026 is a partial year ` +
+      "(searches were run in mid-2026).";
+
+    const pctOfAll = cum.map(c => 100 * c / total);
+    const traces = [
+      {
+        x: years, y: ref,
+        mode: "lines", type: "scatter", showlegend: false,
+        line: { color: "#8a93a0", width: 1.6, dash: "dash" },
+        hovertemplate: `If output had stayed at the ${earlySpan} rate: %{y:,.0f}<extra></extra>`
+      },
+      {
+        x: years, y: cum,
+        mode: "lines+markers", type: "scatter", showlegend: false,
+        line: { color: ACCENT, width: 3, shape: "spline", smoothing: 0.45 },
+        marker: { color: markerColors, size: 7, line: { color: "white", width: 1 } },
+        fill: "tozeroy", fillcolor: "rgba(31,95,168,.12)",
+        fillgradient: {
+          type: "horizontal",
+          colorscale: [[0, "rgba(31,95,168,.04)"], [1, "rgba(31,95,168,.22)"]]
+        },
+        customdata: pctOfAll,
+        hovertemplate: "By %{x}: %{y:,} studies<br>%{customdata:.0f}% of all studies in the map<extra></extra>"
+      }
+    ];
+    const refLabelIdx = Math.round(years.length * 0.62);
+    const annotations = [
+      {
+        x: years[refLabelIdx], y: ref[refLabelIdx], xref: "x", yref: "y",
+        text: `if output had stayed at its ${earlySpan} rate`,
+        showarrow: false, yanchor: "bottom", yshift: 4, font: { color: "#6b7280", size: 11.5 }
+      },
+      {
+        x: halfYear, y: cum[halfIdx], xref: "x", yref: "y",
+        text: `<b>Half of all studies</b><br>published ${halfYear} or later`,
+        showarrow: true, arrowhead: 0, arrowwidth: 1.2, arrowcolor: "#1f5fa8",
+        ax: -95, ay: -38, align: "left",
+        font: { color: "#1a4e8a", size: 12 },
+        bgcolor: "#f0f6fc", bordercolor: "#b9d0ea", borderwidth: 1, borderpad: 5
+      }
+    ];
+    const shapes = [{
+      type: "line", xref: "x", yref: "y", x0: halfYear, x1: halfYear, y0: 0, y1: cum[halfIdx],
+      line: { color: "#1f5fa8", width: 1, dash: "dot" }
+    }];
+    if (partialIndex >= 0) {
+      traces.push({
+        x: [2026], y: [cum[partialIndex]],
+        mode: "markers", type: "scatter", showlegend: false, cliponaxis: false,
+        marker: { symbol: "triangle-up", color: "#b08d3e", size: 13, line: { color: "white", width: 1 } },
+        hovertemplate: "By 2026: %{y:,} studies<br>Partial year: searches were run in mid-2026<extra></extra>"
+      });
+      annotations.push({
+        x: 2026, y: cum[partialIndex], xref: "x", yref: "y",
+        text: "<b>2026: partial year</b><br>searches run mid-2026",
+        showarrow: true, arrowhead: 0, arrowwidth: 1.2, arrowcolor: "#c9a85f",
+        ax: 22, ay: 0, xanchor: "left", align: "left",
+        font: { color: "#6f5420", size: 12.5 },
+        bgcolor: "#fbf5e6", bordercolor: "#dcc48f", borderwidth: 1, borderpad: 5
+      });
+    }
+    window.Plotly.react("ov-trend", traces, {
+      font: BASE_FONT,
+      margin: { t: 10, b: 40, l: 60, r: partialIndex >= 0 ? 175 : 20 },
+      annotations,
+      shapes,
+      xaxis: { showgrid: false, range: [years[0] - 0.4, years[years.length - 1] + 0.3], dtick: 2 },
+      yaxis: { title: "cumulative studies", tickformat: ",d", dtick: 10000, gridcolor: "#eeebe3", zeroline: false, rangemode: "tozero" },
       plot_bgcolor: "rgba(0,0,0,0)",
       paper_bgcolor: "rgba(0,0,0,0)"
     }, PLOTLY_CFG);
@@ -1556,8 +1715,14 @@ if (typeof document !== "undefined") {
     });
   }
 
-  function showSection(i) {
+  // Where the section's back link leads: null = theme index, "overview" =
+  // back to the Overview card the user clicked.
+  let sectionReturnTo = null;
+
+  function showSection(i, returnTo = null) {
     const sec = GALLERY[i];
+    sectionReturnTo = returnTo;
+    $("gal-back").innerHTML = returnTo === "overview" ? "&larr; Back to Overview" : "&larr; All themes";
     $("gal-index").style.display = "none";
     $("gal-section").style.display = "block";
     $("gal-sec-title").textContent = sec.title;
@@ -1568,6 +1733,23 @@ if (typeof document !== "undefined") {
       const box = el("div", "value-box section-analysis-card");
       fillAnalysisApproachCard(box);
       extra.appendChild(box);
+    }
+    if (sec.title === "Financing functions & outcomes") {
+      const links = el("div", "scope-links");
+      const label = el("span", "scope-links-label");
+      label.textContent = "How these categories are defined:";
+      links.appendChild(label);
+      for (const [text, panel] of [
+        ["Financing function definitions", "topics"],
+        ["Outcome domain definitions", "outcomes"]
+      ]) {
+        const link = el("button", "scope-link");
+        link.type = "button";
+        link.innerHTML = text + ' <span aria-hidden="true">&rarr;</span>';
+        link.addEventListener("click", () => openScopePanel(panel));
+        links.appendChild(link);
+      }
+      extra.appendChild(links);
     }
     renderFigureGrid(sec, $("gal-sec-grid"));
     window.scrollTo(0, 0);
@@ -1623,6 +1805,19 @@ if (typeof document !== "undefined") {
   function hideSection() {
     $("gal-section").style.display = "none";
     $("gal-index").style.display = "block";
+    sectionReturnTo = null;
+    $("gal-back").innerHTML = "&larr; All themes";
+  }
+
+  function goBackFromSection() {
+    const toOverview = sectionReturnTo === "overview";
+    hideSection();
+    if (toOverview) {
+      switchTab("overview");
+      $("ov-tiles").scrollIntoView({ block: "center" });
+    } else {
+      window.scrollTo(0, 0);
+    }
   }
 
   function closeThematicMenu() {
@@ -1806,8 +2001,18 @@ if (typeof document !== "undefined") {
     const v = valueBoxes(db, state.result);
     $("v-studies").textContent = fmtNum(v.v_studies);
     $("v-countries").textContent = fmtNum(v.v_countries);
-    $("v-quant").textContent = v.v_quant_pct == null ? "—" : v.v_quant_pct + "%";
-    $("v-doi").textContent = v.v_doi_pct == null ? "—" : v.v_doi_pct + "%";
+    $("v-link").textContent = v.v_link_pct == null ? "—" : v.v_link_pct + "%";
+    const analysisBox = $("v-analysis");
+    analysisBox.textContent = "";
+    if (state.result.studies.length) {
+      fillAnalysisApproachCard(analysisBox, state.result.studies);
+    } else {
+      const title = el("div", "value-box-title");
+      title.textContent = "Type of analysis used in studies";
+      const empty = el("div", "value-box-value");
+      empty.textContent = "—";
+      analysisBox.append(title, empty);
+    }
   }
 
   function hLegend(y) {
@@ -2362,13 +2567,7 @@ if (typeof document !== "undefined") {
       button.addEventListener("click", () => switchMethodsPanel(button.dataset.methodsTab));
     }
     for (const button of document.querySelectorAll("[data-methods-view]")) {
-      button.addEventListener("click", () => {
-        $("functions-help-modal").classList.remove("open");
-        $("outcomes-help-modal").classList.remove("open");
-        switchTab("methods");
-        switchMethodsPanel(button.dataset.methodsView);
-        $("pane-methods").scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+      button.addEventListener("click", () => openScopePanel(button.dataset.methodsView));
     }
     $("thematic-toggle").addEventListener("click", e => {
       e.stopPropagation();
@@ -2408,6 +2607,10 @@ if (typeof document !== "undefined") {
       if (e.target === $("functions-help-modal")) $("functions-help-modal").classList.remove("open");
     });
     $("outcomes-help-close").addEventListener("click", () => $("outcomes-help-modal").classList.remove("open"));
+    $("oa-help-close").addEventListener("click", () => $("oa-help-modal").classList.remove("open"));
+    $("oa-help-modal").addEventListener("click", e => {
+      if (e.target === $("oa-help-modal")) $("oa-help-modal").classList.remove("open");
+    });
     $("outcomes-help-modal").addEventListener("click", e => {
       if (e.target === $("outcomes-help-modal")) $("outcomes-help-modal").classList.remove("open");
     });
@@ -2418,9 +2621,13 @@ if (typeof document !== "undefined") {
         closeThematicMenu();
         $("functions-help-modal").classList.remove("open");
         $("outcomes-help-modal").classList.remove("open");
+        $("oa-help-modal").classList.remove("open");
       }
     });
-    $("gal-back").addEventListener("click", hideSection);
+    $("gal-back").addEventListener("click", goBackFromSection);
+    for (const b of document.querySelectorAll("[data-trend-mode]")) {
+      b.addEventListener("click", () => setOverviewTrendMode(b.dataset.trendMode));
+    }
     $("land-author-link").addEventListener("click", () => openModal("fig_map_authorship.png"));
 
     const get = async name => {

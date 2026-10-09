@@ -226,21 +226,50 @@ def D(s):
     return s.replace("$", r"\$")
 
 
+def _wrap_to_width(text, width_in, fontsize, bold=False):
+    """Wraps text so it fits width_in inches at fontsize. Over-long single lines
+    otherwise widen the saved canvas (bbox_inches="tight") and squeeze the chart."""
+    max_chars = max(30, int(width_in * 72 / (fontsize * (0.62 if bold else 0.55))))
+    return "\n".join(textwrap.fill(part, max_chars, break_long_words=False) if part else ""
+                     for part in text.split("\n"))
+
+
 def set_headline(ax, headline, desc, finding, fname):
     """headline: bold claim. desc: plain, what the chart shows. finding: BOLD
     sentence with the actual numbers — matches HEE's title/subtitle convention
     exactly (plain lead-in, then a bolded finding clause)."""
     FIG_META[fname] = (headline, desc, finding)
-    ax.text(0, 1.30, D(headline), transform=ax.transAxes, fontsize=16, fontweight="bold",
-            color=INK, ha="left", va="bottom", linespacing=1.25)
-    ax.text(0, 1.16, D(desc), transform=ax.transAxes, fontsize=10.5, color=SUBHEAD_COLOR,
-            ha="left", va="bottom")
-    ax.text(0, 1.02, D(finding), transform=ax.transAxes, fontsize=10.5, fontweight="bold",
-            color=INK, ha="left", va="bottom")
+    fig = ax.figure
+    width_in = fig.get_figwidth() * (0.98 - ax.get_position().x0)
+    h = _wrap_to_width(D(headline), width_in, 16, bold=True)
+    d = _wrap_to_width(D(desc), width_in, 10.5)
+    f = _wrap_to_width(D(finding), width_in, 10.5, bold=True)
+    if (h, d, f) == (D(headline), D(desc), D(finding)):
+        # Everything fits: keep the original fixed positions.
+        ax.text(0, 1.30, h, transform=ax.transAxes, fontsize=16, fontweight="bold",
+                color=INK, ha="left", va="bottom", linespacing=1.25)
+        ax.text(0, 1.16, d, transform=ax.transAxes, fontsize=10.5, color=SUBHEAD_COLOR,
+                ha="left", va="bottom")
+        ax.text(0, 1.02, f, transform=ax.transAxes, fontsize=10.5, fontweight="bold",
+                color=INK, ha="left", va="bottom")
+        return
+    # Something wrapped: stack the three blocks upward from the axes by line count.
+    from matplotlib.transforms import offset_copy
+    lines = lambda t: t.count("\n") + 1
+    f_pts = 0
+    d_pts = f_pts + lines(f) * 10.5 * 1.3 + 6
+    h_pts = d_pts + lines(d) * 10.5 * 1.3 + 8
+    for text, pts, size, weight, color in ((f, f_pts, 10.5, "bold", INK),
+                                           (d, d_pts, 10.5, "normal", SUBHEAD_COLOR),
+                                           (h, h_pts, 16, "bold", INK)):
+        tr = offset_copy(ax.transAxes, fig=fig, y=pts, units="points")
+        ax.text(0, 1.02, text, transform=tr, fontsize=size, fontweight=weight, color=color,
+                ha="left", va="bottom", linespacing=1.25)
 
 
 def set_footnote(fig, text):
-    fig.text(0.01, -0.02, D(text), fontsize=8.5, color=SUBHEAD_COLOR, ha="left", va="top")
+    text = _wrap_to_width(D(text), fig.get_figwidth() * 0.97, 8.5)
+    fig.text(0.01, -0.02, text, fontsize=8.5, color=SUBHEAD_COLOR, ha="left", va="top")
 
 
 def declutter_labels(ax, rows, x_col, y_col, name_col="country", fontsize=7.8, name_map=None, avoid=()):
@@ -1431,7 +1460,7 @@ fig.subplots_adjust(left=0.23, right=0.95, top=0.77, bottom=0.17)
 fig.savefig(FIGS / "fig_deficit.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
 
-# --- fig_equity_time: share of single-country research about LMICs, over time ---
+# --- fig_equity_time: share of single-country research about L&MICs, over time ---
 lv_scope = LV["geo_scope"]
 single_code = lv_scope.index("Single country")
 s_to_cs = defaultdict(set)
@@ -1457,25 +1486,25 @@ fig, ax = plt.subplots(figsize=(8.5, 5.2))
 ax.fill_between(yrs_eq, share_eq, color="#c0392b", alpha=0.12, zorder=1)
 ax.plot(yrs_eq, share_eq, color="#c0392b", linewidth=2.75, marker="o", markersize=4, zorder=3)
 ax.axhline(lmic_burden_share, color=SUBHEAD_COLOR, linewidth=1.2, linestyle=(0, (4, 3)), zorder=2)
-ax.text(yrs_eq[0], lmic_burden_share + 2, f"LMIC share of global disease burden — {lmic_burden_share:.0f}%",
+ax.text(yrs_eq[0], lmic_burden_share + 2, f"L&MICs share of global disease burden — {lmic_burden_share:.0f}%",
         fontsize=9, color=SUBHEAD_COLOR)
-set_headline(ax, "Research about LMICs is rising, but still far below their burden share",
+set_headline(ax, "Research about L&MICs is rising, but still far below their burden share",
              "Share of each year's single-country studies that are about low- and middle-income countries.",
              f"It climbed from {share_eq[0]:.0f}% in {yrs_eq[0]} to {share_eq[-1]:.0f}% in {yrs_eq[-1]} — real "
-             f"progress, yet still far below the {lmic_burden_share:.0f}% of global disease burden LMICs carry.",
+             f"progress, yet still far below the {lmic_burden_share:.0f}% of global disease burden L&MICs carry.",
              "fig_equity_time.png")
-ax.set_ylabel("share of single-country studies about LMICs (%)")
+ax.set_ylabel("share of single-country studies about L&MICs (%)")
 ax.set_ylim(0, 100)
 ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True, nbins=8))
 clean_axes(ax)
 ax.grid(axis="y", color="#e7e3da", linewidth=0.8, zorder=0)
 set_footnote(fig, f"Base: single-country studies with a known income group, by publication year; "
-                   f"{yrs_eq[-1] + 1} (partial) omitted. Burden reference: LMIC share of GBD 2023 all-cause DALYs.")
+                   f"{yrs_eq[-1] + 1} (partial) omitted. Burden reference: L&MICs share of GBD 2023 all-cause DALYs.")
 fig.tight_layout()
 fig.savefig(FIGS / "fig_equity_time.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
 
-# --- fig_inequality: Lorenz curve of LMIC evidence vs. LMIC burden ---
+# --- fig_inequality: Lorenz curve of L&MICs evidence vs. L&MICs burden ---
 lmic_df = cdf_b[cdf_b["income"] != "High income"].sort_values("per100k").copy()
 lmic_df["cum_daly"] = lmic_df["dalys"].cumsum() / lmic_df["dalys"].sum()
 lmic_df["cum_studies"] = lmic_df["studies"].cumsum() / lmic_df["studies"].sum()
@@ -1492,20 +1521,20 @@ ax.fill_between(x_l, x_l, y_l, color="#c0392b", alpha=0.12, zorder=1)
 ax.plot(x_l, y_l, color="#c0392b", linewidth=2.5, zorder=3)
 ax.scatter([0.5], [half_share / 100], color=INK, zorder=4, s=45)
 ax.annotate(f"Countries carrying the least-served half of\nLMIC disease burden hold only {half_share:.0f}% of "
-            f"the LMIC evidence", xy=(0.5, half_share / 100), xytext=(0.52, half_share / 100 + 0.12),
+            f"the L&MICs evidence", xy=(0.5, half_share / 100), xytext=(0.52, half_share / 100 + 0.12),
             fontsize=9.5, fontweight="bold", color=INK)
-set_headline(ax, "Evidence is concentrated in a few LMICs",
+set_headline(ax, "Evidence is concentrated in a few L&MICs",
              "Low- and middle-income countries ordered from least to most research per unit of disease burden.",
-             f"The five most-studied LMICs hold {top5_share:.0f}% of the LMIC evidence (Gini = {gini:.2f}).",
+             f"The five most-studied L&MICs hold {top5_share:.0f}% of the L&MICs evidence (Gini = {gini:.2f}).",
              "fig_inequality.png")
-ax.set_xlabel("cumulative share of LMIC disease burden (DALYs)")
-ax.set_ylabel("cumulative share of LMIC evidence")
+ax.set_xlabel("cumulative share of L&MICs disease burden (DALYs)")
+ax.set_ylabel("cumulative share of L&MICs evidence")
 ax.set_xlim(0, 1)
 ax.set_ylim(0, 1)
 ax.xaxis.set_major_formatter(mticker.PercentFormatter(xmax=1))
 ax.yaxis.set_major_formatter(mticker.PercentFormatter(xmax=1))
 clean_axes(ax)
-set_footnote(fig, f"Base: {len(lmic_df)} LMIC countries with GBD 2023 burden data. Eligible HFF studies naming "
+set_footnote(fig, f"Base: {len(lmic_df)} L&MICs countries with GBD 2023 burden data. Eligible HFF studies naming "
                    f"each country vs. GBD 2023 DALYs.")
 fig.tight_layout()
 fig.savefig(FIGS / "fig_inequality.png", dpi=150, bbox_inches="tight")
@@ -3080,7 +3109,7 @@ if HAVE_PLOTLY:
         "HFF studies naming each country, per 100,000 DALYs of disease burden. Blue: more research per "
         "unit of burden than the typical studied country; red: less.",
         f"The median studied country has {studied_b['per100k'].median():.2f} studies per 100,000 DALYs "
-        f"— rich, small countries cluster far above that line, populous LMICs far below it.",
+        f"— rich, small countries cluster far above that line, populous L&MICs far below it.",
         f"Base: {len(studied_b):,} countries with GBD 2023 burden data and ≥1 study; global median "
         f"{studied_b['per100k'].median():.2f}. Grey = no study naming the country, or no GBD burden row.",
         studied_b["iso3"].tolist(), studied_b["log_per100k"].tolist(),
@@ -3338,7 +3367,7 @@ if have_topics:
          "fig_theme_rank.png", f"Base: {int(topic_labels['n'].sum()):,} studies with a topic embedding, "
          f"across {len(topic_labels)} emergent themes.", color=GOLD, xlabel="records")
 
-    # --- fig_topicmap_income: emergent theme map, coloured by LMIC share ---
+    # --- fig_topicmap_income: emergent theme map, coloured by L&MICs share ---
     lv_scope_ti = LV["geo_scope"]
     single_code_ti = lv_scope_ti.index("Single country")
     s_to_c_ti = defaultdict(set)
@@ -3379,13 +3408,13 @@ if have_topics:
                      alpha=0.7, linewidths=0, zorder=3)
     colorbar_ax = fig.add_axes([0.79, 0.19, 0.025, 0.46])
     cb = fig.colorbar(sc, cax=colorbar_ax)
-    cb.set_label("share about LMICs", fontsize=9, color=SUBHEAD_COLOR)
+    cb.set_label("share about L&MICs", fontsize=9, color=SUBHEAD_COLOR)
     cb.ax.tick_params(labelsize=8)
     cb.outline.set_visible(False)
     ti_headline = "Research about poor and rich countries sits in different themes"
     ti_desc = (f"The emergent theme map, each theme coloured by the share of its single-country studies "
-               f"about LMICs (overall {overall_lmic_share:.0%}).")
-    ti_finding = (f"'{most_lmic_label}' skews most LMIC "
+               f"about L&MICs (overall {overall_lmic_share:.0%}).")
+    ti_finding = (f"'{most_lmic_label}' skews most L&MICs "
                   f"({cluster_lmic_share[most_lmic_cluster]:.0%}); '{most_hic_label}' skews most high-income "
                   f"({1 - cluster_lmic_share[most_hic_cluster]:.0%} high-income).")
     FIG_META["fig_topicmap_income.png"] = (ti_headline, ti_desc, ti_finding)
@@ -3820,8 +3849,8 @@ if have_taxonomy:
     fcirc_headline = "The disease focus of HFF research"
     fcirc_desc = ("Each bar is a MeSH-derived disease category; length is its share of the disease-coded "
                   "literature, colour is whether that research skews toward richer or poorer countries.")
-    fcirc_finding = (f"{fc_order[top_lmic_i]} research skews most toward LMICs ({fc_lmic[top_lmic_i]:.0f}% "
-                      f"LMIC); {fc_order[top_hic_i]} skews most toward high-income settings "
+    fcirc_finding = (f"{fc_order[top_lmic_i]} research skews most toward L&MICs ({fc_lmic[top_lmic_i]:.0f}% "
+                      f"L&MICs); {fc_order[top_hic_i]} skews most toward high-income settings "
                       f"({100 - fc_lmic[top_hic_i]:.0f}% high-income).")
     FIG_META["fig_disease_circular.png"] = (fcirc_headline, fcirc_desc, fcirc_finding)
 
@@ -3871,7 +3900,7 @@ if have_taxonomy:
     fig.savefig(FIGS / "fig_disease_circular.png", dpi=150)
     plt.close(fig)
 
-    # --- fig_transition: LMIC research mix across 3 epi-transition classes ---
+    # --- fig_transition: L&MICs research mix across 3 epi-transition classes ---
     COMM_GROUP = {"Infectious", "Maternal & neonatal"}
     INJ_GROUP = {"Injuries"}
     lmic_c_idx = {i for i, inc in income_of_c.items() if inc and inc != "High income"}
@@ -3902,14 +3931,14 @@ if have_taxonomy:
     comm_first, comm_last = trans_series["Communicable, maternal & nutritional"][0], \
         trans_series["Communicable, maternal & nutritional"][-1]
     ncd_first, ncd_last = trans_series["Non-communicable"][0], trans_series["Non-communicable"][-1]
-    set_headline(ax, "LMIC research has shifted from communicable disease toward NCDs",
+    set_headline(ax, "L&MICs research has shifted from communicable disease toward NCDs",
                  "Disease mix of MeSH-classified HFF research about low- and middle-income countries, across "
                  "three epidemiological-transition classes.",
                  f"Communicable/maternal/nutritional fell {comm_first:.0f}%→{comm_last:.0f}%; "
                  f"non-communicable rose {ncd_first:.0f}%→{ncd_last:.0f}%, {trans_years[0]}–"
                  f"{trans_years[-1]}.",
                  "fig_transition.png")
-    ax.set_ylabel("share of LMIC MeSH-classified research (%)")
+    ax.set_ylabel("share of L&MICs MeSH-classified research (%)")
     ax.set_ylim(0, 100)
     ax.set_xlim(min(trans_years) - 0.5, max(trans_years) + 0.5)
     ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True, nbins=8))
@@ -3917,7 +3946,7 @@ if have_taxonomy:
     ax.grid(axis="y", color="#e7e3da", linewidth=0.8, zorder=0)
     ax.legend(loc="center left", frameon=False, fontsize=9)
     set_footnote(fig, f"Base: {sum(sum(c.values()) for c in trans_by_year.values()):,} MeSH-classified studies "
-                       f"about LMIC countries, by year. No disease-specific burden data exists to benchmark "
+                       f"about L&MICs countries, by year. No disease-specific burden data exists to benchmark "
                        f"against (unlike HEE's version) — shown as research composition only.")
     fig.tight_layout()
     fig.savefig(FIGS / "fig_transition.png", dpi=150, bbox_inches="tight")
@@ -4095,11 +4124,11 @@ if have_taxonomy:
     tmp_dmap.unlink(missing_ok=True)
 
     # -------------------------------------------------------------------
-    # fig_funder_trajectory: LMIC research share of each disease area,
-    # era 1 -> era 2. HEE's original plots each disease area's LMIC
+    # fig_funder_trajectory: L&MICs research share of each disease area,
+    # era 1 -> era 2. HEE's original plots each disease area's L&MICs
     # research-to-burden RATIO across two eras; HFF has no disease-
     # category-level GBD burden data (only country-level totals), so this
-    # substitutes each category's LMIC SHARE of research directly — same
+    # substitutes each category's L&MICs SHARE of research directly — same
     # dumbbell/arrow "closing vs stuck" design, without a burden
     # denominator. Reuses disease_of/disease_totals/s_to_cs_disease from
     # the opportunity matrix and disease cross-tabs above.
@@ -4142,20 +4171,20 @@ if have_taxonomy:
         ax.annotate("", xy=(s2, y), xytext=(s1, y), zorder=4,
                     arrowprops=dict(arrowstyle="-|>", color=color, linewidth=2.5, mutation_scale=16))
     ax.set_yticks(ys, [d for d, *_ in traj_rows], fontsize=9.5)
-    ax.set_xlabel("share of research about LMICs (%)")
+    ax.set_xlabel("share of research about L&MICs (%)")
     ax.set_xlim(-3, 75)
     legend_handles = [
         plt.Line2D([0], [0], color="#2e7d5b", linewidth=2.5, marker=">", markersize=7,
-                   label="Gaining LMIC share"),
+                   label="Gaining L&MICs share"),
         plt.Line2D([0], [0], color="#c0392b", linewidth=2.5, marker=">", markersize=7,
-                   label="Losing LMIC share"),
+                   label="Losing L&MICs share"),
     ]
     ax.legend(handles=legend_handles, loc="upper center", bbox_to_anchor=(0.5, -0.13),
               ncol=2, frameon=False, fontsize=9.5)
-    tj_headline = "LMIC research share is rising for most disease areas"
-    tj_desc = ("Share of research about LMICs within each MeSH-derived disease category, "
+    tj_headline = "L&MICs research share is rising for most disease areas"
+    tj_desc = ("Share of research about L&MICs within each MeSH-derived disease category, "
                "2010–2017 (dot) to 2018–2026 (arrowhead).")
-    tj_finding = (f"{biggest_gain[0]}'s LMIC share rose {biggest_gain[2] - biggest_gain[1]:+.0f}pp; "
+    tj_finding = (f"{biggest_gain[0]}'s L&MICs share rose {biggest_gain[2] - biggest_gain[1]:+.0f}pp; "
                   f"{biggest_drop[0]}'s fell {biggest_drop[2] - biggest_drop[1]:+.0f}pp — the widest "
                   f"swings either way.")
     set_headline(ax, tj_headline, tj_desc, tj_finding, "fig_funder_trajectory.png")
@@ -4164,7 +4193,7 @@ if have_taxonomy:
     set_footnote(fig, f"Base: PubMed-MeSH-classified, geo-tagged studies with a known country income group, "
                        f"split by era (2010–2017 vs. 2018–2026); smallest category has {min_n} "
                        f"studies in one era — read narrow categories with caution. HFF has no disease-"
-                       f"category burden data, unlike HEE's burden-ratio design; this shows LMIC research "
+                       f"category burden data, unlike HEE's burden-ratio design; this shows L&MICs research "
                        f"share directly, not a ratio to burden.")
     fig.tight_layout()
     fig.savefig(FIGS / "fig_funder_trajectory.png", dpi=150, bbox_inches="tight")
@@ -4231,11 +4260,12 @@ if have_ihme:
     span = float(src["Difference_2024_to_2025"].abs().max()) / 1000
     ax.barh(src["Source"], src["Difference_2024_to_2025"] / 1000, color=colors, zorder=3)
     for y, (v, p) in enumerate(zip(src["Difference_2024_to_2025"] / 1000, src["Percent_change_2024_to_2025"])):
+        # Label sits just past the end of its own bar (left of cuts, right of gains).
         offset = span * 0.02
-        ax.text(offset if v >= 0 else -offset, y, f"{v:+,.1f}bn ({p:+.0f}%)",
+        ax.text(v + offset if v >= 0 else v - offset, y, f"{v:+,.1f}bn ({p:+.0f}%)",
                 va="center", ha="left" if v >= 0 else "right", fontsize=9, color=INK)
     ax.axvline(0, color="#8a8272", linewidth=0.8, zorder=2)
-    ax.set_xlim(-span * 1.28, span * 1.05)
+    ax.set_xlim(-span * 1.5, span * 1.05)
     set_headline(ax, "The United States drove the 2025 aid collapse",
                  "Change in development assistance for health by source, 2024 → 2025.",
                  f"The US cut ${abs(top_cutter['Difference_2024_to_2025'] / 1000):,.1f}bn "
@@ -5270,8 +5300,8 @@ gallery = [
                  "to, and where important evidence gaps remain.",
         "figs": [
             fig_entry("fig_function_bar.png", "Financing function"),
-            fig_entry("fig_function_time.png", "Financing-function mix over time"),
-            fig_entry("fig_function_time_lines.png", "Financing-function mix over time (line option)"),
+            # fig_function_time.png (stacked-area version) is still built but hidden.
+            fig_entry("fig_function_time_lines.png", "Financing-function mix over time"),
             fig_entry("fig_method_stream.png", "Financing-function output over time"),
             fig_entry("fig_outcome_lollipop.png", "Outcome domain"),
             fig_entry("fig_function_outcome_heatmap.png", "Function vs. outcome"),
@@ -5287,10 +5317,10 @@ gallery = [
              fig_entry("fig_funder_opportunity.png", "The opportunity matrix"),
              fig_entry("fig_disease_method.png", "How each disease area is evaluated"),
              fig_entry("fig_disease_circular.png", "The disease focus of HFF research"),
-             fig_entry("fig_transition.png", "LMIC research: communicable to NCD shift"),
+             fig_entry("fig_transition.png", "L&MICs research: communicable to NCD shift"),
              fig_entry("fig_alluvial.png", "Evidence flow: design to function to outcome"),
              fig_entry("fig_map_disease.png", "The disease atlas"),
-             fig_entry("fig_funder_trajectory.png", "LMIC research share, era 1 to era 2")] if have_taxonomy else []
+             fig_entry("fig_funder_trajectory.png", "L&MICs research share, era 1 to era 2")] if have_taxonomy else []
         ) + (
             [fig_entry("fig_topicmap.png", "Thematic landscape"),
              fig_entry("fig_theme_rank.png", "Top 20 research themes"),
@@ -5306,52 +5336,77 @@ gallery = [
                       "Methodological characteristics of included studies"),
         ],
     },
+    # Geography is split into three questions; funding figures go to the
+    # "Funders, fragility & outcomes" section (merged with build_fcas_outcomes_v5.py).
     {
-        "title": "Geography",
-        "blurb": "Explore where health financing research is concentrated, how coverage differs between "
-                 "countries and income groups, and where evidence remains limited.",
-        "figs": [
+        "title": "Geographic coverage",
+        "blurb": "Where health financing research is concentrated: which countries, income groups and "
+                 "settings it covers, how coverage has spread over time, and how methods vary by place.",
+        "figs": ([
+            fig_entry("fig_worldmap.png", "Where the evidence is about"),
+        ] if HAVE_PLOTLY else []) + [
             fig_entry("fig_top_countries.png", "Top 20 countries"),
             fig_entry("fig_income_bar.png", "Study-country pairs by income group"),
             fig_entry("fig_scope_bar.png", "Geographic scope"),
-            fig_entry("fig_burden.png", "Research intensity vs. disease burden"),
-            fig_entry("fig_deficit.png", "Studies vs. a burden-proportional share"),
-            fig_entry("fig_equity_time.png", "LMIC research share over time"),
-            fig_entry("fig_inequality.png", "Evidence concentration among LMICs"),
-            fig_entry("fig_injustice.png", "Research relative to disease burden"),
-            fig_entry("fig_funder_scorecard.png", "Funding priority scorecard"),
+        ] + ([
+            fig_entry("fig_map_growth.png", "Where the evidence is youngest"),
+        ] if HAVE_PLOTLY else []) + [
             fig_entry("fig_reach_time.png", "When evidence reached each income group"),
             fig_entry("fig_top_producers.png", "Biggest producers vs. best-served"),
-            fig_entry("fig_forest.png", "Adjusted odds ratios by income group"),
         ] + ([
-            fig_entry("fig_authorship_pattern.png", "Who leads research about each setting"),
-            fig_entry("fig_authorship_by_function.png", "Local authorship, by financing function"),
-            fig_entry("fig_authorship_outcome_heatmap.png", "Local authorship, by outcome domain")] if have_authors else []
-        ) + ([
-            fig_entry("fig_collab_chord.png", "Cross-income co-authorship")] if have_authors else []
-        ) + ([
-            fig_entry("fig_funder_capacity.png", "Where to build local research capacity")] if have_authors else []
-        ) + ([
-            fig_entry("fig_funder_funders.png", "The top research funders"),
-            fig_entry("fig_funder_funders_treemap.png", "The top research funders (treemap option)"),
-            fig_entry("fig_funder_function_heatmap.png", "What each top funder pays for"),
-            fig_entry("fig_funder_function_bubbles.png", "What each top funder pays for (bubble option)"),
-            fig_entry("fig_funder_outcome_heatmap.png", "What each top funder's research finds"),
-            fig_entry("fig_funder_function_mix.png", "Financing-function mix by top funder"),
-            fig_entry("fig_funder_trend.png", "Which funders are gaining ground"),
-            fig_entry("fig_funder_authorship_alluvial.png",
-                      "Funder to financing function to authorship")] if (have_authors and have_funders) else []
-        ) + ([
+            fig_entry("fig_map_method.png", "The dominant type of analysis"),
+        ] if HAVE_PLOTLY else []),
+    },
+    {
+        "title": "Geographic inequalities",
+        "blurb": "Whether research is distributed in proportion to health needs: where evidence falls short "
+                 "of disease burden, how concentrated the L&MICs evidence base is, and where evidence "
+                 "deserts remain.",
+        "figs": ([
             fig_entry("fig_map_bivariate.png", "Where high burden meets low evidence"),
             fig_entry("fig_map_burden.png", "Research intensity against disease burden (map)"),
             fig_entry("fig_map_deserts.png", "Evidence deserts"),
-            fig_entry("fig_map_growth.png", "Where the evidence is youngest"),
-            fig_entry("fig_worldmap.png", "Where the evidence is about"),
-            fig_entry("fig_map_method.png", "The dominant type of analysis"),
-        ] if HAVE_PLOTLY else []) + ([
-            fig_entry("fig_map_authorship.png", "Who studies whom")] if (HAVE_PLOTLY and have_authors) else []
-        ),
+        ] if HAVE_PLOTLY else []) + [
+            fig_entry("fig_burden.png", "Research intensity vs. disease burden"),
+            fig_entry("fig_deficit.png", "Studies vs. a burden-proportional share"),
+            fig_entry("fig_injustice.png", "Research relative to disease burden"),
+            fig_entry("fig_equity_time.png", "L&MICs research share over time"),
+            fig_entry("fig_inequality.png", "Evidence concentration among L&MICs"),
+            fig_entry("fig_forest.png", "Adjusted odds ratios by income group"),
+            fig_entry("fig_funder_scorecard.png", "Funding priority scorecard"),
+        ],
     },
+    {
+        "title": "Research ownership & collaboration",
+        "blurb": "Who produces research about different settings: local versus foreign authorship, "
+                 "collaboration across income groups, and where local research capacity could be "
+                 "strengthened.",
+        "figs": ([
+            fig_entry("fig_map_authorship.png", "Who studies whom"),
+        ] if HAVE_PLOTLY else []) + [
+            fig_entry("fig_authorship_pattern.png", "Who leads research about each setting"),
+            fig_entry("fig_authorship_by_function.png", "Local authorship, by financing function"),
+            fig_entry("fig_authorship_outcome_heatmap.png", "Local authorship, by outcome domain"),
+            fig_entry("fig_collab_chord.png", "Cross-income co-authorship"),
+            fig_entry("fig_funder_capacity.png", "Where to build local research capacity"),
+        ],
+    } if have_authors else None,
+    {
+        # Funding figures; build_fcas_outcomes_v5.py adds its own figures to this
+        # section. The treemap and bubble "option" versions are still built (the
+        # Overview funder card uses the treemap) but are not listed here.
+        "title": "Funders, fragility & outcomes",
+        "blurb": "Who funds health financing research and what they prioritise.",
+        "figs": [
+            fig_entry("fig_funder_funders.png", "The top research funders"),
+            fig_entry("fig_funder_function_heatmap.png", "What each top funder pays for"),
+            fig_entry("fig_funder_outcome_heatmap.png", "What each top funder's research finds"),
+            fig_entry("fig_funder_function_mix.png", "Financing-function mix by top funder"),
+            fig_entry("fig_funder_trend.png", "Which funders are gaining ground"),
+        ] + ([
+            fig_entry("fig_funder_authorship_alluvial.png",
+                      "Funder to financing function to authorship")] if have_authors else []),
+    } if have_funders else None,
     {
         "title": "Global financing context",
         "blurb": "Compare the research landscape with global health financing trends, including development "

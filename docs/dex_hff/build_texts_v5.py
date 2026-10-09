@@ -18,6 +18,7 @@ Output:
 Run: python docs/dex_hff/build_texts_v5.py  (after build_data_v5.py)
 """
 import json
+import re
 from collections import defaultdict
 from pathlib import Path
 
@@ -44,7 +45,8 @@ abstract_of = dict(zip(raw["record_id"], raw["abstract"]))
 def clean(v):
     if v is None or (isinstance(v, float) and pd.isna(v)):
         return None
-    return str(v).strip()
+    # Site-wide wording: "LMIC"/"LMICs" is shown as "L&MICs".
+    return re.sub(r"\bLMICs?\b", "L&MICs", str(v).strip())
 
 
 studies_by_country = defaultdict(set)

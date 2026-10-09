@@ -590,7 +590,7 @@
     }
   },
   "income_group_mean_of_top_countries_pct": {
-    "LMIC": 77.2,
+    "L&MICs": 77.2,
     "HIC": 71.7
   },
   "oa_by_author_income_pct": {
@@ -616,11 +616,11 @@
       "n": 14899,
       "oa_share_pct": 63.5
     },
-    "Mixed high-income and LMIC team": {
+    "Mixed high-income and L&MICs team": {
       "n": 4292,
       "oa_share_pct": 77.2
     },
-    "LMIC authors only": {
+    "L&MICs authors only": {
       "n": 4149,
       "oa_share_pct": 73.0
     }
@@ -645,7 +645,7 @@
     {
       "file": "fig_oa_author_income_v5.png",
       "title": "Research with lower-income authors is more often open access",
-      "caption": "Open-access share by where a study's authors are based (dashed line: all studies). 73% of LMIC-only author teams publish open access and 77% of mixed teams, vs 63% of teams based only in high-income countries."
+      "caption": "Open-access share by where a study's authors are based (dashed line: all studies). 73% of L&MICs-only author teams publish open access and 77% of mixed teams, vs 63% of teams based only in high-income countries."
     }
   ]
 }
