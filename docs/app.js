@@ -1227,7 +1227,8 @@ if (typeof document !== "undefined") {
   function renderOverview() {
     const m = db.dict.meta;
     $("nav-built").textContent = "Last update " + m.built;
-    $("overview-updated").textContent = "Evidence map updated " + m.built;
+    const updated = $("overview-updated");
+    if (updated) updated.textContent = "Evidence map updated " + m.built;
 
     // Glance tiles: final formatted strings from content.json;
     // sub === null means no footer line.
@@ -2363,12 +2364,17 @@ if (typeof document !== "undefined") {
     $("fig-zoom-out").addEventListener("click", () => setFigureZoom(figureZoom - 0.25));
     $("fig-zoom-reset").addEventListener("click", () => setFigureZoom(1));
     $("fig-zoom-in").addEventListener("click", () => setFigureZoom(figureZoom + 0.25));
-    $("ov-worldmap-open").addEventListener("click", () => openModal("fig_worldmap.png"));
-    $("ov-growth-open").addEventListener("click", () => openModal("fig_growth.png"));
-    $("ov-function-open").addEventListener("click", () => openModal("fig_function_bar.png"));
-    $("ov-funders-open").addEventListener("click", () => openModal("fig_funder_funders_treemap.png"));
-    $("ov-disease-method-open").addEventListener("click", () => openModal("fig_disease_method.png"));
-    $("ov-wellcome-open").addEventListener("click", () => openModal("fig_wellcome_priorities.png"));
+    // Overview figure cards are optional in the HTML; skip any that are absent.
+    for (const [id, file] of [
+      ["ov-worldmap-open", "fig_worldmap.png"],
+      ["ov-growth-open", "fig_growth.png"],
+      ["ov-function-open", "fig_function_bar.png"],
+      ["ov-funders-open", "fig_funder_funders_treemap.png"],
+      ["ov-disease-method-open", "fig_disease_method.png"],
+      ["ov-wellcome-open", "fig_wellcome_priorities.png"]
+    ]) {
+      $(id)?.addEventListener("click", () => openModal(file));
+    }
     $("study-modal-close").addEventListener("click", closeStudyModal);
     $("study-modal").addEventListener("click", e => { if (e.target === $("study-modal")) closeStudyModal(); });
     $("functions-help-close").addEventListener("click", () => $("functions-help-modal").classList.remove("open"));
@@ -2406,7 +2412,11 @@ if (typeof document !== "undefined") {
     // Sections listed here stay in content.json (and their figures stay built)
     // but are hidden from the Thematic analysis tab.
     const HIDDEN_SECTIONS = new Set(["Pipeline"]);
-    GALLERY = (db.content.gallery || []).filter(sec => !HIDDEN_SECTIONS.has(sec.title));
+    const HIDDEN_FIGS = new Set(["fig_wellcome_priorities.png"]);
+    GALLERY = (db.content.gallery || [])
+      .filter(sec => !HIDDEN_SECTIONS.has(sec.title))
+      .map(sec => ({ ...sec, figs: sec.figs.filter(f => !HIDDEN_FIGS.has(f.file)) }))
+      .filter(sec => sec.figs.length);
     FIG_INDEX = {};
     for (const sec of GALLERY) {
       for (const f of sec.figs) FIG_INDEX[f.file] = { ...f, sectionTitle: sec.title };
