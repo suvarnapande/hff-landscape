@@ -7,7 +7,7 @@ without it.
 
 v5 fields used:
   fcas                  geo countries on the WB FCAS list in the publication year ('; '-sep)
-  income_level          WB income group per geo country (LIC / L&MICs / MIC = upper-middle / HIC)
+  income_level          WB income group per geo country (LIC / LMIC / MIC = upper-middle / HIC)
   outcome_domain_final  multi-label outcome domains ('; '-sep)
   outcome_other_theme   non-LLM theme for studies tagged 'Other' ('; '-sep)
 
@@ -33,6 +33,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
+import fig_text_fit  # keeps footnotes/notes inside every saved figure
+fig_text_fit.install()
 import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
@@ -79,7 +81,8 @@ COUNTRY_ALIASES = {"Democratic Republic of Congo": "Democratic Republic of the C
                    "Occupied Palestinian Territory": "Palestine",
                    "West Bank and Gaza": "Palestine"}
 SHORT_COUNTRY = {"Democratic Republic of the Congo": "DR Congo", "Central African Republic": "CAR"}
-INCOME_LABEL = {"LIC": "Low income", "L&MICs": "Lower-middle", "MIC": "Upper-middle", "HIC": "High income"}
+# Keys are the source file's income codes (data values, not display text).
+INCOME_LABEL = {"LIC": "Low income", "LMIC": "Lower-middle", "MIC": "Upper-middle", "HIC": "High income"}
 
 FIG_META = {}
 
@@ -339,7 +342,7 @@ summary["outcome_share_2010_vs_2025_pct"] = {k: [round(a, 1), round(b, 1)] for k
 
 # ---------------------------------------------------------------- OUTCOME x CONTEXT heatmap
 groups = [("FCAS", df["is_fcas"])] + [
-    (INCOME_LABEL[g], df["income_list"].map(lambda l, g=g: g in l)) for g in ("LIC", "L&MICs", "MIC", "HIC")]
+    (INCOME_LABEL[g], df["income_list"].map(lambda l, g=g: g in l)) for g in ("LIC", "LMIC", "MIC", "HIC")]
 rows = named_order
 mat = np.array([[100 * df.loc[m, "outcomes"].map(lambda l, k=k: k in l).mean() for _, m in groups] for k in rows])
 ns = [int(m.sum()) for _, m in groups]

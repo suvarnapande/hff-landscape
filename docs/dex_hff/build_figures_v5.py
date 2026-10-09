@@ -20,6 +20,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
+import fig_text_fit  # keeps footnotes/notes inside every saved figure
+fig_text_fit.install()
 import matplotlib.ticker as mticker
 from matplotlib.patches import FancyBboxPatch
 import numpy as np
@@ -93,6 +95,9 @@ def load(name):
 
 
 dict_json = load("dict.json")
+# Soft income palette (Low -> High), the same one the site's interactive charts use;
+# replaces the brighter colours stored in dict.json for every income-coloured figure.
+dict_json["meta"]["pal_inc"] = ["#c96a4a", "#d2a84a", "#3b9b84", "#356fa8"]
 studies = load("studies.json")
 function_j = load("function.json")
 outcome_j = load("outcome.json")
@@ -1800,7 +1805,7 @@ sc_finding = (f"{lowest_sc['country']} has the largest finite relative gap: its 
               f"{1 / lowest_sc['research_to_burden']:.0f}x smaller than its burden share. "
               f"No identified studies: {zero_study_names_sc}.")
 FIG_META["fig_funder_scorecard.png"] = (sc_headline, sc_desc, sc_finding)
-fig.text(0.02, 0.965, D(sc_headline.upper()), fontsize=17, fontweight="bold", color=INK, ha="left", va="top")
+fig.text(0.02, 0.965, D(sc_headline), fontsize=17, fontweight="bold", color=INK, ha="left", va="top")
 fig.text(0.02, 0.915, D(sc_desc), fontsize=10, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
 fig.text(0.02, 0.882, D(sc_finding), fontsize=10, fontweight="bold", color=INK, ha="left", va="top", wrap=True)
 income_legend(fig, loc="upper left", ncol=4, bbox_to_anchor=(0.02, 0.80))
@@ -2194,6 +2199,9 @@ for ax, (panel_title, rows_fp) in zip(axes, fp_results.items()):
     ax.axvline(1, color="#8a8272", linewidth=1, linestyle=(0, (4, 3)), zorder=2)
     ax.set_yticks(ys, [inc for inc, *_ in rows_fp], fontsize=9.5)
     ax.set_xscale("log")
+    ax.xaxis.set_major_locator(mticker.FixedLocator([0.05, 0.1, 0.2, 0.3, 0.5, 1.0]))
+    ax.xaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:g}"))
+    ax.xaxis.set_minor_formatter(mticker.NullFormatter())
     ax.set_xlabel("adjusted odds ratio vs. high income (log)")
     ax.set_title(panel_title, fontsize=11, fontweight="bold", color=INK, loc="left")
     ax.set_ylim(-0.6, len(rows_fp) - 0.4)
@@ -2218,8 +2226,8 @@ fp_finding = (f"{lowest_quant[0]} studies have {lowest_quant[1]:.2f}× the odds 
 FIG_META["fig_forest.png"] = (fp_headline, fp_desc, fp_finding)
 fig.suptitle("")
 fig.text(0.02, 0.99, D(fp_headline), fontsize=15.5, fontweight="bold", color=INK, ha="left", va="top")
-fig.text(0.02, 0.95, D(fp_desc), fontsize=9, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
-fig.text(0.02, 0.865, D(fp_finding), fontsize=9.5, fontweight="bold", color=INK, ha="left", va="top", wrap=True)
+fig.text(0.02, 0.935, D(fp_desc), fontsize=9.5, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
+fig.text(0.02, 0.85, D(fp_finding), fontsize=9.5, fontweight="bold", color=INK, ha="left", va="top", wrap=True)
 fig.text(0.01, -0.02, f"Base: {len(fp_df):,} single-country studies with a known income group; "
                       f"{n_local_model:,} of these also have an author-affiliation country (local-authorship model).",
          fontsize=7.6, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
@@ -3087,7 +3095,9 @@ if have_funders:
     trend_years = sorted(y for y in year_funded_totals if 2013 <= y <= 2025)
 
     fig, ax = plt.subplots(figsize=(10, 6.4))
-    trend_cmap = plt.get_cmap("tab10")
+    # Soft palette shared with the other gallery figures.
+    trend_soft = ["#1764C0", "#D2B06B", "#2F9B92", "#93A3D0", "#C98F7A", "#63B0BC", "#B79BCB", "#7E94B1"]
+    trend_cmap = lambda i: trend_soft[i % len(trend_soft)]
     for i, f in enumerate(trend_funders):
         shares = [100 * by_year_funder[f].get(y, 0) / year_funded_totals[y] for y in trend_years]
         ax.plot(trend_years, shares, marker="o", markersize=4, linewidth=2.25, color=trend_cmap(i), label=f)
@@ -3159,9 +3169,15 @@ if have_funders:
                      [("auth", a) for a in fa_auth_cats])
     fa_idx_of = {k: i for i, k in enumerate(fa_node_keys)}
     fa_node_labels = [k[1] for k in fa_node_keys]
+    # Soft palette matching the gallery; ribbons are semi-transparent so overlaps stay readable.
     fa_funder_palette = dict(zip(fa_funders,
-        [ACCENT, GOLD, "#1baf7a", "#8a5fb0", "#c0392b", "#2a9d8f", "#e07b39", "#6b7280"]))
-    fa_auth_palette = {"Local authors only": ACCENT, "Local and foreign": GREY, "Foreign authors only": "#e0752f"}
+        ["#1764C0", "#D2B06B", "#2F9B92", "#93A3D0", "#C98F7A", "#63B0BC", "#B79BCB", "#7E94B1"]))
+    fa_auth_palette = {"Local authors only": "#2F9B92", "Local and foreign": "#93A3D0",
+                       "Foreign authors only": "#C98F7A"}
+
+    def fa_rgba(hex_color, alpha):
+        h = hex_color.lstrip("#")
+        return f"rgba({int(h[0:2], 16)},{int(h[2:4], 16)},{int(h[4:6], 16)},{alpha})"
 
     fa_link1 = Counter((r[0], r[1]) for r in fa_rows)
     fa_link2 = Counter((r[1], r[2]) for r in fa_rows)
@@ -3170,22 +3186,23 @@ if have_funders:
         fa_sources.append(fa_idx_of[("funder", f)])
         fa_targets.append(fa_idx_of[("func", fn)])
         fa_values.append(v)
-        fa_colors.append(fa_funder_palette.get(f, "#adb5bd"))
+        fa_colors.append(fa_rgba(fa_funder_palette.get(f, "#adb5bd"), 0.55))
     for (fn, a), v in fa_link2.items():
         fa_sources.append(fa_idx_of[("func", fn)])
         fa_targets.append(fa_idx_of[("auth", a)])
         fa_values.append(v)
-        fa_colors.append("rgba(150,150,150,0.35)")
+        fa_colors.append(fa_rgba(fa_auth_palette[a], 0.45))  # coloured by authorship pattern
     fa_node_colors = ([fa_funder_palette[f] for f in fa_funders] +
-                       ["#5a6472"] * len(fa_funcs) +
+                       ["#9aa8b6"] * len(fa_funcs) +
                        [fa_auth_palette[a] for a in fa_auth_cats])
 
     fa_sankey_fig = go.Figure(go.Sankey(
-        node=dict(label=[SHORT_FN.get(n, n) for n in fa_node_labels], color=fa_node_colors, pad=14,
-                  thickness=14, line=dict(color="white", width=0.5)),
+        node=dict(label=[SHORT_FN.get(n, n) for n in fa_node_labels], color=fa_node_colors, pad=18,
+                  thickness=18, line=dict(color="white", width=0.5)),
         link=dict(source=fa_sources, target=fa_targets, value=fa_values, color=fa_colors)))
-    fa_sankey_fig.update_layout(width=1700, height=1000, margin=dict(l=10, r=10, t=10, b=10),
-                                 paper_bgcolor="rgba(0,0,0,0)", font=dict(size=12, color=INK))
+    # Drawn smaller with larger text, so labels stay readable once placed in the figure.
+    fa_sankey_fig.update_layout(width=1300, height=780, margin=dict(l=10, r=10, t=10, b=10),
+                                 paper_bgcolor="rgba(0,0,0,0)", font=dict(size=17, color=INK))
     tmp_fa_sankey = FIGS / "_tmp_fig_funder_authorship_alluvial.png"
     fa_sankey_fig.write_image(str(tmp_fa_sankey), scale=2)
 
@@ -3210,7 +3227,7 @@ if have_funders:
              wrap=True)
     fig.text(0.01, 0.02, f"Base: {len(fa_rows):,} single-country studies with exactly one recognized "
                          f"funder (among the top 6 by study count), a known author-affiliation country, "
-                         f"and ≥1 financing-function tag (primary tag shown).", fontsize=7.6,
+                         f"and ≥1 financing-function tag (primary tag shown).", fontsize=9,
              color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
     fig.patch.set_facecolor(PAPER)
     fig.savefig(FIGS / "fig_funder_authorship_alluvial.png", dpi=150)
@@ -4761,7 +4778,7 @@ if have_ihme:
     sce_finding = (f"{biggest_deficit_exp['country']} alone is {abs(round(biggest_deficit_exp['deficit'])):,} "
                    f"studies short of a spending-proportional share — the largest gap of any country.")
     FIG_META["fig_funder_scorecard_expenditure.png"] = (sce_headline, sce_desc, sce_finding)
-    fig.text(0.02, 0.965, D(sce_headline.upper()), fontsize=17, fontweight="bold", color=INK, ha="left", va="top")
+    fig.text(0.02, 0.965, D(sce_headline), fontsize=17, fontweight="bold", color=INK, ha="left", va="top")
     fig.text(0.02, 0.915, D(sce_desc), fontsize=10, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
     fig.text(0.02, 0.882, D(sce_finding), fontsize=10, fontweight="bold", color=INK, ha="left", va="top", wrap=True)
     income_legend(fig, loc="upper left", ncol=4, bbox_to_anchor=(0.02, 0.80))
@@ -4872,7 +4889,7 @@ if have_ihme:
                    f"studies short of a share proportional to its burden-to-spending need — the largest gap "
                    f"of any country.")
     FIG_META["fig_funder_scorecard_combined.png"] = (scc_headline, scc_desc, scc_finding)
-    fig.text(0.02, 0.965, D(scc_headline.upper()), fontsize=17, fontweight="bold", color=INK, ha="left", va="top")
+    fig.text(0.02, 0.965, D(scc_headline), fontsize=17, fontweight="bold", color=INK, ha="left", va="top")
     fig.text(0.02, 0.915, D(scc_desc), fontsize=10, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
     fig.text(0.02, 0.865, D(scc_finding), fontsize=10, fontweight="bold", color=INK, ha="left", va="top", wrap=True)
     income_legend(fig, loc="upper left", ncol=4, bbox_to_anchor=(0.02, 0.80))
@@ -5553,33 +5570,56 @@ gallery = [
             fig_entry("fig_funder_authorship_alluvial.png",
                       "Funder to financing function to authorship")] if have_authors else []),
     } if have_funders else None,
+    # "Global financing context" is a group card (SECTION_GROUPS in app.js) holding these
+    # five sections, in this order.
     {
-        "title": "Global financing context",
-        "blurb": "Compare the research landscape with global health financing trends, including development "
-                 "assistance, national health spending and differences between countries.",
-        "figs": (
-            [
-                fig_entry("fig_dah_trend.png", "Development assistance for health, 1990–2030"),
-                fig_entry("fig_dah_cuts_source.png", "The 2025 aid cuts, by source"),
-                fig_entry("fig_health_spending_income.png", "Health spending per person, by income group"),
-                fig_entry("fig_revenue_vs_dah.png", "Revenue-Raising research vs. real-world aid"),
-                fig_entry("fig_functions_vs_dah_index.png", "Every financing function vs. real-world aid"),
-                fig_entry("fig_aid_vs_evidence_region.png", "Aid vs. evidence, by region"),
-                fig_entry("fig_research_vs_spending_country.png", "Research intensity vs. health spending, by country"),
-                fig_entry("fig_funder_scorecard_expenditure.png", "Funding priority scorecard: health expenditure edition"),
-                fig_entry("fig_funder_scorecard_combined.png", "Funding priority scorecard: burden, spending and research together"),
-                fig_entry("fig_function_share_facets.png", "Each function's research share vs. health spending"),
-                fig_entry("fig_function_share_lollipop.png", "Ranked: function share vs. health spending"),
-                fig_entry("fig_function_share_lollipop_no_usa.png", "Ranked: function share vs. health spending (excluding USA)"),
-                fig_entry("fig_function_share_lollipop_all_vs_no_usa.png", "Paired lollipop: all studies vs excluding USA"),
-                fig_entry("fig_function_share_r_no_usa_dumbbell.png", "Correlation sensitivity: all studies vs excluding USA"),
-                fig_entry("fig_function_share_no_usa_dumbbell.png", "Global financing-function mix: all studies vs excluding USA"),
-                fig_entry("fig_function_share_no_usa_delta.png", "Change in financing-function mix after excluding USA"),
-                fig_entry("fig_function_share_quartile.png", "Financing-function mix by spending quartile"),
-                fig_entry("fig_outcome_share_quartile.png", "Outcome-domain mix by spending quartile"),
-                fig_entry("fig_function_bump_eras.png", "Financing-function ranks, aid boom vs. bust"),
-            ] if have_ihme else []
-        ),
+        "title": "The financing backdrop",
+        "blurb": "How development assistance for health and national health spending have changed, including the 2025 aid cuts.",
+        "figs": [
+            fig_entry("fig_dah_trend.png", "Development assistance for health, 1990–2030"),
+            fig_entry("fig_dah_cuts_source.png", "The 2025 aid cuts, by source"),
+            fig_entry("fig_health_spending_income.png", "Health spending per person, by income group"),
+        ],
+    } if have_ihme else None,
+    {
+        "title": "Where financing and evidence diverge",
+        "blurb": "Where the amount of research does not match the money spent on health, or the disease burden, across regions and countries.",
+        "figs": [
+            fig_entry("fig_aid_vs_evidence_region.png", "Aid vs. evidence, by region"),
+            fig_entry("fig_research_vs_spending_country.png", "Research intensity vs. health spending, by country"),
+            fig_entry("fig_funder_scorecard_combined.png", "Funding priority scorecard: burden, spending and research together"),
+            fig_entry("fig_funder_scorecard_expenditure.png", "Funding priority scorecard: health expenditure edition"),
+        ],
+    } if have_ihme else None,
+    {
+        "title": "How research priorities differ",
+        "blurb": "How the financing functions and outcomes that research focuses on differ between countries that spend more or less on health.",
+        "figs": [
+            fig_entry("fig_function_share_quartile.png", "Financing-function mix by spending quartile"),
+            fig_entry("fig_outcome_share_quartile.png", "Outcome-domain mix by spending quartile"),
+            fig_entry("fig_function_share_facets.png", "Each function's research share vs. health spending"),
+            fig_entry("fig_function_share_lollipop.png", "Ranked: function share vs. health spending"),
+        ],
+    } if have_ihme else None,
+    {
+        "title": "How research responds over time",
+        "blurb": "Whether research on each financing function rises and falls with development assistance for health.",
+        "figs": [
+            fig_entry("fig_functions_vs_dah_index.png", "Every financing function vs. real-world aid"),
+            fig_entry("fig_revenue_vs_dah.png", "Revenue-Raising research vs. real-world aid"),
+            fig_entry("fig_function_bump_eras.png", "Financing-function ranks, aid boom vs. bust"),
+        ],
+    } if have_ihme else None,
+    {
+        "title": "USA sensitivity analysis",
+        "blurb": "Whether the results hold when studies about the United States, the largest single source of studies, are left out.",
+        "figs": [
+            fig_entry("fig_function_share_lollipop_no_usa.png", "Ranked: function share vs. health spending (excluding USA)"),
+            fig_entry("fig_function_share_lollipop_all_vs_no_usa.png", "Paired lollipop: all studies vs. excluding USA"),
+            fig_entry("fig_function_share_r_no_usa_dumbbell.png", "Correlation sensitivity: all studies vs. excluding USA"),
+            fig_entry("fig_function_share_no_usa_dumbbell.png", "Global financing-function mix: all studies vs. excluding USA"),
+            fig_entry("fig_function_share_no_usa_delta.png", "Change in financing-function mix after excluding USA"),
+        ],
     } if have_ihme else None,
     # Pipeline section (fig_funnel.png) is hidden; see build_hidden_figures_v5.py.
 ]

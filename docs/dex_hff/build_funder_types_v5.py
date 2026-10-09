@@ -22,6 +22,8 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import fig_text_fit  # keeps footnotes/notes inside every saved figure
+fig_text_fit.install()
 import matplotlib.ticker as mticker
 import pandas as pd
 
@@ -39,7 +41,7 @@ GOLD = "#b08d3e"
 INK = "#10243e"
 SUBHEAD_COLOR = "#5a6472"
 PAPER = "#faf9f6"
-MUTED = "#c9cfd6"
+MUTED = "#d6dee7"
 
 plt.rcParams.update({
     "font.family": "sans-serif",
@@ -64,7 +66,7 @@ ACADEMIC = "Universities, hospitals & institutes"
 OTHER = "Unclassified"
 
 # The three types the figure is about, and their colours.
-HIGHLIGHT = {NATGOV: ACCENT, PHARMA: "#ca746a", PRIVATE: GOLD}
+HIGHLIGHT = {NATGOV: "#2f6db3", PHARMA: "#C98F7A", PRIVATE: "#D2B06B"}  # soft gallery palette
 
 PHARMA_COMPANIES = [
     "pfizer", "novartis", "roche", "hoffmann", "genentech", "merck", "msd", "astrazeneca",
@@ -311,7 +313,7 @@ vals = [share(type_study_n[k]) for k in order]
 colors = [HIGHLIGHT.get(k, MUTED) for k in order]
 
 fig, ax = plt.subplots(figsize=(8.6, 5.2))
-ax.barh(order, vals, color=colors, zorder=3, height=0.66)
+ax.barh(order, vals, color=colors, zorder=3, height=0.58)
 for y, (k, v) in enumerate(zip(order, vals)):
     ax.text(v, y, f"  {v:.1f}%  ({type_study_n[k]:,})", va="center", fontsize=9,
             color=INK, fontweight="bold" if k in HIGHLIGHT else "normal")
@@ -321,9 +323,11 @@ for lbl in ax.get_yticklabels():
 ax.set_xlim(0, max(vals) * 1.25)
 ax.xaxis.set_major_formatter(mticker.PercentFormatter(decimals=0))
 ax.set_xlabel("share of studies that name a funder")
-for spine in ("top", "right"):
+for spine in ("top", "right", "left"):
     ax.spines[spine].set_visible(False)
-ax.grid(axis="x", color="#e7e3da", linewidth=0.8, zorder=0)
+ax.spines["bottom"].set_color("#c9ced6")
+ax.tick_params(axis="y", length=0)
+ax.grid(axis="x", color="#eceff3", linewidth=0.8, zorder=0)
 ax.set_axisbelow(True)
 
 ng, ph, pr = (share(type_study_n[k]) for k in (NATGOV, PHARMA, PRIVATE))
@@ -339,11 +343,10 @@ fig.text(0.01, 0.975, headline, fontsize=16, fontweight="bold", color=INK, ha="l
 fig.text(0.01, 0.905, desc, fontsize=10.5, color=SUBHEAD_COLOR, ha="left", va="top")
 fig.text(0.01, 0.862, finding, fontsize=10.5, fontweight="bold", color=INK, ha="left", va="top")
 footnote = (f"Base: {N_FUNDED:,} of {N:,} studies ({100 * N_FUNDED / N:.1f}%) report a research funder "
-            f"(HSF extraction 29 Sept v5; research_funder from CrossRef).\nEach named funder is assigned one type by "
+            f"(from CrossRef).\nEach named funder is assigned one type by "
             f"keyword rules; a study naming funders of several types counts in each, so shares sum to >100%.\n"
             f"National governments include ministries, national agencies, public research councils and bilateral aid "
-            f"agencies. Pharmaceutical companies\ninclude their corporate foundations. Funder-to-type mapping: "
-            f"docs/data/funder_types_v5.csv.")
+            f"agencies. Pharmaceutical companies\ninclude their corporate foundations.")
 fig.text(0.01, 0.02, footnote, fontsize=8, color=SUBHEAD_COLOR, ha="left", va="top", linespacing=1.4)
 fname = "fig_funder_types_v5.png"
 fig.savefig(FIGS / fname, dpi=150, bbox_inches="tight")

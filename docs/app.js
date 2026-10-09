@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-10i";
+const BUILD = "2026-10-10o";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -802,6 +802,22 @@ function rampColor(t) {
   return `rgb(${c[0]},${c[1]},${c[2]})`;
 }
 
+// Shorter display names for long category labels in interactive charts.
+const SHORT_LABELS = {
+  "Recurrent financing for the procurement and distribution of supply chain inputs": "Supply-chain financing",
+  "Capital investment: other health system inputs": "Capital: other inputs",
+  "Capital investment: infrastructure": "Capital: infrastructure",
+  "Equitable distribution of health system resources": "Equitable distribution",
+  "Improved level and distribution of health": "Health level & distribution",
+  "Efficiency in the use of resources": "Efficiency",
+  "Experimental and quasi-experimental impact evaluations": "Experimental & quasi-experimental",
+  "Cross-sectional and correlational analyses": "Cross-sectional & correlational",
+  "Qualitative and mixed-methods evaluations": "Qualitative & mixed-methods eval.",
+  "National / international survey datasets": "National / international surveys",
+  "Geospatial / remote-sensing data": "Geospatial / remote sensing"
+};
+const shortLabel = s => SHORT_LABELS[s] || s;
+
 // Breaks a long axis label into lines of about `width` characters.
 function wrapLabel(text, width = 24) {
   const words = String(text).split(" ");
@@ -1387,14 +1403,21 @@ if (typeof document !== "undefined") {
 
   // Sections shown together under one card on the Thematic analysis index.
   const SECTION_GROUPS = [{
+    title: "Global financing context",
+    blurb: "How the research landscape compares with global health financing: aid, national spending, "
+      + "where money and evidence diverge, and how research responds over time.",
+    members: ["The financing backdrop", "Where financing and evidence diverge", "How research priorities differ",
+      "How research responds over time", "USA sensitivity analysis"]
+  }, {
     title: "Authorship & access",
     blurb: "Who writes health financing research about different settings, how authors collaborate "
       + "across income groups, and how much of their work is freely available.",
     members: ["Research ownership & collaboration", "Open access & author countries"]
   }, {
     title: "Topics & themes",
-    blurb: "What health financing studies are about: topics found from the studies' own text, and "
-      + "the disease areas they address.",
+    blurb: "The subjects studies deal with: topics found in the wording of their abstracts, and the "
+      + "diseases they address. These are different from financing functions and outcomes, which classify "
+      + "the part of health financing a study examines and the results it measures.",
     members: ["Topic clusters", "Disease focus"]
   }, {
     title: "Geography",
@@ -2219,7 +2242,7 @@ if (typeof document !== "undefined") {
     };
     // A visible "N views" label so readers can tell the tabs switch the figure.
     const label = el("span", "fig-tabs-label");
-    label.innerHTML = '<span aria-hidden="true">&#8644;</span> ' + figs.length + " views:";
+    label.innerHTML = '<span aria-hidden="true">&#8644;</span> ' + figs.length + " views";
     tabs.appendChild(label);
     figs.forEach((f, i) => {
       const b = el("button", "fig-tab");
@@ -2594,10 +2617,15 @@ if (typeof document !== "undefined") {
     const years = Object.keys(ser).map(Number);
     let traces;
     if (v === "none") {
+      const span = Math.max(1, years[years.length - 1] - years[0]);
       traces = [{
         x: years, y: years.map(y => ser[y]),
-        mode: "lines", type: "scatter",
-        line: { color: ACCENT, width: 3 },
+        mode: "lines+markers", type: "scatter",
+        line: { color: ACCENT, width: 3, shape: "spline", smoothing: 0.45 },
+        marker: { color: years.map(y => rampColor(0.3 + 0.7 * (y - years[0]) / span)), size: 7,
+          line: { color: "white", width: 1 } },
+        fill: "tozeroy", fillcolor: "rgba(31,95,168,.12)",
+        fillgradient: { type: "horizontal", colorscale: [[0, "rgba(31,95,168,.04)"], [1, "rgba(31,95,168,.22)"]] },
         name: "studies", hovertemplate: "%{x}: %{y} studies<extra></extra>"
       }];
     } else {
@@ -2612,10 +2640,11 @@ if (typeof document !== "undefined") {
       traces = cats.map(cat => ({
         x: years,
         y: years.map(y => (ser[y] && ser[y][cat] != null) ? ser[y][cat] : null),
-        mode: "lines", type: "scatter",
-        name: cat,
+        mode: "lines+markers", type: "scatter",
+        name: shortLabel(cat),
         connectgaps: false,
-        line: { width: 2.4, color: colorMap ? colorMap[cat] : undefined },
+        line: { width: 2.4, shape: "spline", smoothing: 0.4, color: colorMap ? colorMap[cat] : undefined },
+        marker: { size: 5, line: { color: "white", width: 1 } },
         // cat comes from dict levels (developer-curated); escaped anyway —
         // Plotly renders hovertemplate output as HTML.
         hovertemplate: "%{x} · " + esc(cat) + ": %{y} studies<extra></extra>"
@@ -2625,8 +2654,8 @@ if (typeof document !== "undefined") {
       font: BASE_FONT,
       margin: { t: 20, b: 60, l: 60, r: 20 },
       legend: hLegend(-0.18),
-      xaxis: { title: null, gridcolor: "#eeebe3" },
-      yaxis: { title: "studies", gridcolor: "#eeebe3" },
+      xaxis: { title: null, showgrid: false },
+      yaxis: { title: "studies", gridcolor: "#eeebe3", zeroline: false, rangemode: "tozero" },
       plot_bgcolor: "rgba(0,0,0,0)",
       paper_bgcolor: "rgba(0,0,0,0)"
     }, PLOTLY_CFG);
@@ -2695,15 +2724,16 @@ if (typeof document !== "undefined") {
       const maxV = Math.max(1, ...desc.map(r => r.v));
       traces = [{
         type: "bar", orientation: "h",
-        y: desc.map(r => wrapLabel(r.x)),
+        y: desc.map(r => wrapLabel(shortLabel(r.x), 28)),
         x: desc.map(r => r.v),
+        customdata: desc.map(r => r.x),
         marker: { color: desc.map(r => rampColor(0.15 + 0.85 * Math.sqrt(r.v / maxV))) },
-        hovertemplate: "%{y}: %{x}<extra></extra>"
+        hovertemplate: "%{customdata}: %{x}<extra></extra>"
       }];
       layout = {
         yaxis: {
           categoryorder: "array",
-          categoryarray: bottomUp.map(r => wrapLabel(r.x)),
+          categoryarray: bottomUp.map(r => wrapLabel(shortLabel(r.x), 28)),
           automargin: true
         },
         xaxis: {
@@ -2717,7 +2747,7 @@ if (typeof document !== "undefined") {
       traces = res.stacks.map(k => ({
         type: "bar", orientation: "h",
         name: k,
-        y: res.catOrder.map(c => wrapLabel(c)),
+        y: res.catOrder.map(c => wrapLabel(shortLabel(c), 28)),
         x: res.catOrder.map(c => res.values[c][k] != null ? res.values[c][k] : 0),
         // k comes from dict levels (developer-curated); escaped anyway —
         // Plotly renders hovertemplate output as HTML.
@@ -2727,7 +2757,7 @@ if (typeof document !== "undefined") {
         barmode: "stack",
         yaxis: {
           categoryorder: "array",
-          categoryarray: bottomUp.map(c => wrapLabel(c)),
+          categoryarray: bottomUp.map(c => wrapLabel(shortLabel(c), 28)),
           automargin: true
         },
         xaxis: {
@@ -2738,6 +2768,9 @@ if (typeof document !== "undefined") {
         }
       };
     }
+    // Give every category enough room for its (possibly two-line) label.
+    const nCats = res.type === "simple" ? res.rows.length : res.catOrder.length;
+    $("x-comp").style.height = Math.max(340, 70 + nCats * 34) + "px";
     window.Plotly.react("x-comp", traces, Object.assign({
       font: BASE_FONT,
       margin: { t: 30, b: 70, l: 20, r: 20 },

@@ -29,7 +29,10 @@ from pathlib import Path
 
 import matplotlib
 matplotlib.use("Agg")
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
+import fig_text_fit  # keeps footnotes/notes inside every saved figure
+fig_text_fit.install()
 import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
@@ -57,7 +60,8 @@ plt.rcParams.update({
 
 dict_json = json.loads((DATA / "dict.json").read_text(encoding="utf-8"))
 INC_ORDER = dict_json["meta"]["inc_lv"]  # Low -> High, the site's order
-INC_COLORS = dict(zip(INC_ORDER, dict_json["meta"]["pal_inc"]))  # same colours as every income chart on the site
+# Soft income palette, the same one the site's interactive charts use.
+INC_COLORS = {"Low income": "#c96a4a", "Lower middle income": "#d2a84a", "Upper middle income": "#3b9b84", "High income": "#356fa8"}
 countries = json.loads((DATA / "countries.json").read_text(encoding="utf-8"))
 INCOME_OF_ISO3 = {c["iso3"]: c["income"] for c in countries}
 NAME_OF_ISO3 = {c["iso3"]: c["country"] for c in countries}
@@ -170,8 +174,12 @@ x = by.index.astype(int)
 fname = "fig_oa_trend_v5.png"
 fig, ax = plt.subplots(figsize=(10, 5.8))
 fig.subplots_adjust(left=0.08, right=0.93, top=0.77, bottom=0.14)
-ax.fill_between(x, by["share"], color=ACCENT, alpha=0.12, linewidth=0)
-ax.plot(x, by["share"], color=ACCENT, linewidth=2, marker="o", markersize=5, zorder=3)
+ax.fill_between(x, by["share"], color=ACCENT, alpha=0.10, linewidth=0)
+ax.plot(x, by["share"], color=ACCENT, linewidth=2.4, zorder=3)
+# Markers shade from light (early years) to strong (recent), as in the Overview trend.
+oa_ramp = mcolors.LinearSegmentedColormap.from_list("oa", ["#9fc4df", "#1f5fa8"])
+ax.scatter(x, by["share"], c=[oa_ramp(i / max(1, len(x) - 1)) for i in range(len(x))], s=42,
+           edgecolors="white", linewidths=1, zorder=4)
 for xi in (x[0], x[-1]):
     v = by.loc[xi, "share"]
     ax.annotate(f"{v:.0f}%", (xi, v), xytext=(0, 9), textcoords="offset points", ha="center",
@@ -312,7 +320,9 @@ for yv, g in enumerate(inc_rows):
     a1.text(inc_share[g], yv, f"  {inc_share[g]:.0f}%  (n={inc_n[g]:,})", va="center", fontsize=9, color=INK)
 a1.set_title("Any author from this income group", loc="left", fontsize=10.5, fontweight="bold", color=INK)
 t_rows = TEAM_ORDER[::-1]
-a2.barh(t_rows, [team_share[t] for t in t_rows], color=ACCENT, height=0.55, zorder=3)
+TEAM_COLORS = {"High-income authors only": "#356fa8", "Mixed high-income and L&MICs team": "#93A3D0",
+               "L&MICs authors only": "#3b9b84"}
+a2.barh(t_rows, [team_share[t] for t in t_rows], color=[TEAM_COLORS[t] for t in t_rows], height=0.55, zorder=3)
 for yv, t in enumerate(t_rows):
     a2.text(team_share[t], yv, f"  {team_share[t]:.0f}%  (n={team_n[t]:,})", va="center", fontsize=9, color=INK)
 a2.set_title("Author-team make-up", loc="left", fontsize=10.5, fontweight="bold", color=INK)
