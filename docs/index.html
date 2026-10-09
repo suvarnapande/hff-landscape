@@ -11,7 +11,7 @@
      versions with SHA-384 integrity hashes verified by double fetch. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" integrity="sha384-krui876Mk6M6Lq6uj1SQo+u4MoImxFwCfwzWNU982QBMNci3VMZ3FoYSdUakJD5I" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css" integrity="sha384-PSZaVsyG9jDu8hFaSJev5s/9poIJlX7cuxSGdqCgXRHpo2DzIaZAyCd2rG/DJJmV" crossorigin="anonymous">
-<link rel="stylesheet" href="styles.css?v=2026-10-10g">
+<link rel="stylesheet" href="styles.css?v=2026-10-10h">
 </head>
 <body>
 
@@ -712,13 +712,16 @@
 
 
 <footer class="site-footer">
-  <strong>About the data:</strong> This release analyses 36,495 records from the HSF extraction dated 29 September, 2026. Classification is LLM-assisted with rigorous human verification. See <strong>Scope</strong> for details. · <strong>Sources:</strong> HFF extraction pipeline (LLM-assisted classification, GLM/Sonnet/DeepSeek consensus) · <a href="https://www.who.int/publications/i/item/9789240042476" target="_blank" rel="noopener">WHO Health System Performance Assessment framework</a> · World Bank (income groups, population) · IHME GBD 2023 &amp; IHME Health Spending 1995–2022 (country-level reference)
+  <!-- Record count and date are filled from the data by app.js (renderOverview). -->
+  <strong>About the data:</strong> This release analyses <span id="footer-n">36,495</span> records dated
+  <span id="footer-date">30 September 2026</span>. Classification is LLM-assisted with human oversight and verification.
+  See <a href="https://sawalee-3ie.github.io/health-financing-platform/#methods-title">methods and scope</a> for details.
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js" integrity="sha384-EcVTHT5RdDTvzbTIbNOtaNxNALeJYDgmv5Crp3NBmcdrCPrDnqp6I1+ETJ/FCFHI" crossorigin="anonymous"></script>
-<script type="module" src="app.js?v=2026-10-10n"></script>
+<script type="module" src="app.js?v=2026-10-10u"></script>
 
 </body>
 </html>

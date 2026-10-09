@@ -264,12 +264,29 @@ def set_headline(ax, headline, desc, finding, fname):
     f_pts = 0
     d_pts = f_pts + lines(f) * 10.5 * 1.3 + 6
     h_pts = d_pts + lines(d) * 10.5 * 1.3 + 8
-    for text, pts, size, weight, color in ((f, f_pts, 10.5, "bold", INK),
+    # Created headline -> subtitle -> finding, the same order as the unwrapped path, so
+    # figures that reposition ax.texts[-3:] still get [headline, subtitle, finding].
+    for text, pts, size, weight, color in ((h, h_pts, 16, "bold", INK),
                                            (d, d_pts, 10.5, "normal", SUBHEAD_COLOR),
-                                           (h, h_pts, 16, "bold", INK)):
+                                           (f, f_pts, 10.5, "bold", INK)):
         tr = offset_copy(ax.transAxes, fig=fig, y=pts, units="points")
         ax.text(0, 1.02, text, transform=tr, fontsize=size, fontweight=weight, color=color,
                 ha="left", va="bottom", linespacing=1.25)
+
+
+def stack_headline(ax, texts, base_y):
+    """Re-stacks set_headline's [headline, subtitle, finding] texts upward from
+    base_y (axes fraction) with even point spacing, e.g. above top column headers."""
+    from matplotlib.transforms import offset_copy
+    h, d, f = texts
+    lines = lambda t: t.get_text().count("\n") + 1
+    f_pts = 0
+    d_pts = f_pts + lines(f) * 10.5 * 1.3 + 7
+    h_pts = d_pts + lines(d) * 10.5 * 1.3 + 9
+    for t, pts in ((f, f_pts), (d, d_pts), (h, h_pts)):
+        t.set_transform(offset_copy(ax.transAxes, fig=ax.figure, y=pts, units="points"))
+        t.set_position((0, base_y))
+        t.set_va("bottom")
 
 
 def set_footnote(fig, text):
@@ -2024,10 +2041,7 @@ set_headline(ax, "Each financing function reports a different outcome mix",
              "fig_function_outcome_heatmap.png")
 
 # Keep editorial text comfortably clear of the top column headers.
-headline_texts = ax.texts[-3:]
-headline_texts[0].set_position((0, 1.50))
-headline_texts[1].set_position((0, 1.355))
-headline_texts[2].set_position((0, 1.21))
+stack_headline(ax, ax.texts[-3:], 1.21)  # just above the top column headers
 
 # Match the reference: short horizontal scale under the table with descriptor
 # sitting to the right instead of under the scale.
@@ -2842,15 +2856,16 @@ if have_funders:
     # textwrap.fill() that produced 3-4 line headers tall enough to collide
     # with the editorial text; row labels stay single-line, as in
     # fig_funder_outcome_heatmap, since funder names fit fine unwrapped.
-    fig, ax = plt.subplots(figsize=(14.2, 12.8))
+    # Same size as fig_funder_outcome_heatmap: the two are tabs of one card on the site.
+    fig, ax = plt.subplots(figsize=(12, 8.6))
     im = ax.imshow(fh_grid, aspect="auto", cmap=fh_cmap, vmin=0, vmax=max(60, np.nanmax(fh_grid)))
     ax.set_xticks(np.arange(len(ms_funcs)))
     ax.set_yticks(np.arange(len(fh_order)))
     # fo_rowlabels' wraps (~20-24 char lines) were sized for that figure's
     # wider per-row space; with 9 columns here each line must be much
     # narrower or neighbouring headers collide, hence a tighter wrap here.
-    ax.set_xticklabels([textwrap.fill(SHORT_FN.get(fn, fn), width=13, break_long_words=False) for fn in ms_funcs],
-                        fontsize=8.6, fontweight="bold", linespacing=1.2)
+    ax.set_xticklabels([textwrap.fill(SHORT_FN.get(fn, fn), width=11, break_long_words=False) for fn in ms_funcs],
+                        fontsize=8, fontweight="bold", linespacing=1.15)
     ax.set_yticklabels([f"{f}  (n={fh_study_totals[f]:,})" for f in fh_order], fontsize=10, fontweight="bold")
     ax.tick_params(top=True, bottom=False, labeltop=True, labelbottom=False, length=0, pad=10)
     for lab in ax.get_xticklabels():
@@ -2884,10 +2899,7 @@ if have_funders:
     # Column headers wrap to 2 lines and sit above the axes (labeltop=True),
     # so push the editorial text further up to keep it clear of them — same
     # fix as fig_function_outcome_heatmap above.
-    headline_texts = ax.texts[-3:]
-    headline_texts[0].set_position((0, 1.50))
-    headline_texts[1].set_position((0, 1.355))
-    headline_texts[2].set_position((0, 1.21))
+    stack_headline(ax, ax.texts[-3:], 1.21)  # just above the top column headers
 
     fig.subplots_adjust(left=0.30, right=0.97, top=0.72, bottom=0.13)
     cbar_ax = fig.add_axes([0.36, 0.055, 0.30, 0.02])
@@ -2955,10 +2967,7 @@ if have_funders:
     )
     # Same clearance fix as the heatmap above: column headers sit above the
     # axes, so push the editorial text further up.
-    headline_texts = ax.texts[-3:]
-    headline_texts[0].set_position((0, 1.50))
-    headline_texts[1].set_position((0, 1.355))
-    headline_texts[2].set_position((0, 1.21))
+    stack_headline(ax, ax.texts[-3:], 1.21)  # just above the top column headers
 
     fig.subplots_adjust(left=0.30, right=0.97, top=0.72, bottom=0.17)
     fig.text(0.02, 0.765, "Funder (number of studies)", fontsize=10, fontweight="bold", color=INK, va="bottom")
@@ -3004,7 +3013,8 @@ if have_funders:
                               for o in fo_outs] for f in fu_out_order])
     fu_out_cmap = mcolors.LinearSegmentedColormap.from_list("fuo", ["#eef5f5", "#4f8f96", "#123a40"])
 
-    fig, ax = plt.subplots(figsize=(11, 7.6))
+    # Same size as fig_funder_function_heatmap (tabbed together on the site).
+    fig, ax = plt.subplots(figsize=(12, 8.6))
     im = ax.imshow(fu_out_grid, cmap=fu_out_cmap, aspect="auto", vmin=0, vmax=fu_out_grid.max())
     ax.set_xticks(range(len(fo_outs)))
     ax.set_xticklabels([SHORT_OUT.get(o, o) for o in fo_outs], fontsize=8, rotation=28, ha="right")
@@ -4393,7 +4403,7 @@ if have_ihme:
     src = src.sort_values("Difference_2024_to_2025")
     top_cutter = src.iloc[0]
     total_cut = src["Difference_2024_to_2025"].sum() / 1000  # millions -> billions
-    colors = ["#c0392b" if v < 0 else "#1baf7a" for v in src["Difference_2024_to_2025"]]
+    colors = ["#c96a4a" if v < 0 else "#2F9B92" for v in src["Difference_2024_to_2025"]]
     fig, ax = plt.subplots(figsize=(8.5, 4.6))
     span = float(src["Difference_2024_to_2025"].abs().max()) / 1000
     ax.barh(src["Source"], src["Difference_2024_to_2025"] / 1000, color=colors, zorder=3)
@@ -4422,7 +4432,8 @@ if have_ihme:
     hsp = pd.read_excel(DEX / "F11_Total_health_spending_per_person_by_WB_income_group_2000-2030.xlsx", sheet_name="in")
     hsp = hsp[["Year", "World Bank income group", "Total health spending per person", "Status"]].dropna()
     inc_order_hsp = ["High", "Upper-Middle", "Lower-Middle", "Low"]
-    inc_colors_hsp = dict(zip(inc_order_hsp, [ACCENT, "#1baf7a", GOLD, "#c0392b"]))
+    # Soft income palette (High -> Low), as in the site's other income charts.
+    inc_colors_hsp = dict(zip(inc_order_hsp, ["#356fa8", "#3b9b84", "#d2a84a", "#c96a4a"]))
     high_2025 = hsp[(hsp["World Bank income group"] == "High") & (hsp["Year"] == 2025)]["Total health spending per person"].iloc[0]
     low_2025 = hsp[(hsp["World Bank income group"] == "Low") & (hsp["Year"] == 2025)]["Total health spending per person"].iloc[0]
     low_2020 = hsp[(hsp["World Bank income group"] == "Low") & (hsp["Year"] == 2020)]["Total health spending per person"].iloc[0]
@@ -4516,7 +4527,8 @@ if have_ihme:
     dah_index = [100 * dah_by_year[y] / dah_base for y in common_years]
 
     fig, ax = plt.subplots(figsize=(9, 5.6))
-    func_palette = [ACCENT, "#1baf7a", "#8a5fb0", "#c0392b", "#2a9d8f", "#e07b39"]
+    # Each function keeps its site-wide colour (FUNCTION_COLORS).
+    func_palette = [FUNCTION_COLORS.get(fn, "#8FA6B8") for fn in top6]
     best_fn, best_corr = None, -2
     for fn, col in zip(top6, func_palette):
         series = [func_year_counts[fn].get(y, 0) for y in common_years]
@@ -4748,11 +4760,11 @@ if have_ihme:
     zone_x0_exp = exp_pts["total_exp"].median()
     ax1.axhline(median_rate_exp, color="#8a8272", linewidth=1, linestyle=(0, (4, 3)), zorder=2)
     ax1.add_patch(plt.Rectangle((zone_x0_exp, y_min_exp), x_max_exp - zone_x0_exp, median_rate_exp - y_min_exp,
-                                 facecolor="#c0392b", alpha=0.08, edgecolor="none", zorder=1))
+                                 facecolor="#c96a4a", alpha=0.08, edgecolor="none", zorder=1))
     zone_text_exp = "priority zone\nhigh spending, low research intensity"
     zone_tx_exp, zone_ty_exp = zone_x0_exp * 2.2, y_min_exp * 2.6
     ax1.text(zone_tx_exp, zone_ty_exp, zone_text_exp,
-             ha="left", va="center", fontsize=8.5, fontweight="bold", color="#a13a2a", linespacing=1.4)
+             ha="left", va="center", fontsize=8.5, fontweight="bold", color="#9c4f3a", linespacing=1.4)
 
     label_rows_exp = exp_pts[exp_pts["country"].isin(top_deficit_exp["country"])].sort_values("total_exp")
     declutter_labels(ax1, label_rows_exp, "total_exp", "per100k", name_map=SHORT_COUNTRY,
@@ -4850,7 +4862,7 @@ if have_ihme:
     ys_line_combo = xs_line_combo * k_combo
     ax1.plot(xs_line_combo, ys_line_combo, color="#8a8272", linewidth=1, linestyle=(0, (4, 3)), zorder=2)
     ax1.fill_between(xs_line_combo, [y_min_combo, y_min_combo], ys_line_combo,
-                      color="#c0392b", alpha=0.08, zorder=1)
+                      color="#c96a4a", alpha=0.08, zorder=1)
     # Position in log-space (not a plain fraction of the linear x-range, which
     # would sit almost at x_max on a log axis) and left-align well short of
     # the right edge — a long, centered line here previously ran past ax1's
@@ -4860,7 +4872,7 @@ if have_ihme:
     zone_tx_combo = 10 ** log_zone_x_combo
     zone_ty_combo = zone_tx_combo * k_combo * 0.3
     ax1.text(zone_tx_combo, zone_ty_combo, zone_text_combo,
-             ha="left", va="center", fontsize=8.2, fontweight="bold", color="#a13a2a", linespacing=1.4)
+             ha="left", va="center", fontsize=8.2, fontweight="bold", color="#9c4f3a", linespacing=1.4)
 
     label_rows_combo = combo_pts[combo_pts["country"].isin(top_deficit_combo["country"])].sort_values("dalys")
     declutter_labels(ax1, label_rows_combo, "dalys", "total_exp", name_map=SHORT_COUNTRY,
@@ -4924,8 +4936,7 @@ if have_ihme:
         function_studies[g].add(s)
 
     comp_funcs = [fn for fn in FUNC_GRPS if fn != "Unclear"]
-    comp_palette = dict(zip(comp_funcs, [ACCENT, GOLD, "#1baf7a", "#8a5fb0", "#c0392b",
-                                          "#2a9d8f", "#e07b39", "#6b7280", "#3d5a80"]))
+    comp_palette = {fn: FUNCTION_COLORS.get(fn, "#8FA6B8") for fn in comp_funcs}  # site-wide function colours
     def build_function_share_df(excluded_studies=None):
         """Build country-level financing-function shares after optional study exclusion.
 
@@ -5011,7 +5022,7 @@ if have_ihme:
         lollipop = sorted(local_slopes.items(), key=lambda kv: kv[1][1])
         labels_lol = [SHORT_FN.get(fn, fn) for fn, _ in lollipop]
         r_vals = [v[1] for _, v in lollipop]
-        colors_lol = ["#c0392b" if r < 0 else ACCENT for r in r_vals]
+        colors_lol = ["#c96a4a" if r < 0 else ACCENT for r in r_vals]
         y_pos = np.arange(len(labels_lol))
 
         fig, ax = plt.subplots(figsize=(8.5, 5.2))
@@ -5095,9 +5106,9 @@ if have_ihme:
 
         fig, ax = plt.subplots(figsize=(11.2, 6.25))
         ax.axvline(0, color="#8a8272", linewidth=0.9, zorder=1)
-        ax.hlines(y_all, 0, compare_all_vals, color="#90b7e1", linewidth=2.2, zorder=2)
+        ax.hlines(y_all, 0, compare_all_vals, color="#a9c6e2", linewidth=2.2, zorder=2)
         ax.hlines(y_no, 0, compare_no_vals, color="#1f5fa8", linewidth=2.2, zorder=2)
-        ax.scatter(compare_all_vals, y_all, s=92, color="#90b7e1", edgecolor="white", linewidth=0.8,
+        ax.scatter(compare_all_vals, y_all, s=92, color="#a9c6e2", edgecolor="white", linewidth=0.8,
                    zorder=4, label="All studies")
         ax.scatter(compare_no_vals, y_no, s=92, color="#1f5fa8", edgecolor="white", linewidth=0.8,
                    zorder=4, label="Excluding USA-mapped studies")
@@ -5109,7 +5120,7 @@ if have_ihme:
         for y, r in zip(y_all, compare_all_vals):
             ax.text(r + (0.018 if r >= 0 else -0.018), y, f"{r:.2f}",
                     va="center", ha="left" if r >= 0 else "right",
-                    fontsize=8.6, color="#557da8")
+                    fontsize=8.6, color="#4f7cb8")
         for y, r in zip(y_no, compare_no_vals):
             ax.text(r + (0.018 if r >= 0 else -0.018), y, f"{r:.2f}",
                     va="center", ha="left" if r >= 0 else "right",
@@ -5161,7 +5172,7 @@ if have_ihme:
         fig, ax = plt.subplots(figsize=(11.2, 6.8))
         for y, x1, x2 in zip(y_pos, corr_all_vals, corr_no_vals):
             ax.plot([x1, x2], [y, y], color="#d6dee7", linewidth=2.6, zorder=2)
-        ax.scatter(corr_all_vals, y_pos, s=104, color="#90b7e1", edgecolor="white", linewidth=0.9,
+        ax.scatter(corr_all_vals, y_pos, s=104, color="#a9c6e2", edgecolor="white", linewidth=0.9,
                    zorder=3, label="All studies")
         ax.scatter(corr_no_vals, y_pos, s=104, color="#1f5fa8", edgecolor="white", linewidth=0.9,
                    zorder=4, label="Excluding USA-mapped studies")
@@ -5229,7 +5240,7 @@ if have_ihme:
         )
     for y, x1, x2 in zip(y_pos, sens_all_vals, sens_no_vals):
         ax.plot([x1, x2], [y, y], color="#d6dee7", linewidth=2.6, zorder=2)
-    ax.scatter(sens_all_vals, y_pos, s=104, color="#90b7e1", edgecolor="white", linewidth=0.9,
+    ax.scatter(sens_all_vals, y_pos, s=104, color="#a9c6e2", edgecolor="white", linewidth=0.9,
                zorder=3, label="All studies")
     ax.scatter(sens_no_vals, y_pos, s=104, color="#1f5fa8", edgecolor="white", linewidth=0.9,
                zorder=4, label="Excluding USA-mapped studies")
@@ -5259,7 +5270,7 @@ if have_ihme:
     delta_items = sorted(overall_delta_no_usa.items(), key=lambda kv: kv[1])
     delta_labels = [SHORT_FN.get(fn, fn) for fn, _ in delta_items]
     delta_vals = [v for _, v in delta_items]
-    delta_colors = ["#c0392b" if v < 0 else ACCENT for v in delta_vals]
+    delta_colors = ["#c96a4a" if v < 0 else ACCENT for v in delta_vals]
     y_pos = np.arange(len(delta_labels))
     fig, ax = plt.subplots(figsize=(8.8, 5.2))
     ax.hlines(y_pos, 0, delta_vals, color=delta_colors, linewidth=2.2, zorder=3)
@@ -5319,8 +5330,8 @@ if have_ihme:
     for s, g in zip(outcome_j["s"], outcome_j["g"]):
         outcome_studies[g].add(s)
     out_comp_outs = [o for o in OUTCOME_GRPS if o != "Unclear"]
-    out_comp_palette = dict(zip(out_comp_outs, [ACCENT, GOLD, "#1baf7a", "#8a5fb0", "#c0392b",
-                                                 "#2a9d8f", "#e07b39", "#6b7280", "#3d5a80"]))
+    out_comp_palette = dict(zip(out_comp_outs, ["#1764C0", "#2F9B92", "#63B0BC", "#93A3D0", "#D2B06B",
+                                                 "#88B7A8", "#B79BCB", "#7E94B1", "#C98F7A"]))  # soft gallery set
     out_comp_rows = []
     for name, spend in spend_by_country.items():
         i = country_idx[name]

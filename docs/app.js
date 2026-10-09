@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-10o";
+const BUILD = "2026-10-10u";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1414,7 +1414,7 @@ if (typeof document !== "undefined") {
       + "across income groups, and how much of their work is freely available.",
     members: ["Research ownership & collaboration", "Open access & author countries"]
   }, {
-    title: "Topics & themes",
+    title: "Topic clustering & disease focus",
     blurb: "The subjects studies deal with: topics found in the wording of their abstracts, and the "
       + "diseases they address. These are different from financing functions and outcomes, which classify "
       + "the part of health financing a study examines and the results it measures.",
@@ -1631,6 +1631,14 @@ if (typeof document !== "undefined") {
     if (built) built.textContent = "Last update " + m.built;
     const updated = $("overview-updated");
     if (updated) updated.textContent = "Evidence map updated " + m.built;
+    // Footer: same study count as "Studies captured in the map", and the data build date.
+    const footN = $("footer-n");
+    if (footN) footN.textContent = fmtNum(db.nStudies);
+    const footDate = $("footer-date");
+    if (footDate && m.built) {
+      const d = new Date(m.built + "T00:00:00");
+      if (!isNaN(d)) footDate.textContent = d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    }
 
     // Glance tiles: final formatted strings from content.json;
     // sub === null means no footer line.
@@ -2321,10 +2329,14 @@ if (typeof document !== "undefined") {
     grid.appendChild(card);
   }
 
+  const STACKED_SECTIONS = new Set(["Financing functions & outcomes"]);
+
   function renderFigureGrid(sec, grid) {
     grid.textContent = "";
     // A lone figure (e.g. the combined Methods & data figure) gets the full width.
     grid.classList.toggle("fig-grid-single", sec.figs.length === 1);
+    // Sections whose cards are stacked one per row at the same width.
+    grid.classList.toggle("fig-grid-stack", STACKED_SECTIONS.has(sec.title));
     const doneGroups = new Set();
     for (const f of sec.figs) {
       const panelGroup = FIGURE_PANEL_GROUPS.find(g => g.rows.some(r => r.includes(f.file)));

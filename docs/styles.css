@@ -1749,3 +1749,10 @@ table.dataTable thead th.num { text-align: right; }
 .filter-help p { margin: 0 0 .3rem; }
 .filter-help ul { margin: .2rem 0 0; padding-left: 1.1rem; }
 .filter-help li { margin: .1rem 0; }
+
+/* Sections stacked one card per row, all at the width of the widest card. */
+.fig-grid.fig-grid-stack { grid-template-columns: minmax(0, 1fr); max-width: 1180px; }
+.fig-grid-stack .fig-card.fig-card-wide { grid-column: auto; }
+.fig-grid-stack .fig-card > img,
+.fig-grid-stack .fig-card-tabbed img { max-height: 600px; object-fit: contain; background: #fff; }
+.fig-grid-stack .fig-card-tabbed img { aspect-ratio: auto; height: 560px; }
