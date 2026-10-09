@@ -685,8 +685,8 @@ ax.yaxis.set_major_formatter(mticker.StrMethodFormatter("{x:,.0f}"))
 ax.set_ylim(0, cum[-1] * 1.18)
 clean_axes(ax)
 ax.grid(axis="y", color="#e7e3da", linewidth=0.8, zorder=0)
-set_footnote(fig, f"Base: {total_full:,} records by publication year between {years[0]}–{full_years[-1]}. "
-                   f"{years[-1]} data covers only part of the year. Reference: cumulative growth at the {years[0]}–{years[2]} average annual rate.")
+set_footnote(fig, f"{years[-1]} is a partial year (searches were run in mid-{years[-1]}). Dashed line: cumulative "
+                   f"growth at the {years[0]}–{str(years[2])[2:]} average annual rate.")
 fig.tight_layout()
 fig.savefig(FIGS / "fig_growth.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
@@ -732,8 +732,7 @@ ax.set_xlabel("studies")
 ax.tick_params(axis="y", labelsize=10.5)
 clean_axes(ax)
 ax.xaxis.set_major_formatter(mticker.StrMethodFormatter("{x:,.0f}"))
-set_footnote(fig, f"Base: {sum(func_counts.values()):,} financing-function tags across {N:,} studies "
-                   f"(a study can carry more than one tag).")
+set_footnote(fig, f"Base: {sum(func_counts.values()):,} tags across {N:,} studies.")
 fig.subplots_adjust(left=0.31, right=0.96, top=0.78, bottom=0.14)
 fig.savefig(FIGS / "fig_function_bar.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
@@ -775,7 +774,7 @@ ax.set_ylabel("share of tagged studies (%)")
 ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True, nbins=9))
 clean_axes(ax)
 ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.15), ncol=2, frameon=False, fontsize=9)
-set_footnote(fig, f"Base: {sum(totals_by_year.values()):,} function tags among the top 5 functions, by publication year.")
+set_footnote(fig, f"Base: {sum(totals_by_year.values()):,} tags for the top 5 functions.")
 fig.tight_layout()
 fig.savefig(FIGS / "fig_function_time.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
@@ -841,7 +840,7 @@ clean_axes(ax)
 ax.grid(axis="both", color="#ddd8cf", linewidth=0.8, zorder=0)
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
-set_footnote(fig, f"Base: {sum(totals_by_year.values()):,} function tags among the top 5 functions, by publication year.")
+set_footnote(fig, f"Base: {sum(totals_by_year.values()):,} tags for the top 5 functions.")
 fig.subplots_adjust(left=0.09, right=0.78, top=0.74, bottom=0.18)
 fig.savefig(FIGS / "fig_function_time_lines.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
@@ -940,7 +939,7 @@ ax.tick_params(axis="y", labelsize=10.5)
 clean_axes(ax)
 ax.xaxis.set_major_formatter(mticker.StrMethodFormatter("{x:,.0f}"))
 ax.xaxis.set_major_locator(mticker.MaxNLocator(nbins=5))
-set_footnote(fig, f"Base: {sum(outcome_counts.values()):,} outcome-domain tags across {N:,} studies.")
+set_footnote(fig, f"Base: {sum(outcome_counts.values()):,} tags across {N:,} studies.")
 fig.subplots_adjust(left=0.34, right=0.92, top=0.78, bottom=0.18)
 fig.savefig(FIGS / "fig_outcome_bar.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
@@ -958,7 +957,7 @@ for y, v in zip(ypos, out_values):
     ax.text(v + label_pad, y, f"{v:,}", va="center", ha="left", fontsize=11,
             fontweight="bold", color=INK)
 set_headline(ax, "One outcome domain dominates the rest",
-             "Alternative view: lollipop chart of studies by outcome domain — a study can carry more than one.",
+             "Studies by outcome domain — a study can carry more than one.",
              f"{top_outcome} is tagged {round(top_outcome_n / second_outcome_n, 1)}× as often as "
              f"{second_outcome} ({top_outcome_n:,} vs {second_outcome_n:,}), the next largest domain.",
              "fig_outcome_lollipop.png")
@@ -969,7 +968,7 @@ clean_axes(ax)
 ax.grid(axis="x", color="#edf2f6", linewidth=0.8, zorder=0)
 ax.xaxis.set_major_formatter(mticker.StrMethodFormatter("{x:,.0f}"))
 ax.xaxis.set_major_locator(mticker.MaxNLocator(nbins=5))
-set_footnote(fig, f"Base: {sum(outcome_counts.values()):,} outcome-domain tags across {N:,} studies.")
+set_footnote(fig, f"Base: {sum(outcome_counts.values()):,} tags across {N:,} studies.")
 fig.subplots_adjust(left=0.34, right=0.92, top=0.78, bottom=0.18)
 fig.savefig(FIGS / "fig_outcome_lollipop.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
@@ -1078,8 +1077,9 @@ mc_desc = (f"Distribution of {N:,} studies by study design, data type and data s
 mc_finding = (f"{design_rows[0][0]} is the most common design ({method_pct(design_rows[0][1])}); "
               f"{dtype_rows[0][0].lower()} data and {dsource_rows[0][0].lower()} sources lead their "
               f"dimensions ({method_pct(dtype_rows[0][1])} and {method_pct(dsource_rows[0][1])}).")
+# The figure already prints mc_desc as its subtitle, so the gallery caption is the finding only.
 FIG_META["fig_methods_characteristics.png"] = (
-    "Methodological characteristics of included studies", mc_desc, mc_finding)
+    "Methodological characteristics of included studies", "", mc_finding)
 
 fig = plt.figure(figsize=(16, 10))
 fig.text(0.022, 0.975, "Methodological characteristics of included studies", fontsize=22,
@@ -1230,6 +1230,127 @@ fig.savefig(FIGS / "fig_methods_characteristics.png", dpi=150)
 plt.close(fig)
 
 # ---------------------------------------------------------------------------
+# 8b. Financing functions & outcomes in one figure: functions (bars), outcome
+# domains (dot plot) and functions x outcomes (row-% heatmap), on the same
+# tinted cards as fig_methods_characteristics.png. Replaces fig_function_bar,
+# fig_outcome_lollipop and fig_function_outcome_heatmap in the gallery (those
+# are still built; the Overview uses fig_function_bar).
+# ---------------------------------------------------------------------------
+FO_SHORT_F = {"Recurrent financing for the procurement and distribution of supply chain inputs": "Supply-chain financing",
+              "Capital investment: other health system inputs": "Capital: other inputs",
+              "Capital investment: infrastructure": "Capital: infrastructure",
+              "Public financial management": "Public financial management",
+              "Revenue Raising": "Revenue raising"}
+FO_SHORT_O = {"Equitable distribution of health system resources": "Equitable distribution",
+              "Improved level and distribution of health": "Health level & distribution",
+              "Efficiency in the use of resources": "Efficiency",
+              "Quality of service provision": "Quality of services",
+              "Transparency and accountability": "Transparency & accountability",
+              "Responsiveness to citizens": "Responsiveness"}
+fo_funcs_of, fo_outs_of = defaultdict(set), defaultdict(set)
+for s_, g in zip(function_j["s"], function_j["g"]):
+    fo_funcs_of[s_].add(FUNC_GRPS[g])
+for s_, g in zip(outcome_j["s"], outcome_j["g"]):
+    fo_outs_of[s_].add(OUTCOME_GRPS[g])
+fo_fcount = Counter(f for fs in fo_funcs_of.values() for f in fs)
+fo_ocount = Counter(o for os_ in fo_outs_of.values() for o in os_)
+FO_FUNCS = [f for f, _ in fo_fcount.most_common() if f not in ("Unclear", "Other")]
+FO_OUTS = [o for o, _ in fo_ocount.most_common() if o not in ("Unclear", "Other")]
+fo_cross = {f: Counter() for f in FO_FUNCS}
+for s_, fs in fo_funcs_of.items():
+    for f in fs:
+        if f in fo_cross:
+            fo_cross[f].update(fo_outs_of.get(s_, ()))
+fo_mat = np.array([[100 * fo_cross[f][o] / max(1, fo_fcount[f]) for o in FO_OUTS] for f in FO_FUNCS])
+fo_peak_i, fo_peak_j = np.unravel_index(int(fo_mat.argmax()), fo_mat.shape)
+
+fo_desc = (f"Financing functions studies address, outcome domains they measure, and how the two combine, "
+           f"across {N:,} studies. A study can carry several functions and outcomes.")
+fo_finding = (f"{FO_FUNCS[0]} is the most-studied function ({100 * fo_fcount[FO_FUNCS[0]] / N:.0f}% of studies) and "
+              f"{FO_SHORT_O.get(FO_OUTS[0], FO_OUTS[0]).lower()} the most-measured named outcome "
+              f"({100 * fo_ocount[FO_OUTS[0]] / N:.0f}%); {fo_mat[fo_peak_i, fo_peak_j]:.0f}% of "
+              f"{FO_SHORT_F.get(FO_FUNCS[fo_peak_i], FO_FUNCS[fo_peak_i]).lower()} studies measure "
+              f"{FO_SHORT_O.get(FO_OUTS[fo_peak_j], FO_OUTS[fo_peak_j]).lower()}.")
+# The figure prints fo_desc as its subtitle, so the gallery caption is the finding only.
+FIG_META["fig_functions_outcomes.png"] = ("Financing functions and outcomes studied", "", fo_finding)
+
+fig = plt.figure(figsize=(16, 10.5))
+fig.text(0.022, 0.975, "Financing functions and outcomes studied", fontsize=22, fontweight="bold", va="top")
+fig.text(0.022, 0.93, fo_desc, fontsize=11.5, color=SUBHEAD_COLOR, va="top")
+
+
+def fo_ramp(cols, n):
+    cmap = mcolors.LinearSegmentedColormap.from_list("fo", cols)
+    return [cmap(0.95 - 0.75 * i / max(1, n - 1)) for i in range(n)]
+
+
+# Panel: financing functions.
+method_card("design", "Financing functions", "Which functions do studies address?", 0.015, 0.47, 0.42, 0.895)
+ax = fig.add_axes([0.175, 0.5, 0.22, 0.31])
+fo_vals = [fo_fcount[f] for f in FO_FUNCS][::-1]
+ax.barh([FO_SHORT_F.get(f, f) for f in FO_FUNCS][::-1], fo_vals,
+        color=fo_ramp(METHOD_THEMES["design"]["cols"], len(FO_FUNCS))[::-1], height=.68)
+fo_avg = float(np.mean([fo_fcount[f] for f in FO_FUNCS]))
+ax.axvline(fo_avg, color=SUBHEAD_COLOR, ls="--", lw=1)
+ax.text(fo_avg, len(FO_FUNCS) - .35, f" average {fo_avg:,.0f}", fontsize=8.5, color=SUBHEAD_COLOR, va="bottom")
+for y, val in enumerate(fo_vals):
+    ax.text(val, y, f"  {val:,} ({100 * val / N:.0f}%)", va="center", fontsize=8.8)
+ax.set_xlim(0, max(fo_vals) * 1.38)
+ax.xaxis.set_major_locator(mticker.MaxNLocator(4))  # fewer ticks: labels were crowded
+ax.xaxis.set_major_formatter(mticker.StrMethodFormatter("{x:,.0f}"))
+for sp in ("top", "right", "left"):
+    ax.spines[sp].set_visible(False)
+ax.spines["bottom"].set_color("#c9ced6")
+ax.tick_params(axis="y", length=0, labelsize=9.5)
+ax.tick_params(axis="x", labelsize=8)
+
+# Panel: outcome domains.
+method_card("type", "Outcome domains", "Which outcomes do studies measure?", 0.43, 0.47, 0.985, 0.895)
+ax = fig.add_axes([0.6, 0.5, 0.36, 0.31])
+fo_ovals = [fo_ocount[o] for o in FO_OUTS][::-1]
+fo_ocols = fo_ramp(METHOD_THEMES["type"]["cols"], len(FO_OUTS))[::-1]
+ys = list(range(len(FO_OUTS)))
+ax.hlines(ys, 0, fo_ovals, color=fo_ocols, lw=2.2)
+ax.scatter(fo_ovals, ys, color=fo_ocols, s=70, zorder=3, edgecolor="white")
+for y, val in zip(ys, fo_ovals):
+    ax.text(val, y, f"  {val:,} ({100 * val / N:.0f}%)", va="center", fontsize=8.8)
+ax.set_yticks(ys, [FO_SHORT_O.get(o, o) for o in FO_OUTS][::-1], fontsize=9.5)
+ax.set_xlim(0, max(fo_ovals) * 1.3)
+ax.xaxis.set_major_formatter(mticker.StrMethodFormatter("{x:,.0f}"))
+for sp in ("top", "right", "left"):
+    ax.spines[sp].set_visible(False)
+ax.spines["bottom"].set_color("#c9ced6")
+ax.tick_params(axis="y", length=0)
+ax.tick_params(axis="x", labelsize=8)
+
+# Panel: functions x outcomes (row %).
+method_card("source", "Functions × outcomes", "Which outcomes does each function's research measure? (% of the function's studies)",
+            0.015, 0.075, 0.985, 0.455)
+ax = fig.add_axes([0.175, 0.13, 0.79, 0.25])
+fo_cmap = mcolors.LinearSegmentedColormap.from_list("fo_x", ["#fbf6ea", "#e9cf94", "#b08d3e", "#6b5220"])
+ax.imshow(fo_mat, aspect="auto", cmap=fo_cmap, vmin=0, vmax=fo_mat.max())
+for i in range(fo_mat.shape[0]):
+    for j in range(fo_mat.shape[1]):
+        ax.text(j, i, "<1%" if 0 < fo_mat[i, j] < 1 else f"{fo_mat[i, j]:.0f}%", ha="center", va="center",
+                fontsize=8.5, color="white" if fo_mat[i, j] > fo_mat.max() * .55 else INK)
+ax.set_xticks(range(len(FO_OUTS)),
+              ["\n".join(textwrap.wrap(FO_SHORT_O.get(o, o), 16)) for o in FO_OUTS], fontsize=8.6)
+ax.set_yticks(range(len(FO_FUNCS)), [FO_SHORT_F.get(f, f) for f in FO_FUNCS], fontsize=9)
+ax.tick_params(length=0)
+for sp in ax.spines.values():
+    sp.set_visible(False)
+
+fig.text(0.022, 0.04, f"Note: shares add to more than 100% because a study can carry several functions and outcomes. "
+         f"The average line is across the {len(FO_FUNCS)} named functions.", fontsize=9, color=SUBHEAD_COLOR)
+fig.text(0.022, 0.018, f"Not shown: 'Other' outcomes ({fo_ocount['Other']:,} studies), 'Other' functions "
+         f"({fo_fcount['Other']:,}) and 'Unclear' tags, where the record did not allow a confident classification.",
+         fontsize=9, color=SUBHEAD_COLOR)
+for a in fig.axes:
+    a.set_zorder(5)
+fig.savefig(FIGS / "fig_functions_outcomes.png", dpi=150)
+plt.close(fig)
+
+# ---------------------------------------------------------------------------
 # 9. Geographic scope
 # ---------------------------------------------------------------------------
 pct_single = dict_json["meta"]["pct_single"]
@@ -1251,19 +1372,31 @@ income_counts_ordered = {k: income_counts.get(k, 0) for k in inc_order}
 inc_ranked = sorted(income_counts_ordered.items(), key=lambda kv: -kv[1])
 top_income, top_income_n = inc_ranked[0]
 second_income, second_income_n = inc_ranked[1]
-fig, ax = plt.subplots(figsize=(7, 4))
-ax.bar(list(income_counts_ordered.keys()), list(income_counts_ordered.values()),
-       color=[dict_json["meta"]["pal_inc"][i] for i in range(len(inc_order))], zorder=3, width=0.62)
-ax.margins(x=0.06)
+# Soft blue-teal gradient (as in the other count charts), lightest for the smallest group.
+inc_values = list(income_counts_ordered.values())
+inc_total = sum(inc_values)
+inc_norm = mcolors.PowerNorm(gamma=0.6, vmin=min(inc_values), vmax=max(inc_values))
+inc_cmap = mcolors.LinearSegmentedColormap.from_list(
+    "income_soft", ["#cfe6ee", "#9fd0d8", "#5eb2ba", "#2f8f9d", "#1f5fa8"])
+fig, ax = plt.subplots(figsize=(8.5, 5.4))
+inc_labels = [k.replace(" middle income", "\nmiddle income") for k in income_counts_ordered]
+bars = ax.bar(inc_labels, inc_values, color=[inc_cmap(inc_norm(v)) for v in inc_values],
+              zorder=3, width=0.6)
+for bar, v in zip(bars, inc_values):
+    ax.text(bar.get_x() + bar.get_width() / 2, v + max(inc_values) * 0.015,
+            f"{v:,}\n({100 * v / inc_total:.0f}%)", ha="center", va="bottom", fontsize=9.5,
+            color=INK, linespacing=1.15)
+ax.margins(x=0.04)
+ax.set_ylim(0, max(inc_values) * 1.18)
 set_headline(ax, f"{top_income} settings carry the largest share of study-country pairs",
-             "Study-country pairs by income group.",
-             f"{top_income} accounts for {top_income_n:,} study-country pairs, ahead of "
+             "Each study counts once for every country it examines, grouped by World Bank income level.",
+             f"{top_income} accounts for {top_income_n:,} pairs, ahead of "
              f"{second_income}'s {second_income_n:,}.", "fig_income_bar.png")
-ax.set_ylabel("studies")
+ax.set_ylabel("study-country pairs")
+ax.yaxis.set_major_formatter(mticker.StrMethodFormatter("{x:,.0f}"))
 clean_axes(ax)
 ax.grid(axis="y", color="#e7e3da", linewidth=0.8, zorder=0)
-plt.setp(ax.get_xticklabels(), rotation=12, ha="right")
-set_footnote(fig, f"Base: {sum(income_counts_ordered.values()):,} study-country pairs with a known income group.")
+set_footnote(fig, f"Base: {inc_total:,} pairs; countries without an income group are excluded.")
 fig.tight_layout()
 fig.savefig(FIGS / "fig_income_bar.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
@@ -1534,8 +1667,7 @@ ax.set_ylim(0, 1)
 ax.xaxis.set_major_formatter(mticker.PercentFormatter(xmax=1))
 ax.yaxis.set_major_formatter(mticker.PercentFormatter(xmax=1))
 clean_axes(ax)
-set_footnote(fig, f"Base: {len(lmic_df)} L&MICs countries with GBD 2023 burden data. Eligible HFF studies naming "
-                   f"each country vs. GBD 2023 DALYs.")
+set_footnote(fig, f"Base: {len(lmic_df)} L&MICs with GBD 2023 burden data.")
 fig.tight_layout()
 fig.savefig(FIGS / "fig_inequality.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
@@ -1905,8 +2037,7 @@ cbar.outline.set_visible(False)
 fig.text(0.71, 0.087, "Share of tagged studies (%)", ha="left", va="center",
          fontsize=10.2, color=INK)
 
-set_footnote(fig, f"Base: {N:,} studies; cross-tab of financing_function × outcome_domain tags, both "
-                   f"excluding 'Unclear'.")
+set_footnote(fig, f"Base: {N:,} studies; 'Unclear' tags excluded.")
 fig.savefig(FIGS / "fig_function_outcome_heatmap.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
 
@@ -2089,9 +2220,8 @@ fig.suptitle("")
 fig.text(0.02, 0.99, D(fp_headline), fontsize=15.5, fontweight="bold", color=INK, ha="left", va="top")
 fig.text(0.02, 0.95, D(fp_desc), fontsize=9, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
 fig.text(0.02, 0.865, D(fp_finding), fontsize=9.5, fontweight="bold", color=INK, ha="left", va="top", wrap=True)
-fig.text(0.01, -0.02, f"Base: {len(fp_df):,} single-country studies with a known income group (is_quant "
-                      f"model); {n_local_model:,} of those also have a recovered author affiliation country "
-                      f"(has_local_author model). From type_of_analysis and author_affiliation_countries.",
+fig.text(0.01, -0.02, f"Base: {len(fp_df):,} single-country studies with a known income group; "
+                      f"{n_local_model:,} of these also have an author-affiliation country (local-authorship model).",
          fontsize=7.6, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
 fig.patch.set_facecolor(PAPER)
 for ax in axes:
@@ -2326,8 +2456,7 @@ if have_authors:
     ax.tick_params(left=False)
     ax.grid(axis="x", color="#e7e3da", linewidth=0.8, zorder=0)
     set_footnote(fig, f"Base: {sum(sum(pattern_counts[i].values()) for i in pat_incomes):,} single-country "
-                       f"studies with a known income group and a recovered author-affiliation country. From "
-                       f"author_affiliation_countries.")
+                       f"studies with a known income group and a recovered author-affiliation country.")
     fig.tight_layout()
     fig.savefig(FIGS / "fig_authorship_pattern.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -2497,9 +2626,8 @@ if have_funders:
         ff_desc,
         ff_finding,
         "fig_funder_funders.png",
-        f"Base: {n_funded:,} of {N:,} studies ({100 * n_funded / N:.1f}%) report a research funder "
-        f"(most do not); a study naming >1 funder counts once per funder. From research_funder, "
-        f"name-normalized.",
+        f"Base: {n_funded:,} of {N:,} studies ({100 * n_funded / N:.1f}%) name a funder; a study naming "
+        f"several funders counts once for each.",
         color=GOLD, top=15, xlabel="studies", gradient=True
     )
 
@@ -2664,9 +2792,8 @@ if have_funders:
     )
     set_footnote(
         fig,
-        f"Base: {n_funded:,} of {N:,} studies ({100 * n_funded / N:.1f}%) report a research funder "
-        f"(most do not); a study naming >1 funder counts once per funder. From research_funder, "
-        f"name-normalized. Area ∝ funded-study count; top 15 funders shown."
+        f"Base: {n_funded:,} of {N:,} studies ({100 * n_funded / N:.1f}%) name a funder; a study naming "
+        f"several funders counts once for each. Area shows funded studies; top 15 funders."
     )
     fig.subplots_adjust(left=0.02, right=0.99, top=0.74, bottom=0.08)
     fig.savefig(FIGS / "fig_funder_funders_treemap.png", dpi=150, bbox_inches="tight")
@@ -2760,7 +2887,7 @@ if have_funders:
     cbar.outline.set_visible(False)
     cbar.ax.tick_params(labelsize=8.5, colors=SUBHEAD_COLOR, length=3, pad=2)
     fig.text(0.685, 0.065, "Share of tagged studies (%)", ha="left", va="center", fontsize=9.5, color=INK)
-    set_footnote(fig, f"Base: top {len(fh_order)} funders by study count, restricted to studies with ≥1 financing-function tag. From research_funder (name-normalized) × financing_function.")
+    set_footnote(fig, f"Base: top {len(fh_order)} funders by study count, restricted to studies with ≥1 financing-function tag.")
     fig.savefig(FIGS / "fig_funder_function_heatmap.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
@@ -2845,7 +2972,7 @@ if have_funders:
     note_ax.text(0.0, 0.85, "Note:", fontsize=9, fontweight="bold", color=INK, va="top")
     note_ax.text(0.0, 0.58, "Highlights the dominant funding focus by funder\n(largest 1–2 percentages in each row).", fontsize=8.8, color=INK, va="top")
 
-    set_footnote(fig, f"Base: top {len(fh_order)} funders by study count, restricted to studies with ≥1 financing-function tag. From research_funder (name-normalized) × financing_function.")
+    set_footnote(fig, f"Base: top {len(fh_order)} funders by study count, restricted to studies with ≥1 financing-function tag.")
     fig.savefig(FIGS / "fig_funder_function_bubbles.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
@@ -2895,8 +3022,7 @@ if have_funders:
     clean_axes(ax)
     ax.grid(False)
     set_footnote(fig, f"Base: top {len(fu_out_order)} funders by study count, restricted to studies with "
-                       f"≥1 outcome-domain tag. From research_funder (name-normalized) × "
-                       f"outcome_domain.")
+                       f"≥1 outcome-domain tag.")
     fig.tight_layout()
     fig.savefig(FIGS / "fig_funder_outcome_heatmap.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -2941,8 +3067,7 @@ if have_funders:
     fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(0.5, 0.235),
                bbox_transform=fig.transFigure, ncol=2, frameon=False, fontsize=8.5)
     set_footnote(fig, f"Base: top {len(mix_funders)} funders by study count, restricted to studies with "
-                       f"≥1 financing-function tag. From research_funder (name-normalized) × "
-                       f"financing_function.")
+                       f"≥1 financing-function tag.")
     fig.subplots_adjust(left=0.28, right=0.97, top=0.72, bottom=0.34)
     fig.savefig(FIGS / "fig_funder_function_mix.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -2986,8 +3111,8 @@ if have_funders:
     set_headline(ax, trend_headline, trend_desc, trend_finding, "fig_funder_trend.png")
     clean_axes(ax)
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=3, frameon=False, fontsize=8.5)
-    set_footnote(fig, f"Base: studies 2013–2025 with a known research funder (name-normalized); top "
-                       f"{TOP_N_TREND} funders by total study count. 2026 excluded (partial year).")
+    set_footnote(fig, f"Base: studies with a named funder; top {TOP_N_TREND} funders by total studies. "
+                       f"2026 (partial year) excluded.")
     fig.tight_layout()
     fig.savefig(FIGS / "fig_funder_trend.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -3758,12 +3883,10 @@ if have_taxonomy:
     fig.text(0.02, 0.935, D(opp_desc), fontsize=10, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
     fig.text(0.02, 0.895, D(opp_finding), fontsize=10, fontweight="bold", color=INK, ha="left", va="top", wrap=True)
     fig.text(0.01, 0.155,
-             f"Disease category: PubMed-sourced MeSH terms only (not the OpenAlex-fallback theme), "
-             f"keyword-matched to 11 broad groups modeled on HEE's MeSH C-tree groupings — "
-             f"{pct_classified}% of {n_pubmed_mesh:,} PubMed-MeSH records matched a category "
-             f"({n_disease_total:,} studies). Reference is each function's own share of this disease-tagged "
-             f"subset, not GBD disease burden — HFF has no burden data by financing function, unlike "
-             f"HEE's DALY-based opportunity matrix. Grey cells have <{CELL_MIN} studies for that pairing.",
+             f"Disease category: PubMed MeSH terms keyword-matched to 11 broad groups "
+             f"({pct_classified}% of {n_pubmed_mesh:,} PubMed-MeSH records; {n_disease_total:,} studies). "
+             f"Reference is each function's own share of this subset, not disease burden. Grey cells have "
+             f"<{CELL_MIN} studies.",
              fontsize=7.6, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
     fig.patch.set_facecolor(PAPER)
     ax.set_facecolor(PAPER)
@@ -3946,8 +4069,8 @@ if have_taxonomy:
     ax.grid(axis="y", color="#e7e3da", linewidth=0.8, zorder=0)
     ax.legend(loc="center left", frameon=False, fontsize=9)
     set_footnote(fig, f"Base: {sum(sum(c.values()) for c in trans_by_year.values()):,} MeSH-classified studies "
-                       f"about L&MICs countries, by year. No disease-specific burden data exists to benchmark "
-                       f"against (unlike HEE's version) — shown as research composition only.")
+                       f"about L&MICs. Shows the composition of research only; there is no disease-specific "
+                       f"burden benchmark.")
     fig.tight_layout()
     fig.savefig(FIGS / "fig_transition.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -4190,11 +4313,9 @@ if have_taxonomy:
     set_headline(ax, tj_headline, tj_desc, tj_finding, "fig_funder_trajectory.png")
     clean_axes(ax)
     ax.grid(axis="x", color="#e7e3da", linewidth=0.8, zorder=0)
-    set_footnote(fig, f"Base: PubMed-MeSH-classified, geo-tagged studies with a known country income group, "
-                       f"split by era (2010–2017 vs. 2018–2026); smallest category has {min_n} "
-                       f"studies in one era — read narrow categories with caution. HFF has no disease-"
-                       f"category burden data, unlike HEE's burden-ratio design; this shows L&MICs research "
-                       f"share directly, not a ratio to burden.")
+    set_footnote(fig, f"Base: PubMed-MeSH-classified, geo-tagged studies with a known country income group. The "
+                       f"smallest category has {min_n} studies in one era, so read narrow categories with caution. "
+                       f"Shows research share only, not a ratio to burden.")
     fig.tight_layout()
     fig.savefig(FIGS / "fig_funder_trajectory.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -4454,7 +4575,7 @@ if have_ihme:
     ax.invert_yaxis()
 
     av_headline = f"{most_under} gets a far larger share of aid than of research attention"
-    av_desc = ("Share of global DAH (2022–24 average) vs. share of this dataset's study-country pairs, "
+    av_desc = ("Share of global DAH (2022–24 average) vs. share of HFF study-country pairs, "
                "by region (income-first approximation of GBD super-regions).")
     av_finding = (f"{most_under} receives {aid_by_bucket.get(most_under, 0) / aid_total * 100:.0f}% of DAH but only "
                   f"{research_by_bucket.get(most_under, 0) / research_total * 100:.0f}% of study-country pairs — "
@@ -4464,9 +4585,8 @@ if have_ihme:
     ax.set_xlabel("share (%)")
     clean_axes(ax)
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.11), ncol=2, frameon=False, fontsize=9.5)
-    set_footnote(fig, "Base: IHME DAH by GBD super-region (F04) vs. this dataset's study-country pairs, bucketed "
-                       "by World Bank income group (High income → ‘High-income’) then UN region — "
-                       "an approximation of IHME's super-regions, not their exact country list.")
+    set_footnote(fig, "Base: IHME DAH by GBD super-region. Countries are grouped by World Bank income group, then "
+                       "UN region, which approximates (but does not exactly match) IHME's super-regions.")
     fig.tight_layout()
 
     # Headline/desc/finding are long enough to look better wrapped across a
@@ -4558,8 +4678,8 @@ if have_ihme:
     ax.set_ylabel("studies per million people (log)")
     clean_axes(ax)
     ax.legend(loc="lower right", frameon=False, fontsize=9)
-    set_footnote(fig, f"Base: {len(pts)} countries matched between IHME health spending per person (F12, 2025) "
-                       f"and this dataset's study-country pairs + World Bank population.")
+    set_footnote(fig, f"Base: {len(pts)} countries with IHME health-spending data (2025), World Bank population "
+                       f"and at least one study.")
     fig.tight_layout()
     fig.savefig(FIGS / "fig_research_vs_spending_country.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -4646,7 +4766,7 @@ if have_ihme:
     fig.text(0.02, 0.882, D(sce_finding), fontsize=10, fontweight="bold", color=INK, ha="left", va="top", wrap=True)
     income_legend(fig, loc="upper left", ncol=4, bbox_to_anchor=(0.02, 0.80))
     fig.text(0.01, 0.03, f"Base: {len(exp_b):,} countries matched between IHME health spending per person × "
-                         f"World Bank population (F12, 2025) and this dataset's study-country pairs. Point "
+                         f"World Bank population (2025) and study-country pairs. Point "
                          f"area ∝ population. Expected = studies × (country expenditure ÷ total expenditure). "
                          f"Priority zone/reference line use the median rate as a descriptive split, not a "
                          f"proportionality claim (unlike the disease-burden scorecard). This flags countries "
@@ -4757,7 +4877,7 @@ if have_ihme:
     fig.text(0.02, 0.865, D(scc_finding), fontsize=10, fontweight="bold", color=INK, ha="left", va="top", wrap=True)
     income_legend(fig, loc="upper left", ncol=4, bbox_to_anchor=(0.02, 0.80))
     fig.text(0.01, 0.03, f"Base: {len(combo_b):,} countries matched across GBD 2023 DALYs, IHME health spending "
-                         f"per person × World Bank population (F12, 2025), and this dataset's study-country "
+                         f"per person × World Bank population (2025), and study-country "
                          f"pairs. Point area ∝ number of HFF studies. Need index = (country's share of total "
                          f"burden) ÷ (country's share of total spending); expected = total studies × (country "
                          f"need index ÷ sum of all need indices). Dashed line = spending exactly proportional "
@@ -4888,10 +5008,10 @@ if have_ihme:
 
         top_fn2, bottom_fn2 = lollipop[-1][0], lollipop[0][0]
         desc = "Correlation between each function's share of a country's research and log(health spending per person), across countries."
-        base_note = f"Base: {len(df_in)} countries with ≥5 classified financing-function tags matched to IHME health spending per person (F12, 2025)."
+        base_note = f"Base: {len(df_in)} countries with ≥5 classified financing-function tags matched to IHME health spending per person (2025)."
         if not include_usa:
             desc += " Studies mapped to the United States of America are excluded before country shares are recalculated."
-            base_note = base_note[:-1] + "; all studies mapped to the United States of America excluded before aggregation."
+            base_note = base_note[:-1] + "; USA-mapped studies excluded."
 
         set_headline(ax, f"{top_fn2}'s research share rises most with health spending",
                      desc,
@@ -4998,7 +5118,7 @@ if have_ihme:
             labelspacing=0.75,
             borderaxespad=0.6,
         )
-        set_footnote(fig, f"Base: all-studies version uses {len(comp_df):,} countries; no-USA version uses {len(comp_df_no_usa):,} countries. USA-mapped studies are removed before country-level shares are recalculated.")
+        set_footnote(fig, f"Base: all-studies version uses {len(comp_df):,} countries; no-USA version uses {len(comp_df_no_usa):,} countries.")
         fig.subplots_adjust(left=0.33, right=0.96, top=0.76, bottom=0.14)
         fig.savefig(FIGS / "fig_function_share_lollipop_all_vs_no_usa.png", dpi=150, bbox_inches="tight")
         plt.close(fig)
@@ -5058,7 +5178,7 @@ if have_ihme:
             labelspacing=0.75,
             borderaxespad=0.0,
         )
-        set_footnote(fig, f"Base: all-studies version uses {len(comp_df):,} countries; no-USA version uses {len(comp_df_no_usa):,} countries. Numbers at right show the change in r after excluding all USA-mapped studies before aggregation.")
+        set_footnote(fig, f"Base: all-studies version uses {len(comp_df):,} countries; no-USA version uses {len(comp_df_no_usa):,} countries. Numbers at right show the change in r.")
         fig.subplots_adjust(left=0.33, right=0.96, top=0.78, bottom=0.30)
         fig.savefig(FIGS / "fig_function_share_r_no_usa_dumbbell.png", dpi=150, bbox_inches="tight")
         plt.close(fig)
@@ -5141,7 +5261,7 @@ if have_ihme:
     ax.set_xlim(-max_abs_delta * 1.35, max_abs_delta * 1.35)
     clean_axes(ax)
     ax.grid(axis="x", color="#e7e3da", linewidth=0.8, zorder=0)
-    set_footnote(fig, f"Base: {total_counts_all:,} classified financing-function tags overall; {len(usa_studies):,} USA-mapped studies removed before recalculating shares.")
+    set_footnote(fig, f"Base: {total_counts_all:,} classified financing-function tags overall; {len(usa_studies):,} USA-mapped studies removed.")
     fig.tight_layout()
     fig.savefig(FIGS / "fig_function_share_no_usa_delta.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -5169,7 +5289,7 @@ if have_ihme:
     ax.set_ylabel("share of classified research (%)")
     clean_axes(ax)
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=3, frameon=False, fontsize=8)
-    set_footnote(fig, f"Base: {len(comp_df)} countries split into spending quartiles (IHME F12, 2025); shares "
+    set_footnote(fig, f"Base: {len(comp_df)} countries split into spending quartiles (IHME, 2025); shares "
                        f"are quartile averages, renormalized to 100%.")
     fig.tight_layout()
     fig.savefig(FIGS / "fig_function_share_quartile.png", dpi=150, bbox_inches="tight")
@@ -5220,7 +5340,7 @@ if have_ihme:
     ax.set_ylabel("share of classified research (%)")
     clean_axes(ax)
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=3, frameon=False, fontsize=8)
-    set_footnote(fig, f"Base: {len(out_comp_df)} countries split into spending quartiles (IHME F12, 2025); "
+    set_footnote(fig, f"Base: {len(out_comp_df)} countries split into spending quartiles (IHME, 2025); "
                        f"shares are quartile averages, renormalized to 100%.")
     fig.tight_layout()
     fig.savefig(FIGS / "fig_outcome_share_quartile.png", dpi=150, bbox_inches="tight")
@@ -5272,8 +5392,7 @@ if have_ihme:
                      f"{biggest_riser} climbed from rank {rank_a[biggest_riser]} to {rank_b[biggest_riser]}; "
                      f"{biggest_faller} fell from rank {rank_a[biggest_faller]} to {rank_b[biggest_faller]}.",
                      "fig_function_bump_eras.png")
-    set_footnote(fig, "Base: financing-function tags by publication year, this dataset. Eras chosen around the "
-                       "2020–2021 COVID-19 DAH spike (IHME).")
+    set_footnote(fig, "Eras chosen around the 2020–21 COVID-19 spike in development assistance for health (IHME).")
     fig.tight_layout()
     fig.savefig(FIGS / "fig_function_bump_eras.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -5288,45 +5407,53 @@ for f in sorted(FIGS.glob("*.png")):
 # what's baked into the image itself.
 # ---------------------------------------------------------------------------
 gallery = [
-    {
-        "title": "Size & growth",
-        "blurb": "See how the health financing evidence base has grown since 2010 and how quickly new "
-                 "research is being published.",
-        "figs": [fig_entry("fig_growth.png", "Cumulative growth")],
-    },
+    # "Size & growth" section (fig_growth.png) is hidden: the Overview publication-trend
+    # chart has a Cumulative view with the same key messages. fig_growth.png is still built.
     {
         "title": "Financing functions & outcomes",
         "blurb": "Explore which parts of health financing are studied most, which outcomes they are linked "
                  "to, and where important evidence gaps remain.",
         "figs": [
-            fig_entry("fig_function_bar.png", "Financing function"),
-            # fig_function_time.png (stacked-area version) is still built but hidden.
+            fig_entry("fig_functions_outcomes.png", "Financing functions and outcomes studied"),
+            # The two trend figures are shown as one tabbed card (FIGURE_TAB_GROUPS in app.js).
             fig_entry("fig_function_time_lines.png", "Financing-function mix over time"),
             fig_entry("fig_method_stream.png", "Financing-function output over time"),
-            fig_entry("fig_outcome_lollipop.png", "Outcome domain"),
-            fig_entry("fig_function_outcome_heatmap.png", "Function vs. outcome"),
+            # Still built but hidden (combined into fig_functions_outcomes.png): fig_function_bar.png
+            # (also used by the Overview), fig_outcome_lollipop.png, fig_function_outcome_heatmap.png.
+            # fig_function_time.png (stacked-area mix) is also hidden.
         ],
     },
+    # "Topics & themes" is shown as a group card (SECTION_GROUPS in app.js) holding
+    # Topic clusters and Disease focus; app.js also adds a plain-language method note
+    # to each. Related figures are tabbed (FIGURE_TAB_GROUPS in app.js).
     {
-        "title": "Topics & themes",
-        "blurb": "Discover the health issues, disease areas and wider research themes covered by the "
-                 "evidence, including which topics receive the most or least attention.",
-        "figs": (
-            [fig_entry("fig_topic_landscape.png", "Topic landscape"),
-             fig_entry("fig_topic_landscape_treemap.png", "Topic landscape (treemap)"),
-             fig_entry("fig_funder_opportunity.png", "The opportunity matrix"),
-             fig_entry("fig_disease_method.png", "How each disease area is evaluated"),
-             fig_entry("fig_disease_circular.png", "The disease focus of HFF research"),
-             fig_entry("fig_transition.png", "L&MICs research: communicable to NCD shift"),
-             fig_entry("fig_alluvial.png", "Evidence flow: design to function to outcome"),
-             fig_entry("fig_map_disease.png", "The disease atlas"),
-             fig_entry("fig_funder_trajectory.png", "L&MICs research share, era 1 to era 2")] if have_taxonomy else []
-        ) + (
-            [fig_entry("fig_topicmap.png", "Thematic landscape"),
-             fig_entry("fig_theme_rank.png", "Top 20 research themes"),
-             fig_entry("fig_topicmap_income.png", "Themes by income skew")] if have_topics else []
-        ),
+        "title": "Topic clusters",
+        "blurb": "What studies are about, found from the text of their abstracts rather than from "
+                 "predefined categories, alongside the research fields studies belong to.",
+        # Original figures, repositioned only (the two theme maps are tabbed in app.js).
+        "figs": ([
+            fig_entry("fig_theme_rank.png", "Top 20 research themes"),
+            fig_entry("fig_topicmap.png", "Thematic landscape"),
+            fig_entry("fig_topicmap_income.png", "Themes by income skew"),
+        ] if have_topics else []) + ([
+            fig_entry("fig_topic_landscape.png", "Topic landscape"),
+            fig_entry("fig_topic_landscape_treemap.png", "Topic landscape (treemap)"),
+        ] if have_taxonomy else []),
     } if (have_topics or have_taxonomy) else None,
+    {
+        "title": "Disease focus",
+        "blurb": "Which disease areas health financing research addresses, how each is studied, and how "
+                 "research about L&MICs is shifting between disease areas.",
+        # Original figures, repositioned only (related figures are tabbed in app.js).
+        "figs": [
+            fig_entry("fig_disease_circular.png", "The disease focus of HFF research"),
+            fig_entry("fig_disease_method.png", "How each disease area is evaluated"),
+            fig_entry("fig_funder_opportunity.png", "The opportunity matrix"),
+            fig_entry("fig_transition.png", "L&MICs research: communicable to NCD shift"),
+            fig_entry("fig_funder_trajectory.png", "L&MICs research share, era 1 to era 2"),
+            fig_entry("fig_map_disease.png", "The disease atlas"),
+        ],
+    } if have_taxonomy else None,
     {
         "title": "Methods & data",
         "blurb": "See how studies were designed, whether they used quantitative, qualitative or mixed "
@@ -5334,10 +5461,13 @@ gallery = [
         "figs": [
             fig_entry("fig_methods_characteristics.png",
                       "Methodological characteristics of included studies"),
-        ],
+        ] + ([
+            # Moved here from Topics & themes: it traces study design -> function -> outcome.
+            fig_entry("fig_alluvial.png", "Evidence flow: design to function to outcome"),
+        ] if have_taxonomy else []),
     },
     # Geography is split into three questions; funding figures go to the
-    # "Funders, fragility & outcomes" section (merged with build_fcas_outcomes_v5.py).
+    # "Research funding" section (build_fcas_outcomes_v5.py adds funder types to it).
     {
         "title": "Geographic coverage",
         "blurb": "Where health financing research is concentrated: which countries, income groups and "
@@ -5347,12 +5477,19 @@ gallery = [
         ] if HAVE_PLOTLY else []) + [
             fig_entry("fig_top_countries.png", "Top 20 countries"),
             fig_entry("fig_income_bar.png", "Study-country pairs by income group"),
-            fig_entry("fig_scope_bar.png", "Geographic scope"),
+            # fig_scope_bar.png is still built but hidden: the section shows the
+            # Overview "Geographic scope of studies" card instead (app.js).
         ] + ([
             fig_entry("fig_map_growth.png", "Where the evidence is youngest"),
         ] if HAVE_PLOTLY else []) + [
-            fig_entry("fig_reach_time.png", "When evidence reached each income group"),
-            fig_entry("fig_top_producers.png", "Biggest producers vs. best-served"),
+            # HIDDEN (still built, not shown on the site):
+            # - fig_reach_time.png ("When evidence reached each income group"): it shows
+            #   coverage of countries with more than one study, which is not the same as
+            #   depth of evidence; the other coverage figures are more useful, so it is
+            #   hidden for now.
+            # - fig_top_producers.png ("Biggest producers vs. best-served"): an interesting
+            #   ranking comparison, but it overlaps with the research-intensity figures.
+            # To show either again, restore its fig_entry(...) line here.
         ] + ([
             fig_entry("fig_map_method.png", "The dominant type of analysis"),
         ] if HAVE_PLOTLY else []),
@@ -5395,8 +5532,9 @@ gallery = [
         # Funding figures; build_fcas_outcomes_v5.py adds its own figures to this
         # section. The treemap and bubble "option" versions are still built (the
         # Overview funder card uses the treemap) but are not listed here.
-        "title": "Funders, fragility & outcomes",
-        "blurb": "Who funds health financing research and what they prioritise.",
+        "title": "Research funding",
+        "blurb": "Who funds health financing research, what they prioritise, and how funding "
+                 "patterns are changing.",
         "figs": [
             fig_entry("fig_funder_funders.png", "The top research funders"),
             fig_entry("fig_funder_function_heatmap.png", "What each top funder pays for"),

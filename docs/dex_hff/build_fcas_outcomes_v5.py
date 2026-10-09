@@ -1,6 +1,7 @@
 """FCAS and outcome-pattern figures from the HSF extraction 29 Sept v5 file (v5
 copy of build_fcas_outcomes_v4.py). Run LAST, after build_figures_v5.py and
-build_funder_types_v5.py: it (re)writes the "Funders, fragility & outcomes"
+build_funder_types_v5.py: it (re)writes the "Research funding" (funder types),
+"Fragile & conflict-affected settings" and "Financing functions & outcomes" (outcome)
 gallery section in docs/data/content.json, which build_figures_v5.py regenerates
 without it.
 
@@ -151,8 +152,8 @@ header(fig, "Nigeria and Ethiopia carry the FCAS evidence base",
        "Studies about each fragile or conflict-affected country, top 20.",
        f"{N_FCAS:,} studies ({100 * N_FCAS / N:.1f}% of all) cover an FCAS country; "
        f"Nigeria ({ng}) and Ethiopia ({et}) appear in {top2_share:.0f}% of them.", fname)
-footnote(fig, f"Base: {N_FCAS:,} of {N:,} studies whose geo_final names a country on the World Bank FCAS list in the study's "
-              f"publication year ({SOURCE}).\nA study covering several FCAS countries counts once per country. "
+footnote(fig, f"Base: {N_FCAS:,} of {N:,} studies name a country on the World Bank FCAS list in their "
+              f"publication year.\nA study covering several FCAS countries counts once per country. "
               f"{len(cc)} FCAS countries appear in total. 'Multiple', 'Global' and region-level studies\ncannot be matched "
               f"and are excluded; studies published after {LAST_WB_YEAR} have no FCAS lookup (World Bank lists end there).",
          y=0.045)
@@ -226,10 +227,10 @@ header(fig, "FCAS research is growing, but list changes exaggerate the jump",
        f"By each year's list the share tripled, {early_share:.1f}% (2010-14) to {late_share:.1f}% ({period}); "
        f"on a fixed set of countries it rose only from {early_fixed:.1f}% to {late_fixed:.1f}%.",
        fname)
-footnote(fig, f"Base: studies published 2010-{LAST_WB_YEAR} whose geo_final resolves to at least one country with a World Bank "
-              f"income/FCAS lookup ({SOURCE}).\nBlue uses the fcas field (the World Bank list in each publication year). "
+footnote(fig, f"Base: studies published 2010-{LAST_WB_YEAR} about at least one country with a World Bank income/FCAS "
+              f"lookup.\nBlue uses the World Bank FCAS list in each publication year. "
               f"Grey counts, in every year, studies on any of the {len(EVER_FCAS)} countries listed at some point\n"
-              f"2010-{LAST_WB_YEAR}, matched on geo_final. Vertical lines mark the first year the largest study countries count as FCAS. "
+              f"2010-{LAST_WB_YEAR}. Vertical lines mark the first year the largest study countries count as FCAS. "
               f"{LAST_WB_YEAR + 1} is excluded (no lookup yet).", y=0.06)
 save(fig, fname)
 summary["fcas_by_year"] = {int(k): {"fcas_that_year": int(r.fcas), "fcas_fixed_set": int(r.fixed),
@@ -260,7 +261,7 @@ header(fig, "Most studies measure outcomes outside the named health-system goals
        "Share of studies investigating each outcome domain (a study can have several).",
        f"'Other' tags {100 * oc['Other'] / N:.0f}% of studies; among named goals, {SHORT_OUT.get(top_named, top_named).lower()} "
        f"({100 * oc[top_named] / N:.0f}%) and {second.lower()} ({100 * oc[second] / N:.0f}%) lead.", fname)
-footnote(fig, f"Base: all {N:,} studies ({SOURCE}, outcome_domain_final). {n_named_any:,} studies ({100 * n_named_any / N:.0f}%) "
+footnote(fig, f"Base: all {N:,} studies. {n_named_any:,} studies ({100 * n_named_any / N:.0f}%) "
               f"name at least one of the {len(named)} health-system goals (blue).\nShares sum to >100% because studies are "
               f"multi-label. 'Other' is broken down by theme in the companion figure.", y=0.05)
 save(fig, fname)
@@ -289,8 +290,8 @@ t1, t2 = order[-1], order[-2]
 header(fig, "'Other' outcomes are led by access and spending",
        "Themes within the studies whose outcome domain is tagged 'Other'.",
        f"{t1} ({100 * tc[t1] / N_OTH:.0f}%) and {t2.lower()} ({100 * tc[t2] / N_OTH:.0f}%) are the largest themes.", fname)
-footnote(fig, f"Base: {N_OTH:,} studies tagged 'Other' in outcome_domain_final ({SOURCE}). Themes come from outcome_other_theme, "
-              f"derived without an LLM from a thematic\nanalysis of the 'Other' justifications; a study can carry two themes. "
+footnote(fig, f"Base: {N_OTH:,} studies with an 'Other' outcome. Themes were derived without an LLM from a thematic\n"
+              f"analysis of the 'Other' justifications; a study can carry two themes. "
               f"{not_clustered:,} studies ({100 * not_clustered / N_OTH:.0f}%) fell outside every theme cluster and are not shown.",
          y=0.045)
 save(fig, fname)
@@ -330,7 +331,7 @@ header(fig, "Health outcomes and financial protection gain ground",
        f"{SHORT_OUT.get(up1, up1)} rose from {changes[up1][0]:.0f}% to {changes[up1][1]:.0f}% and "
        f"{SHORT_OUT.get(up2, up2).lower()} from {changes[up2][0]:.0f}% to {changes[up2][1]:.0f}%; the rest barely moved.",
        fname, top=0.985)
-footnote(fig, f"Base: {len(yd):,} studies published 2010-2025 ({SOURCE}, outcome_domain_final); 2026 is excluded as a part year. "
+footnote(fig, f"Base: {len(yd):,} studies published 2010-2025; 2026 (partial year) excluded. "
               f"Shares are of all studies that year, multi-label.\nPanels share the same y-axis, ordered by overall frequency. "
               f"'Other' and 'Unclear' are not shown.", y=0.045)
 save(fig, fname)
@@ -372,7 +373,7 @@ header(fig, "FCAS studies look more like low-income than high-income evidence",
        f"({mat[rows.index(big_up), 0]:.0f}% vs {mat[rows.index(big_up), 4]:.0f}%) and less on "
        f"{SHORT_OUT.get(big_down, big_down).lower()} ({mat[rows.index(big_down), 0]:.0f}% vs {mat[rows.index(big_down), 4]:.0f}%).",
        fname)
-footnote(fig, f"Base: studies with a World Bank country lookup ({SOURCE}); each column is the share of that group's studies "
+footnote(fig, f"Base: studies with a World Bank country lookup; each column is the share of that group's studies "
               f"tagged with the goal (multi-label).\nFCAS overlaps the income columns (most FCAS countries are low or "
               f"lower-middle income). A study covering countries in several income groups counts in each.\n"
               f"Income group is taken in the publication year; 'Upper-middle' is the source file's 'MIC' code.", y=0.06)
@@ -384,46 +385,57 @@ summary["context_n"] = {g: n for (g, _), n in zip(groups, ns)}
 summary["figures"] = list(FIG_META.values())
 (DATA / "fcas_outcomes_v5.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
 
-# ---------------------------------------------------------------- gallery section
-# build_figures_v5.py rewrites content.json's gallery without these figures, so
-# (re)insert this section each run, replacing any earlier copy by title.
-SECTION = "Funders, fragility & outcomes"
+# ---------------------------------------------------------------- gallery sections
+# build_figures_v5.py rewrites content.json's gallery without these figures, so they
+# are (re)placed on every run:
+#   - funder types      -> first figure of "Research funding" (written by build_figures_v5.py)
+#   - FCAS figures      -> "Fragile & conflict-affected settings", right after Research funding
+#   - 'Other' themes and outcome trends -> end of "Financing functions & outcomes"
+#   - fig_outcome_domains_v5.png is still built but hidden (the combined functions &
+#     outcomes figure already shows outcome domains).
+SEC_FUND = "Research funding"
+SEC_FCAS = "Fragile & conflict-affected settings"
+SEC_FFO = "Financing functions & outcomes"
 funder_meta = json.loads((DATA / "funder_types_v5.json").read_text(encoding="utf-8"))["figure"]
 metas = {m["file"]: m for m in FIG_META.values()}
 metas[funder_meta["file"]] = funder_meta
-order = ["fig_outcome_by_context_v5.png", "fig_funder_types_v5.png", "fig_fcas_countries_v5.png",
-         "fig_fcas_trend_v5.png", "fig_outcome_domains_v5.png", "fig_outcome_other_themes_v5.png",
-         "fig_outcome_trend_v5.png"]
+entry = lambda f: {"file": f, "title": metas[f]["title"], "caption": metas[f]["caption"]}
+own_files = {"fig_funder_types_v5.png", "fig_fcas_countries_v5.png", "fig_fcas_trend_v5.png",
+             "fig_outcome_by_context_v5.png", "fig_outcome_domains_v5.png",
+             "fig_outcome_other_themes_v5.png", "fig_outcome_trend_v5.png"}
 cpath = DATA / "content.json"
 content = json.loads(cpath.read_text(encoding="utf-8"))
-gallery = content["gallery"]
-own = [{"file": f, "title": metas[f]["title"], "caption": metas[f]["caption"]} for f in order]
-own_files = set(order)
-# build_figures_v5.py writes the funding figures into a section of the same title;
-# merge into it (keeping its position) rather than replacing it. Funder types
-# leads, then the funding figures, then the FCAS and outcome figures.
-pos = next((i for i, s in enumerate(gallery) if s["title"] == SECTION), None)
-existing = [f for f in gallery[pos]["figs"] if f["file"] not in own_files] if pos is not None else []
-funder_types = [f for f in own if f["file"] == "fig_funder_types_v5.png"]
-rest = [f for f in own if f["file"] != "fig_funder_types_v5.png"]
-section = {
-    "title": SECTION,
-    "blurb": ("Who funds health financing research and what they prioritise, how research covers fragile "
-              "and conflict-affected (FCAS) settings, and which outcomes studies measure. FCAS figures use "
-              "the v5 fields added by the World Bank lookups (income group, region, FCAS) and the non-LLM "
-              "themes for 'Other' outcomes."),
-    "figs": funder_types + existing + rest,
-}
-if pos is not None:
-    gallery[pos] = section
-else:
-    # Before the Pipeline section, so the dataset-provenance section stays last.
-    pos = next((i for i, s in enumerate(gallery) if s["title"] == "Pipeline"), len(gallery))
-    gallery.insert(pos, section)
+# Drop the old combined section and any earlier copies of these figures.
+gallery = [s for s in content["gallery"] if s["title"] not in ("Funders, fragility & outcomes", SEC_FCAS)]
+for sec in gallery:
+    sec["figs"] = [f for f in sec["figs"] if f["file"] not in own_files]
+
+
+def find(title):
+    return next((i for i, s in enumerate(gallery) if s["title"] == title), None)
+
+
+fund_i = find(SEC_FUND)
+if fund_i is None:
+    gallery.append({"title": SEC_FUND,
+                    "blurb": "Who funds health financing research, what they prioritise, and how funding "
+                             "patterns are changing.", "figs": []})
+    fund_i = len(gallery) - 1
+gallery[fund_i]["figs"].insert(0, entry("fig_funder_types_v5.png"))
+gallery.insert(fund_i + 1, {
+    "title": SEC_FCAS,
+    "blurb": ("How health financing research covers fragile and conflict-affected settings (FCAS): which "
+              "countries carry the evidence, how it has grown, and how its outcomes compare with other "
+              "income groups. Uses the World Bank FCAS list for each publication year."),
+    "figs": [entry(f) for f in ("fig_fcas_countries_v5.png", "fig_fcas_trend_v5.png",
+                                "fig_outcome_by_context_v5.png")],
+})
+ffo_i = find(SEC_FFO)
+if ffo_i is not None:
+    gallery[ffo_i]["figs"] += [entry("fig_outcome_other_themes_v5.png"), entry("fig_outcome_trend_v5.png")]
 content["gallery"] = gallery
 cpath.write_text(json.dumps(content, allow_nan=False, ensure_ascii=False), encoding="utf-8")
-print(f"gallery section '{SECTION}' written with {len(section['figs'])} figures "
-      f"({len(existing)} from build_figures_v5.py)")
+print(f"gallery: funder types -> '{SEC_FUND}', 3 figures -> '{SEC_FCAS}', 2 outcome figures -> '{SEC_FFO}'")
 for m in FIG_META.values():
     print(f"{m['file']}\n  {m['title']}\n  {m['caption']}\n")
 print(json.dumps({k: summary[k] for k in ("n_fcas", "n_country_level", "last_year_with_wb_lookup", "context_n")}, indent=2))

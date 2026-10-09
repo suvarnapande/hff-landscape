@@ -190,8 +190,8 @@ header(fig, "Open access has become the norm",
        "Share of each year's studies (with a DOI) that are open access.",
        f"It rose from {by['share'].iloc[0]:.0f}% in {x[0]} to {by['share'].iloc[-1]:.0f}% in {x[-1]}"
        + (f", passing half in {cross}." if cross else "."), fname)
-footnote(fig, f"Base: {len(d[d['year'].between(2010, LAST)]):,} studies published 2010-{LAST} with a DOI ({SOURCE}); "
-              f"open-access status from OpenAlex (is_oa), looked up on the DOI.\n{N - N_DOI:,} studies without a DOI "
+footnote(fig, f"Base: {len(d[d['year'].between(2010, LAST)]):,} studies published 2010-{LAST} with a DOI; "
+              f"open-access status from OpenAlex, looked up on the DOI.\n{N - N_DOI:,} studies without a DOI "
               f"are excluded because their status can't be checked. {LAST + 1} is excluded as a part year.", y=0.05)
 save(fig, fname)
 summary["oa_by_year"] = {int(k): {"n": int(r.n), "oa": int(r.oa), "share_pct": round(r.share, 1)} for k, r in by.iterrows()}
@@ -228,7 +228,7 @@ build_continuous_map_figure(
     f"{n_above} of {len(map_rows)} author countries beat the average study ({OA_AUTH:.0f}%), which the large US output "
     f"({100 * cc_oa['USA'] / cc_n['USA']:.0f}% open) pulls down. Among countries with ≥200 studies, "
     f"{cname(hi_c[0])} is highest ({hi_c[1]:.0f}%) and {cname(lo_c[0])} lowest ({lo_c[1]:.0f}%).",
-    f"Base: {N_AUTH:,} studies with a DOI and known author-affiliation countries ({SOURCE}; open-access status and "
+    f"Base: {N_AUTH:,} studies with a DOI and known author-affiliation countries (open-access status and "
     f"affiliations from OpenAlex), across the {len(map_rows)} author countries with ≥{MAP_MIN} studies (others grey). "
     f"A study counts once for every country its authors are based in.",
     [r[0] for r in map_rows], [r[1] for r in map_rows],
@@ -275,7 +275,7 @@ header(fig, "Authors in lower-income countries publish open access more often",
        f"{nm[hi]} tops the list ({100 * cc_oa[hi] / cc_n[hi]:.0f}%) and {nm[lo]} is lowest ({100 * cc_oa[lo] / cc_n[lo]:.0f}%)"
        + (f"; the average is {lmic_mean:.0f}% across middle/low-income author countries vs {hic_mean:.0f}% across high-income ones."
           if lmic_mean is not None and hic_mean is not None else "."), fname, top=0.985)
-footnote(fig, f"Base: {N_AUTH:,} studies with a DOI and known author-affiliation countries ({SOURCE}; OpenAlex). A study counts "
+footnote(fig, f"Base: {N_AUTH:,} studies with a DOI and known author-affiliation countries (OpenAlex). A study counts "
               f"once for every country its authors are based in.\nCountries shown: the {len(rows)} with the most studies "
               f"(each ≥{MIN_N}). Income group is the site's country reference (current World Bank group).", y=0.035)
 save(fig, fname)
@@ -329,7 +329,7 @@ header(fig, "Research with lower-income authors is more often open access",
        f"{lo_:.0f}% of L&MICs-only author teams publish open access and {mx:.0f}% of mixed teams, vs {ho:.0f}% "
        f"of teams based only in high-income countries.", fname)
 footnote(fig, f"Base: {N_KNOWN:,} studies with a DOI whose author countries all have an income group in the site's country "
-              f"reference ({SOURCE}; OpenAlex).\nLeft: a study counts in every income group its authors come from. "
+              f"reference (OpenAlex).\nLeft: a study counts in every income group its authors come from. "
               f"L&MICs = low- and middle-income. {N_AUTH - N_KNOWN:,} studies with an author in a country missing from the "
               f"reference\n(e.g. Taiwan, Israel) are left out.", y=0.07)
 save(fig, fname)

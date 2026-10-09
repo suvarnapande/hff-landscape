@@ -1,10 +1,12 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-09k";
+const BUILD = "2026-10-09s";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
 const UNCLEAR_FOOTNOTE = '"Unclear" indicates that the available record did not provide sufficient information to classify the study confidently.';
+// Figures whose image already explains "Unclear", so the page doesn't repeat it.
+const FIGURES_WITH_OWN_UNCLEAR_NOTE = new Set(["fig_methods_characteristics.png", "fig_functions_outcomes.png"]);
 const UNCLEAR_FOOTNOTE_SECTIONS = new Set([
   "Financing functions & outcomes",
   "Methods & data"
@@ -878,30 +880,43 @@ if (typeof document !== "undefined") {
   }
 
   async function downloadFigure(file, title) {
+    await downloadImage("figures/" + file + "?v=" + BUILD, title);
+  }
+
+  // Saves src as a PNG with the citation strip; `heading` (optional) is drawn
+  // above the image, for charts that have no title of their own.
+  async function downloadImage(src, title, heading = null) {
     const img = new Image();
-    img.src = "figures/" + file + "?v=" + BUILD;
+    img.src = src;
     await img.decode();
     const w = img.naturalWidth, h = img.naturalHeight;
     const fontSize = Math.max(14, Math.round(w * 0.0105));
     const pad = Math.round(fontSize * 1.1);
     const lineH = Math.round(fontSize * 1.4);
     const font = `${fontSize}px Inter, system-ui, -apple-system, sans-serif`;
+    const headFont = `700 ${Math.round(fontSize * 1.7)}px Inter, system-ui, -apple-system, sans-serif`;
+    const headH = heading ? Math.round(fontSize * 1.7 * 1.3) + pad * 2 : 0;
     const canvas = document.createElement("canvas");
     let ctx = canvas.getContext("2d");
     ctx.font = font;
     const lines = wrapCanvasText(ctx, figureCitation(title), w - 2 * pad);
     canvas.width = w;
-    canvas.height = h + pad * 2 + lines.length * lineH;
+    canvas.height = headH + h + pad * 2 + lines.length * lineH;
     ctx = canvas.getContext("2d");  // resizing resets the context state
     ctx.fillStyle = "#faf9f6";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, 0, 0);
+    ctx.textBaseline = "top";
+    if (heading) {
+      ctx.font = headFont;
+      ctx.fillStyle = "#10243e";
+      ctx.fillText(heading, pad, pad);
+    }
+    ctx.drawImage(img, 0, headH);
     ctx.fillStyle = "#e7e3da";
-    ctx.fillRect(pad, h, w - 2 * pad, Math.max(1, Math.round(fontSize * 0.08)));
+    ctx.fillRect(pad, headH + h, w - 2 * pad, Math.max(1, Math.round(fontSize * 0.08)));
     ctx.font = font;
     ctx.fillStyle = "#5a6472";
-    ctx.textBaseline = "top";
-    lines.forEach((line, i) => ctx.fillText(line, pad, h + pad + i * lineH));
+    lines.forEach((line, i) => ctx.fillText(line, pad, headH + h + pad + i * lineH));
     const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -942,7 +957,8 @@ if (typeof document !== "undefined") {
     img.alt = f.title;
     const footnote = OTHER_OUTCOME_NOTE_FIGURES.has(f.file)
       ? OUTCOME_CATEGORY_NOTE
-      : UNCLEAR_FOOTNOTE_SECTIONS.has(f.sectionTitle) ? UNCLEAR_FOOTNOTE : "";
+      : UNCLEAR_FOOTNOTE_SECTIONS.has(f.sectionTitle) && !FIGURES_WITH_OWN_UNCLEAR_NOTE.has(f.file)
+        ? UNCLEAR_FOOTNOTE : "";
     const modalCaption = $("fig-modal-caption");
     modalCaption.hidden = !footnote;
     modalCaption.textContent = footnote;
@@ -1211,6 +1227,7 @@ if (typeof document !== "undefined") {
   }
 
   function switchTab(name) {
+    if ($("scope-back")) $("scope-back").hidden = true;
     if (name === "countries") {
       showCountryLandscape();
       return;
@@ -1243,11 +1260,21 @@ if (typeof document !== "undefined") {
   }
 
   // Open a sub-tab of the Scope page (e.g. "topics", "outcomes").
-  function openScopePanel(name) {
+  function openScopePanel(name, fromSection = null) {
     $("functions-help-modal").classList.remove("open");
     $("outcomes-help-modal").classList.remove("open");
     switchTab("methods");
     switchMethodsPanel(name);
+    const back = $("scope-back");
+    if (back && fromSection) {
+      back.hidden = false;
+      back.innerHTML = "&larr; Back to " + fromSection;
+      back.onclick = () => {
+        const i = GALLERY.findIndex(x => x.title === fromSection);
+        switchTab("gallery");
+        if (i >= 0) showSection(i);
+      };
+    }
     $("pane-methods").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -1262,6 +1289,82 @@ if (typeof document !== "undefined") {
     }
   }
 
+  // Plain-language "how this was done" notes shown at the top of a section.
+  const SECTION_METHOD_NOTES = {
+    "Topic clusters": {
+      summary: "How these topics were identified",
+      paragraphs: [
+        "<strong>Topic clusters</strong> were found from the studies themselves, not from a list of "
+          + "categories decided in advance. A language model turned each study's abstract into a numerical "
+          + "summary of its meaning, and studies with similar summaries were grouped together automatically "
+          + "into 49 clusters. Each cluster is named by the words that best set it apart (for example "
+          + "\"insurance / medicaid / medicare\"), so the names describe content rather than official categories.",
+        "<strong>Research fields</strong> come from a separate source: the OpenAlex topic taxonomy, which "
+          + "assigns each publication to a broad field and subfield. These are external bibliographic "
+          + "classifications, not outputs of this project's own analysis."
+      ]
+    },
+    "Disease focus": {
+      summary: "How disease areas were identified",
+      paragraphs: [
+        "Disease areas come from <strong>Medical Subject Headings (MeSH)</strong>: the standard subject "
+          + "terms that indexers at the US National Library of Medicine attach to articles in PubMed. Each "
+          + "study's MeSH terms were matched to 11 broad disease groups, such as infectious diseases, "
+          + "cancers and cardiovascular disease.",
+        "Only studies indexed in PubMed with MeSH terms can be classified this way, and about a third of "
+          + "those matched a disease group (many MeSH terms describe methods or populations rather than "
+          + "diseases). These figures therefore describe a subset of the evidence, not all studies in the map."
+      ]
+    }
+  };
+
+  // Overview tiles copied to the top of a Thematic analysis section.
+  const SECTION_TILE_COPIES = {
+    "Financing functions & outcomes": "Health financing functions covered",
+    "Open access & author countries": "Studies with a publication link",
+    "Research funding": "Who funds the evidence?"
+  };
+
+  function cloneOverviewTile(label) {
+    const src = document.querySelector(`#ov-tiles [data-tile="${CSS.escape(label)}"]`);
+    if (!src) return null;
+    const box = src.cloneNode(true);
+    box.classList.remove("overview-nav-card");
+    box.classList.add("section-analysis-card", "section-tile-copy");
+    for (const attr of ["tabindex", "role", "aria-label", "data-tile"]) box.removeAttribute(attr);
+    const cs = getComputedStyle(src);
+    box.style.setProperty("--tile-accent", cs.getPropertyValue("--tile-accent"));
+    box.style.setProperty("--tile-bg", cs.getPropertyValue("--tile-bg"));
+    for (const help of box.querySelectorAll("[data-modal]")) {
+      help.addEventListener("click", () => $(help.dataset.modal).classList.add("open"));
+    }
+    return box;
+  }
+
+  // Sections shown together under one card on the Thematic analysis index.
+  const SECTION_GROUPS = [{
+    title: "Topics & themes",
+    blurb: "What health financing studies are about: topics found from the studies' own text, and "
+      + "the disease areas they address.",
+    members: ["Topic clusters", "Disease focus"]
+  }, {
+    title: "Geography",
+    blurb: "Where health financing research is concentrated, and whether it is distributed in "
+      + "proportion to health needs.",
+    members: ["Geographic coverage", "Geographic inequalities"]
+  }];
+
+  function groupOf(sectionTitle) {
+    return SECTION_GROUPS.find(g => g.members.includes(sectionTitle)) || null;
+  }
+
+  function openOverviewGroup(title) {
+    const group = SECTION_GROUPS.find(g => g.title === title);
+    if (!group) return;
+    switchTab("gallery");
+    showGroup(group, "overview");
+  }
+
   function openOverviewTheme(title) {
     const index = GALLERY.findIndex(section => section.title === title);
     if (index < 0) return;
@@ -1271,14 +1374,14 @@ if (typeof document !== "undefined") {
 
   function makeOverviewCardInteractive(box, label) {
     const actions = {
-      "Studies captured in the map": () => openOverviewTheme("Size & growth"),
-      "Publication years covered": () => openOverviewTheme("Size & growth"),
-      "Countries covered by studies": showCountryLandscape,
+      "Studies captured in the map": () => showOverviewTrend("cumulative"),
+      "Publication years covered": () => showOverviewTrend("cumulative"),
+      "Countries covered by studies": () => openOverviewGroup("Geography"),
       "Health financing functions covered": () => openOverviewTheme("Financing functions & outcomes"),
       "Studies using quantitative analysis": () => openOverviewTheme("Methods & data"),
       "Studies with a publication link": () => openOverviewTheme("Open access & author countries"),
       "Evidence available open access": () => openOverviewTheme("Open access & author countries"),
-      "Who funds the evidence?": () => openOverviewTheme("Funders, fragility & outcomes"),
+      "Who funds the evidence?": () => openOverviewTheme("Research funding"),
       "Studies focused on one country": () => openOverviewTheme("Geographic coverage")
     };
     const action = actions[label];
@@ -1430,6 +1533,7 @@ if (typeof document !== "undefined") {
     for (const t of tiles) {
       const display = OVERVIEW_TILE_COPY[t.label] || t;
       const box = el("div", "value-box bg-" + t.theme);
+      box.dataset.tile = display.label;
       if (display.label === "Studies with a publication link") {
         box.classList.add("publication-access-card");
         const title = el("div", "value-box-title");
@@ -1449,6 +1553,7 @@ if (typeof document !== "undefined") {
             help.textContent = "?";
             help.title = "What does open access mean?";
             help.setAttribute("aria-label", "Explain what open access means");
+            help.dataset.modal = "oa-help-modal";
             help.addEventListener("click", () => $("oa-help-modal").classList.add("open"));
             metricLabel.appendChild(help);
           }
@@ -1506,6 +1611,7 @@ if (typeof document !== "undefined") {
           help.textContent = "?";
           help.title = `Learn about ${label.toLowerCase()}`;
           help.setAttribute("aria-label", `Explain ${label.toLowerCase()}`);
+          help.dataset.modal = modalId;
           help.addEventListener("click", () => $(modalId).classList.add("open"));
           const metricValue = el("div", "value-box-value");
           metricValue.textContent = valueText;
@@ -1551,6 +1657,7 @@ if (typeof document !== "undefined") {
         help.textContent = "?";
         help.title = "What is covered?";
         help.setAttribute("aria-label", "Explain the health financing functions covered");
+        help.dataset.modal = "functions-help-modal";
         help.addEventListener("click", () => $("functions-help-modal").classList.add("open"));
         titleRow.appendChild(title);
         titleRow.appendChild(help);
@@ -1574,6 +1681,13 @@ if (typeof document !== "undefined") {
   // "Per year | Cumulative" switch. The cumulative view keeps the key messages of
   // fig_growth.png (same definitions as build_figures_v5.py).
   let overviewTrendMode = "annual";
+
+  // Scroll to the Overview publication-trend chart in the given view.
+  function showOverviewTrend(mode) {
+    switchTab("overview");
+    setOverviewTrendMode(mode);
+    document.querySelector(".overview-trend-card").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   function setOverviewTrendMode(mode) {
     overviewTrendMode = mode;
@@ -1761,12 +1875,81 @@ if (typeof document !== "undefined") {
     }, PLOTLY_CFG);
   }
 
+  // A theme card (image, title, count, short description) for the index or a group view.
+  function thematicCard(titleText, blurb, imageFile, countText, onClick) {
+    const card = el("button", "thematic-card");
+    card.type = "button";
+    const img = el("img", "thematic-card-image");
+    img.src = "figures/" + imageFile + "?v=" + BUILD;
+    img.alt = "";
+    img.loading = "lazy";
+    const body = el("div", "thematic-card-body");
+    const title = el("h2", "thematic-card-title");
+    title.textContent = titleText;
+    const count = el("div", "thematic-card-count");
+    count.textContent = countText;
+    const description = el("p", "thematic-card-description");
+    const fullBlurb = blurb.replace(/\s+/g, " ").trim();
+    description.textContent = fullBlurb.length > 155 ? fullBlurb.slice(0, 152) + "..." : fullBlurb;
+    const arrow = el("span", "thematic-card-arrow");
+    arrow.textContent = "→";
+    arrow.setAttribute("aria-hidden", "true");
+    body.append(title, count, description, arrow);
+    card.append(img, body);
+    card.addEventListener("click", onClick);
+    return card;
+  }
+
+  // Group view: the group's sections as theme cards.
+  function showGroup(group, returnTo = null) {
+    $("gal-index").style.display = "none";
+    $("gal-section").style.display = "block";
+    sectionReturnTo = returnTo;
+    $("gal-back").innerHTML = returnTo === "overview" ? "&larr; Back to Overview" : "&larr; All themes";
+    $("gal-sec-title").textContent = group.title;
+    $("gal-sec-blurb").textContent = group.blurb;
+    $("gal-sec-extra").textContent = "";
+    const grid = $("gal-sec-grid");
+    grid.textContent = "";
+    grid.classList.remove("fig-grid-single");
+    grid.classList.add("group-grid");
+    for (const title of group.members) {
+      const i = GALLERY.findIndex(x => x.title === title);
+      if (i < 0) continue;
+      const sec = GALLERY[i];
+      grid.appendChild(thematicCard(sec.title, sec.blurb, sec.figs[0].file, sec.figs.length + " figures",
+        () => showSection(i, { group })));
+    }
+    window.scrollTo(0, 0);
+  }
+
   function renderGalleryIndex() {
     const idx = $("gal-section-index");
     const menu = $("thematic-menu");
     idx.textContent = "";
     menu.textContent = "";
+    const shownGroups = new Set();
     GALLERY.forEach((sec, i) => {
+      const group = groupOf(sec.title);
+      if (group) {
+        if (shownGroups.has(group)) return;
+        shownGroups.add(group);
+        const members = group.members.map(t => GALLERY.find(x => x.title === t)).filter(Boolean);
+        idx.appendChild(thematicCard(group.title, group.blurb, sec.figs[0].file,
+          members.reduce((n, m) => n + m.figs.length, 0) + " figures in " + members.length + " sections",
+          () => showGroup(group)));
+        const item = el("button", "nav-theme-link");
+        item.type = "button";
+        item.setAttribute("role", "menuitem");
+        item.textContent = group.title;
+        item.addEventListener("click", () => {
+          closeThematicMenu();
+          switchTab("gallery");
+          showGroup(group);
+        });
+        menu.appendChild(item);
+        return;
+      }
       const card = el("button", "thematic-card");
       card.type = "button";
       const img = el("img", "thematic-card-image");
@@ -1813,7 +1996,10 @@ if (typeof document !== "undefined") {
   function showSection(i, returnTo = null) {
     const sec = GALLERY[i];
     sectionReturnTo = returnTo;
-    $("gal-back").innerHTML = returnTo === "overview" ? "&larr; Back to Overview" : "&larr; All themes";
+    $("gal-back").innerHTML = returnTo === "overview" ? "&larr; Back to Overview"
+      : returnTo && returnTo.group ? "&larr; " + returnTo.group.title
+      : "&larr; All themes";
+    $("gal-sec-grid").classList.remove("group-grid");
     $("gal-index").style.display = "none";
     $("gal-section").style.display = "block";
     $("gal-sec-title").textContent = sec.title;
@@ -1830,6 +2016,23 @@ if (typeof document !== "undefined") {
       fillGeoScopeCard(box);
       extra.appendChild(box);
     }
+    const methodNote = SECTION_METHOD_NOTES[sec.title];
+    if (methodNote) {
+      const box = el("details", "method-note");
+      const summary = el("summary");
+      summary.textContent = methodNote.summary;
+      box.appendChild(summary);
+      for (const html of methodNote.paragraphs) {
+        const para = el("p");
+        para.innerHTML = html;
+        box.appendChild(para);
+      }
+      extra.appendChild(box);
+    }
+    if (SECTION_TILE_COPIES[sec.title]) {
+      const copy = cloneOverviewTile(SECTION_TILE_COPIES[sec.title]);
+      if (copy) extra.appendChild(copy);
+    }
     if (sec.title === "Financing functions & outcomes") {
       const links = el("div", "scope-links");
       const label = el("span", "scope-links-label");
@@ -1842,7 +2045,7 @@ if (typeof document !== "undefined") {
         const link = el("button", "scope-link");
         link.type = "button";
         link.innerHTML = text + ' <span aria-hidden="true">&rarr;</span>';
-        link.addEventListener("click", () => openScopePanel(panel));
+        link.addEventListener("click", () => openScopePanel(panel, sec.title));
         links.appendChild(link);
       }
       extra.appendChild(links);
@@ -1854,11 +2057,106 @@ if (typeof document !== "undefined") {
   // Figures drawn at least this many pixels wide are treated as dense, wide figures.
   const WIDE_FIGURE_MIN_PX = 2300;
 
+  // Figures shown together as one card with mini-tabs (in this order).
+  const FIGURE_TAB_GROUPS = [{
+    files: ["fig_worldmap.png", "fig_map_growth.png", "fig_map_method.png"],
+    tabs: ["Where the evidence is about", "Where the evidence is youngest", "Dominant type of analysis"]
+  }, {
+    files: ["fig_function_time_lines.png", "fig_method_stream.png"],
+    tabs: ["Share of studies", "Number of studies"]
+
+
+  }, {
+    files: ["fig_topicmap.png", "fig_topicmap_income.png"],
+    tabs: ["All themes", "By income skew"]
+  }, {
+    files: ["fig_topic_landscape.png", "fig_topic_landscape_treemap.png"],
+    tabs: ["Circular view", "Treemap view"]
+  }, {
+    files: ["fig_disease_method.png", "fig_funder_opportunity.png"],
+    tabs: ["How each disease area is evaluated", "Opportunity matrix"]
+  }, {
+    files: ["fig_transition.png", "fig_funder_trajectory.png", "fig_map_disease.png"],
+    tabs: ["Shift to NCDs", "Share by era", "Disease atlas (map)"]
+  }, {
+    files: ["fig_outcome_trend_v5.png", "fig_outcome_other_themes_v5.png"],
+    tabs: ["Outcome trends", "'Other' outcome themes"]
+  }, {
+    files: ["fig_funder_function_heatmap.png", "fig_funder_function_mix.png"],
+    tabs: ["Top 12 funders (heatmap)", "Top 8 funders (bars)"]
+  }, {
+    files: ["fig_funder_outcome_heatmap.png", "fig_funder_trend.png", "fig_funder_authorship_alluvial.png"],
+    tabs: ["Outcomes measured", "Funders over time", "Funding to authorship"]
+  }];
+
+  function renderTabbedFigureCard(group, figs, grid) {
+    const card = el("div", "fig-card fig-card-tabbed");
+    const tabs = el("div", "fig-tabs");
+    tabs.setAttribute("role", "tablist");
+    const img = el("img");
+    img.loading = "lazy";
+    const body = el("div", "fig-body");
+    const ft = el("div", "fig-title");
+    const fc = el("div", "fig-caption");
+    let current = figs[0];
+    const dl = el("button", "fig-download");
+    dl.type = "button";
+    dl.innerHTML = '<span aria-hidden="true">&#10515;</span> Download';
+    dl.title = "Download this figure as a PNG with a citation";
+    dl.addEventListener("click", async event => {
+      event.stopPropagation();
+      dl.disabled = true;
+      try { await downloadFigure(current.file, current.title); } finally { dl.disabled = false; }
+    });
+    const show = f => {
+      current = f;
+      img.src = "figures/" + f.file + "?v=" + BUILD;
+      img.alt = f.title;
+      ft.textContent = f.title;
+      fc.textContent = f.caption.replace(/\s+/g, " ").trim();
+      for (const b of tabs.children) {
+        const on = b.dataset.file === f.file;
+        b.classList.toggle("active", on);
+        b.setAttribute("aria-selected", String(on));
+      }
+    };
+    figs.forEach(f => {
+      const b = el("button", "fig-tab");
+      b.type = "button";
+      b.dataset.file = f.file;
+      b.setAttribute("role", "tab");
+      b.textContent = group.tabs[group.files.indexOf(f.file)] || f.title;
+      b.addEventListener("click", () => show(f));
+      tabs.appendChild(b);
+    });
+    img.addEventListener("click", () => openModal(current.file));
+    img.addEventListener("load", () => {
+      card.classList.toggle("fig-card-wide", img.naturalWidth >= WIDE_FIGURE_MIN_PX);
+    });
+    body.append(ft, fc, dl);
+    card.append(tabs, img, body);
+    grid.appendChild(card);
+    show(figs[0]);
+  }
+
   function renderFigureGrid(sec, grid) {
     grid.textContent = "";
     // A lone figure (e.g. the combined Methods & data figure) gets the full width.
     grid.classList.toggle("fig-grid-single", sec.figs.length === 1);
+    const doneGroups = new Set();
     for (const f of sec.figs) {
+      const group = FIGURE_TAB_GROUPS.find(g => g.files.includes(f.file));
+      if (group) {
+        if (doneGroups.has(group)) continue;
+        doneGroups.add(group);
+        const members = group.files
+          .map(file => sec.figs.find(x => x.file === file))
+          .filter(Boolean);
+        if (members.length > 1) {
+          renderTabbedFigureCard(group, members, grid);
+          continue;
+        }
+      }
       const card = el("div", "fig-card");
       const img = el("img");
       img.src = "figures/" + f.file + "?v=" + BUILD;
@@ -1881,7 +2179,8 @@ if (typeof document !== "undefined") {
       fc.textContent = f.caption.replace(/\s+/g, " ").trim();
       body.appendChild(ft);
       body.appendChild(fc);
-      if (UNCLEAR_FOOTNOTE_SECTIONS.has(f.sourceSectionTitle || sec.title)) {
+      if (UNCLEAR_FOOTNOTE_SECTIONS.has(f.sourceSectionTitle || sec.title)
+          && !FIGURES_WITH_OWN_UNCLEAR_NOTE.has(f.file)) {
         const note = el("div", "fig-footnote");
         note.textContent = OTHER_OUTCOME_NOTE_FIGURES.has(f.file)
           ? OUTCOME_CATEGORY_NOTE
@@ -1908,6 +2207,11 @@ if (typeof document !== "undefined") {
 
   function goBackFromSection() {
     const toOverview = sectionReturnTo === "overview";
+    const toGroup = sectionReturnTo && sectionReturnTo.group;
+    if (toGroup) {
+      showGroup(toGroup);
+      return;
+    }
     hideSection();
     if (toOverview) {
       switchTab("overview");
@@ -2734,6 +3038,19 @@ if (typeof document !== "undefined") {
     for (const b of document.querySelectorAll("[data-trend-mode]")) {
       b.addEventListener("click", () => setOverviewTrendMode(b.dataset.trendMode));
     }
+    $("ov-trend-download").addEventListener("click", async () => {
+      const btn = $("ov-trend-download");
+      const title = overviewTrendMode === "cumulative"
+        ? "Publication trends: cumulative studies"
+        : "Publication trends: studies per year";
+      btn.disabled = true;
+      try {
+        const url = await window.Plotly.toImage($("ov-trend"), { format: "png", width: 1400, height: 520, scale: 2 });
+        await downloadImage(url, title, title);
+      } finally {
+        btn.disabled = false;
+      }
+    });
     $("land-author-link").addEventListener("click", () => openModal("fig_map_authorship.png"));
 
     const get = async name => {
