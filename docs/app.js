@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-09h";
+const BUILD = "2026-10-09k";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1279,7 +1279,7 @@ if (typeof document !== "undefined") {
       "Studies with a publication link": () => openOverviewTheme("Open access & author countries"),
       "Evidence available open access": () => openOverviewTheme("Open access & author countries"),
       "Who funds the evidence?": () => openOverviewTheme("Funders, fragility & outcomes"),
-      "Studies focused on one country": () => switchTab("explorer")
+      "Studies focused on one country": () => openOverviewTheme("Geographic coverage")
     };
     const action = actions[label];
     if (!action) return;
@@ -1365,6 +1365,39 @@ if (typeof document !== "undefined") {
     const note = el("div", "analysis-approach-note");
     note.textContent = unclearPct.toFixed(1) + "% could not be classified.";
     box.append(bar, metrics, note);
+  }
+
+  // "Geographic scope of studies" card: shared by the Overview tile and the
+  // Geographic coverage section of Thematic analysis.
+  function fillGeoScopeCard(box) {
+    box.classList.add("geo-scope-card");
+    const title = el("div", "value-box-title");
+    title.textContent = "Geographic scope of studies";
+    box.appendChild(title);
+
+    const levels = db.levels.geo_scope;
+    const singleCode = levels.indexOf("Single country");
+    const scopes = db.studies.geo_scope;
+    const singleN = scopes.filter(code => code === singleCode).length;
+    const singlePct = 100 * singleN / Math.max(1, scopes.length);
+    const otherPct = 100 - singlePct;
+
+    const bar = el("div", "geo-scope-bar");
+    const single = el("div", "geo-scope-segment geo-scope-single");
+    single.style.width = singlePct + "%";
+    single.textContent = Math.round(singlePct) + "%";
+    const other = el("div", "geo-scope-segment geo-scope-other");
+    other.style.width = otherPct + "%";
+    other.textContent = Math.round(otherPct) + "%";
+    bar.append(single, other);
+
+    const labels = el("div", "geo-scope-labels");
+    const singleLabel = el("div");
+    singleLabel.innerHTML = "<strong>Single-country</strong><span>One country examined</span>";
+    const otherLabel = el("div");
+    otherLabel.innerHTML = "<strong>Other geographic scope</strong><span>14.2% multi-country or regional/global; 4.5% no country stated</span>";
+    labels.append(singleLabel, otherLabel);
+    box.append(bar, labels);
   }
 
   function renderOverview() {
@@ -1502,34 +1535,7 @@ if (typeof document !== "undefined") {
         continue;
       }
       if (display.label === "Studies focused on one country") {
-        box.classList.add("geo-scope-card");
-        const title = el("div", "value-box-title");
-        title.textContent = "Geographic scope of studies";
-        box.appendChild(title);
-
-        const levels = db.levels.geo_scope;
-        const singleCode = levels.indexOf("Single country");
-        const scopes = db.studies.geo_scope;
-        const singleN = scopes.filter(code => code === singleCode).length;
-        const singlePct = 100 * singleN / Math.max(1, scopes.length);
-        const otherPct = 100 - singlePct;
-
-        const bar = el("div", "geo-scope-bar");
-        const single = el("div", "geo-scope-segment geo-scope-single");
-        single.style.width = singlePct + "%";
-        single.textContent = Math.round(singlePct) + "%";
-        const other = el("div", "geo-scope-segment geo-scope-other");
-        other.style.width = otherPct + "%";
-        other.textContent = Math.round(otherPct) + "%";
-        bar.append(single, other);
-
-        const labels = el("div", "geo-scope-labels");
-        const singleLabel = el("div");
-        singleLabel.innerHTML = "<strong>Single-country</strong><span>One country examined</span>";
-        const otherLabel = el("div");
-        otherLabel.innerHTML = "<strong>Other geographic scope</strong><span>14.2% multi-country or regional/global; 4.5% no country stated</span>";
-        labels.append(singleLabel, otherLabel);
-        box.append(bar, labels);
+        fillGeoScopeCard(box);
         makeOverviewCardInteractive(box, display.label);
         wrap.appendChild(box);
         continue;
@@ -1617,7 +1623,6 @@ if (typeof document !== "undefined") {
       hovertemplate: "%{x}: %{y:,} studies<extra></extra>"
     }];
     const annotations = [];
-    const partialIndex = years.indexOf(2026);
     if (partialIndex >= 0) {
       traces.push({
         x: [2026], y: [annual[partialIndex]],
@@ -1818,6 +1823,11 @@ if (typeof document !== "undefined") {
     if (sec.title === "Methods & data") {
       const box = el("div", "value-box section-analysis-card");
       fillAnalysisApproachCard(box);
+      extra.appendChild(box);
+    }
+    if (sec.title === "Geographic coverage") {
+      const box = el("div", "value-box section-analysis-card geo-scope-card");
+      fillGeoScopeCard(box);
       extra.appendChild(box);
     }
     if (sec.title === "Financing functions & outcomes") {

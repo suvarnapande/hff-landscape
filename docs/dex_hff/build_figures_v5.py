@@ -823,9 +823,9 @@ for name, col in zip(top5, line_palette):
             fontsize=12.0, fontweight="medium", va="center", ha="left",
             linespacing=1.08, clip_on=False)
 
-set_headline(ax, "A line-chart view shows the same stable financing-function mix",
+set_headline(ax, "The financing-function mix has stayed stable since 2010",
              "Share of tagged studies by year, top 5 functions, shown as separate lines; a study can carry more than one, so totals can exceed 100%.",
-             f"{top_func}'s share moved only from {top_func_share_first:.0f}% to {top_func_share_last:.0f}% across the whole period — the alternative view tells the same story as the stacked bars.",
+             f"{top_func}{chr(39) if top_func.endswith('s') else chr(39) + 's'} share moved only from {top_func_share_first:.0f}% to {top_func_share_last:.0f}% across the whole period.",
              "fig_function_time_lines.png")
 ax.set_ylabel("Share of tagged studies (%)")
 ax.set_xlim(min(years2), max(years2) + 7.1)
@@ -841,7 +841,7 @@ clean_axes(ax)
 ax.grid(axis="both", color="#ddd8cf", linewidth=0.8, zorder=0)
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
-set_footnote(fig, f"Base: {sum(totals_by_year.values()):,} function tags among the top 5 functions, by publication year. Alternative rendering of fig_function_time.png for design comparison.")
+set_footnote(fig, f"Base: {sum(totals_by_year.values()):,} function tags among the top 5 functions, by publication year.")
 fig.subplots_adjust(left=0.09, right=0.78, top=0.74, bottom=0.18)
 fig.savefig(FIGS / "fig_function_time_lines.png", dpi=150, bbox_inches="tight")
 plt.close(fig)

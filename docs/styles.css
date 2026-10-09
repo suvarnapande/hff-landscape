@@ -582,6 +582,7 @@ main { padding: 1.4rem 1.5rem 2.5rem; max-width: 1500px; margin: 0 auto; }
 }
 .section-analysis-card .analysis-approach-metric span { white-space: nowrap; overflow-wrap: normal; }
 .section-analysis-card .analysis-approach-note { margin-top: .5rem; }
+.value-box.section-analysis-card.geo-scope-card { --tile-accent: #53687d; --tile-bg: #f2f5f7; }
 .fig-grid.fig-grid-single { grid-template-columns: minmax(0, 1fr); max-width: 1180px; }
 /* Wide figures span two columns once the grid is wide enough to hold two
    330px columns; "dense" backfills the gaps they would otherwise leave. */
