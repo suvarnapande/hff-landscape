@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Health financing functions evidence map — interactive</title>
+<title>HFF evidence map — interactive</title>
 <!-- The Google Fonts stylesheet (Inter/Newsreader) is loaded via @import in
      styles.css and deliberately carries NO SRI: the fonts.googleapis.com CSS
      response varies by user agent (woff2 vs ttf rules), so a fixed integrity
@@ -11,12 +11,12 @@
      versions with SHA-384 integrity hashes verified by double fetch. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" integrity="sha384-krui876Mk6M6Lq6uj1SQo+u4MoImxFwCfwzWNU982QBMNci3VMZ3FoYSdUakJD5I" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css" integrity="sha384-PSZaVsyG9jDu8hFaSJev5s/9poIJlX7cuxSGdqCgXRHpo2DzIaZAyCd2rG/DJJmV" crossorigin="anonymous">
-<link rel="stylesheet" href="styles.css?v=2026-10-07o">
+<link rel="stylesheet" href="styles.css?v=2026-10-05c">
 </head>
 <body>
 
 <nav class="navbar">
-  <a class="navbar-brand" href="#">Health financing functions evidence map</a>
+  <a class="navbar-brand" href="#">HFF evidence map</a>
   <div class="navbar-nav">
     <button class="nav-link active" data-tab="overview">Overview</button>
     <div class="nav-dropdown" id="thematic-nav">
@@ -27,12 +27,10 @@
       <div class="nav-dropdown-menu" id="thematic-menu" role="menu" hidden></div>
     </div>
     <button class="nav-link" data-tab="explorer">Explorer</button>
-    <button class="nav-link" data-tab="countries">Countries</button>
-    <button class="nav-link" data-tab="methods">Scope &amp; Methods</button>
+    <button class="nav-link" data-tab="landscape">Country landscape</button>
+    <button class="nav-link" data-tab="country">Country profile</button>
+    <button class="nav-link" data-tab="methods">Methods</button>
   </div>
-  <a class="project-link" href="https://3ieimpact.org/our-work/systematic-mapping-global-research-health-systems-financing-and-health-economics-using"
-     target="_blank" rel="noopener" aria-label="Open the HSF Evidence Map project page"
-     title="Open the HSF project webpage">HSF project <span aria-hidden="true">↗</span></a>
   <span class="navbar-text" id="nav-built"></span>
 </nav>
 
@@ -42,21 +40,14 @@
   <section class="tab-pane active" id="pane-overview">
     <div class="overview-intro">
       <h2 class="hero-title">See where health financing evidence is strong — and where important gaps remain</h2>
-      <div class="overview-update" id="overview-updated"></div>
-      <p class="hero-text">Part of the Health Systems Financing (HSF) project, this evidence map brings together more than 36,000 studies published since 2010 that examine health financing functions — how health systems raise, pool and spend money. Explore what has been studied, where evidence is concentrated, how the field is changing, and which countries and health financing priorities remain underexplored.</p>
-      <p class="hero-actions-copy">Use <strong>Thematic analysis</strong> to discover key patterns, the <strong>Explorer</strong> to investigate the evidence in detail, or <strong>Countries</strong> to compare settings and examine a specific country.</p>
+      <p class="hero-text">The Health Systems Financing (HSF) Evidence Map brings together more than 36,000 studies recently published since 2010, on how health systems raise, pool and spend money. Explore what has been studied, where evidence is concentrated, how the field is changing, and which countries and health financing priorities remain underexplored.</p>
+      <p class="hero-actions-copy">Use <strong>Thematic analysis</strong> to discover key patterns, the <strong>Explorer</strong> to investigate the evidence in detail, or <strong>Country landscape/profile</strong> to examine a specific country setting.</p>
       <h2 class="glance-title">The evidence base at a glance</h2>
       <div class="grid-4" id="ov-tiles"></div>
     </div>
     <div class="card overview-trend-card">
-      <div class="card-header overview-trend-header">
-        <span>Publication trends</span>
-        <button class="card-header-link" id="ov-growth-open" type="button">View cumulative growth &rarr;</button>
-      </div>
-      <div class="card-body">
-        <div id="ov-trend" class="plot overview-trend-plot"></div>
-        <p class="overview-trend-note">Annual studies by publication year; 2026 is a partial year.</p>
-      </div>
+      <div class="card-header">Growing faster than linearly</div>
+      <div class="card-body"><div id="ov-trend" class="plot overview-trend-plot"></div></div>
     </div>
 
     <div class="overview-analysis-grid">
@@ -75,18 +66,8 @@
         <div class="card-body overview-analysis-body">
           <button class="overview-figure-button" id="ov-function-open" type="button"
                   aria-label="Open the studies by financing function figure">
-            <img class="overview-analysis-figure" src="figures/fig_function_bar.png?v=2026-10-07i"
+            <img class="overview-analysis-figure" src="figures/fig_function_bar.png"
                  alt="Bar chart showing studies by health financing function">
-          </button>
-        </div>
-      </div>
-      <div class="card overview-analysis-card">
-        <div class="card-header">What gets evaluated?</div>
-        <div class="card-body overview-analysis-body">
-          <button class="overview-figure-button" id="ov-disease-method-open" type="button"
-                  aria-label="Open the figure showing how each disease area is evaluated">
-            <img class="overview-analysis-figure" src="figures/fig_disease_method.png?v=2026-10-07e"
-                 alt="Heatmap showing the mix of financing functions evaluated within each disease area">
           </button>
         </div>
       </div>
@@ -100,17 +81,11 @@
           </button>
         </div>
       </div>
-      <div class="card overview-analysis-card overview-analysis-card-wide">
-        <div class="card-header">Indicative mapping of studies to Wellcome priority themes</div>
-        <div class="card-body overview-analysis-body overview-analysis-body-wide">
-          <button class="overview-figure-button" id="ov-wellcome-open" type="button"
-                  aria-label="Open the figure showing funding and evidence across Wellcome priority themes">
-            <img class="overview-analysis-figure" src="figures/fig_wellcome_priorities.png?v=2026-10-07"
-                 alt="Two-panel chart showing the amount of evidence and leading donors across Wellcome priority themes">
-          </button>
-        </div>
-      </div>
     </div>
+    <aside class="overview-data-note">
+      <div class="overview-data-note-title">About the data</div>
+      <p>This release analyses 36,495 records from the HSF extraction dated 29 September, 2026. Classification is LLM-assisted with human oversight and verification. See <strong>Methods</strong> for details.</p>
+    </aside>
   </section>
 
   <!-- ============ THEMATIC ANALYSIS ============ -->
@@ -257,10 +232,6 @@
 
   <!-- ============ COUNTRY LANDSCAPE ============ -->
   <section class="tab-pane" id="pane-landscape">
-    <div class="country-view-tabs" role="tablist" aria-label="Country views">
-      <button class="country-view-tab active" type="button" data-country-view="landscape" role="tab" aria-selected="true">Country landscape</button>
-      <button class="country-view-tab" type="button" data-country-view="profile" role="tab" aria-selected="false">Country profile</button>
-    </div>
     <div class="card">
       <div class="card-body">
         <p class="fig-caption">Every country by disease burden, health spending per person, and
@@ -303,10 +274,6 @@
 
   <!-- ============ COUNTRY PROFILE ============ -->
   <section class="tab-pane" id="pane-country">
-    <div class="country-view-tabs" role="tablist" aria-label="Country views">
-      <button class="country-view-tab" type="button" data-country-view="landscape" role="tab" aria-selected="false">Country landscape</button>
-      <button class="country-view-tab active" type="button" data-country-view="profile" role="tab" aria-selected="true">Country profile</button>
-    </div>
     <div class="explorer-layout">
       <aside class="sidebar">
         <h2 class="sidebar-title">Country</h2>
@@ -361,30 +328,20 @@
   <section class="tab-pane" id="pane-methods">
     <div class="methods-wrap">
 
-      <div class="methods-tabs" role="tablist" aria-label="Methods sections">
-        <button class="methods-tab active" type="button" data-methods-tab="eligibility">Eligibility criteria</button>
-        <button class="methods-tab" type="button" data-methods-tab="topics">Financing topics</button>
-        <button class="methods-tab" type="button" data-methods-tab="outcomes">Outcome domains</button>
-        <button class="methods-tab" type="button" data-methods-tab="methodology">Methodology</button>
-      </div>
-
-      <div class="methods-panel" data-methods-panel="methodology">
-
       <div class="card">
         <div class="card-header">How this dataset is built</div>
         <div class="card-body">
-          <p>Every record's title and abstract is classified by an ensemble of LLMs (GLM,
-             Claude Sonnet, DeepSeek) against the health-financing-function taxonomy — <strong>
+          <p>Each record's title and abstract is reviewed by several large language models (GLM,
+             Claude Sonnet and DeepSeek). The models classify each record into one or more health financing areas: — <strong>
              Revenue raising, Pooling, Purchasing, Benefits decisions, Public financial
-             management</strong>, plus recurrent and capital-investment financing — with a
-             consensus step across models. Records that no model places in any bucket, or that
-             stay <strong>Unclear</strong> after consensus, are screened out before full
-             extraction.</p>
-          <p>Records that pass the bucket screen go through full field extraction: study design,
-             type of analysis, data type and source, unit of observation, geography, outcome
-             domain, and (for Revenue-raising studies) sub-questions on external/donor and
-             non-governmental financing mechanisms. A DOI-recovery and MeSH/OpenAlex topic
-             harvest runs on the extracted set.</p>
+             management, and recurrent and capital-investment financing</strong>. 
+             The classifications from the different models are then compared to reach a final decision. Records are 
+             compared to reach a final decision. Records are evant health financing area, or if the classification 
+             remains <strong>Unclear</strong> after this step.</p>
+          <p>Records that are retained are then analysed in more detail. Information is extracted on the study design,
+             type of analysis, data type and source, unit of observation, geographic focus and outcomes sutides.
+             For Revenue-raising studies, additional information is collected on external or donor financing and non-governmental financing mechanisms.
+             For the retained records, we also search for missing DOIs and use PubMed MeSH terms and OpenAlex topics to identify study themes.</p>
           <table class="methods-table">
             <thead><tr><th>Pipeline stage</th><th>Records</th></tr></thead>
             <tbody id="methods-funnel"></tbody>
@@ -398,35 +355,20 @@
           <table class="methods-table">
             <thead><tr><th>Input</th><th>Source</th></tr></thead>
             <tbody>
-              <tr><td>Health-financing framework and coding definitions</td>
-                  <td><a href="https://www.who.int/health-topics/health-financing/" target="_blank" rel="noopener">WHO health-financing framework</a>;
-                      <a href="https://www.who.int/publications/i/item/9789241564021" target="_blank" rel="noopener"><em>World Health Report 2010</em></a>;
-                      <a href="https://www.who.int/publications/i/item/9789240042476" target="_blank" rel="noopener"><em>Health System Performance Assessment</em></a>; and
-                      <a href="https://www.cgdev.org/sites/default/files/financing-healthcare-supply-chains-low-and-middle-income-countries-novel-conceptual.pdf" target="_blank" rel="noopener">CGD supply-chain financing framework</a>.</td></tr>
-              <tr><td>Evidence-map scope and eligibility criteria</td>
-                  <td><a href="https://doi.org/10.17605/OSF.IO/R3CFA" target="_blank" rel="noopener">Marion et al. (2026), <em>Systematic mapping of recent global research on health system financing using machine learning: Extended data</em></a>.</td></tr>
-              <tr><td>Outcome-domain framework</td>
-                  <td><a href="https://www.who.int/publications/i/item/9789240042476" target="_blank" rel="noopener">WHO and European Observatory, <em>Health System Performance Assessment: A Framework for Policy Analysis</em></a>. Economic development uses a project-specific definition.</td></tr>
-              <tr><td>Study classification process</td>
-                  <td>LLM-assisted extraction from titles and abstracts using GLM, Claude Sonnet and DeepSeek, with per-field consensus and human verification. This is the classification method, not the conceptual source of the financing framework.</td></tr>
-              <tr><td>Publication identifiers and links</td>
-                  <td><a href="https://www.crossref.org/documentation/retrieve-metadata/rest-api/" target="_blank" rel="noopener">Crossref REST API</a>,
-                      <a href="https://docs.openalex.org/" target="_blank" rel="noopener">OpenAlex</a> and
-                      <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener">PubMed</a>.</td></tr>
-              <tr><td>Research fields, topics and disease classifications</td>
-                  <td><a href="https://docs.openalex.org/api-entities/topics" target="_blank" rel="noopener">OpenAlex topic taxonomy</a> supplies domain, field and subfield classifications.
-                      <a href="https://www.nlm.nih.gov/mesh/meshhome.html" target="_blank" rel="noopener">PubMed Medical Subject Headings (MeSH)</a> supply disease and health-topic descriptors where available; OpenAlex topic metadata is used as fallback. These are external bibliographic classifications, not outputs of the LLM consensus process.</td></tr>
-              <tr><td>Country income groups, regions and population</td>
-                  <td><a href="https://datahelpdesk.worldbank.org/knowledgebase/articles/906519-world-bank-country-and-lending-groups" target="_blank" rel="noopener">World Bank country and lending groups</a>,
-                      <a href="https://unstats.un.org/unsd/methodology/m49/" target="_blank" rel="noopener">UN M49 regions</a> and
-                      <a href="https://data.worldbank.org/indicator/SP.POP.TOTL" target="_blank" rel="noopener">World Bank population data</a>.</td></tr>
-              <tr><td>Disease burden and health-financing context</td>
-                  <td><a href="https://www.healthdata.org/research-analysis/gbd" target="_blank" rel="noopener">IHME Global Burden of Disease 2023</a> and
-                      <a href="https://www.healthdata.org/data-tools-practices/interactive-visuals/financing-global-health" target="_blank" rel="noopener">IHME Financing Global Health</a>.</td></tr>
-              <tr><td>Open access and author affiliations</td>
-                  <td><a href="https://docs.openalex.org/api-entities/works/work-object" target="_blank" rel="noopener">OpenAlex work, open-access and authorship metadata</a>, matched through recovered DOIs.</td></tr>
-              <tr><td>Research funders</td>
-                  <td>Funder acknowledgements extracted from publication metadata and name-normalized within this project; figures state their analytical base and multi-funder counting convention.</td></tr>
+              <tr><td>Financing-function &amp; field classification</td>
+                  <td>LLM ensemble (GLM, Claude Sonnet, DeepSeek) with a per-field consensus
+                      step, run against title/abstract text</td></tr>
+              <tr><td>DOI recovery &amp; topic harvest</td>
+                  <td>CrossRef/OpenAlex/PubMed lookup; MeSH theme where a DOI resolves,
+                      OpenAlex fallback otherwise</td></tr>
+              <tr><td>Income groups &amp; UN region</td><td>World Bank classification (shared
+                  reference table)</td></tr>
+              <tr><td>Population</td>
+                  <td>World Bank SP.POP.TOTL (latest observation, mostly 2025)</td></tr>
+              <tr><td>Disease burden &amp; health spending</td>
+                  <td>IHME GBD 2023 DALYs and IHME Health Spending 1995–2022 — used only as
+                      country-level reference denominators, not as fields of the studies
+                      themselves</td></tr>
             </tbody>
           </table>
         </div>
@@ -467,118 +409,6 @@
         </div>
       </div>
 
-      </div>
-
-      <div class="methods-panel active" data-methods-panel="eligibility">
-        <div class="card">
-          <div class="card-header">Summary of inclusion criteria</div>
-          <div class="card-body">
-            <table class="methods-table criteria-table">
-              <thead><tr><th>Criteria</th><th>Description</th></tr></thead>
-              <tbody>
-                <tr><td><strong>Population</strong></td><td>Global</td></tr>
-                <tr><td><strong>Interest</strong></td><td>Evidence on recurrent financing of health system services; capital investments; links to the supply chain; and the consequences for health-system and societal goals.</td></tr>
-                <tr><td><strong>Context</strong></td><td>No limitations based on location (geographic or health setting) or health characteristics.</td></tr>
-                <tr><td><strong>Study design</strong></td><td>All types of empirical studies using qualitative, quantitative or mixed-methods approaches are included. For non-economic evaluations, no restriction is placed on methodological rigour. For economic evaluations, only studies comparing both costs and benefits and two or more alternative methods of delivering care are included.</td></tr>
-                <tr><td><strong>Time and scope</strong></td><td>Published articles and reviews published since 2010. English-only search terms are used, but no language restrictions are placed on included studies.</td></tr>
-              </tbody>
-            </table>
-            <p class="methods-note">More detailed inclusion and exclusion criteria are available in Extended data, Appendices C and D: Marion, P., Lee, S., Lotfi, T., Hutchinson, B., Sempé, L., Pande, S., et al. (2026), <em>Systematic mapping of recent global research on health system financing using machine learning</em>. <a href="https://doi.org/10.17605/OSF.IO/R3CFA" target="_blank" rel="noopener">View the extended data ↗</a></p>
-          </div>
-        </div>
-      </div>
-
-      <div class="methods-panel" data-methods-panel="topics">
-        <div class="card">
-          <div class="card-header">Key financing topics of interest</div>
-          <div class="card-body">
-            <p>These definitions describe the health-financing topics included in the evidence map.</p>
-            <div class="methods-accordion">
-              <details><summary>Revenue raising</summary><div>
-                <p><strong>World Health Report 2010 definition.</strong> Revenue collection refers to the way money is raised to pay health-system costs. Money is typically received from households, organisations or companies, and sometimes from contributors outside the country (called external sources). Resources can be collected through general or specific taxation; compulsory or voluntary health-insurance contributions; direct out-of-pocket payments, such as user fees; and donations.</p>
-                <p><strong>Health System Performance Assessment definition.</strong> Revenue raising refers to the ways in which money is brought into the health system. Revenue is collected through out-of-pocket payment at the point of service use, or through prepaid funds including insurance contributions and/or taxes. In part, the way money is generated for the health system depends on whether third-party payers in the system are public, and hence compulsory, or private, as either profit or not-for-profit models.</p>
-                <p>Revenue sources include those that are:</p>
-                <ul>
-                  <li><strong>Public:</strong> forms of taxation, which may or may not be specifically earmarked for health, including social health-insurance contributions, which are a form of earmarked tax.</li>
-                  <li><strong>External:</strong> funds from external sources, usually as development assistance. This money is then channelled into the health system via the Ministry of Finance. Other forms of external funding may include foreign investment, though it is usually for capital investments.</li>
-                  <li><strong>Private:</strong> funds from households or firms in the form of either voluntary prepayment or out-of-pocket payment. Health contributions from non-governmental organisations are also part of private revenue sources.</li>
-                </ul>
-                <p>Schemes are the structural arrangements or systems through which money flows to health services and providers. Types of schemes include:</p>
-                <ul>
-                  <li><strong>Mandatory or automatic:</strong> participation for some or all people is mandatory by law and funded by obligatory contributions made by or on behalf of those individuals, or some people are automatically covered on a non-contributory basis from general budget revenues based on attributes such as citizenship, residence, poverty status or age.</li>
-                  <li><strong>Voluntary:</strong> there are no government requirements; participation is voluntary.</li>
-                </ul>
-              </div></details>
-              <details><summary>Pooling</summary><div>
-                <p><strong>World Health Report 2010 definition.</strong> Pooling is the accumulation and management of financial resources to ensure that the financial risk of having to pay for health care is borne by all members of the pool and not by the individuals who fall ill. The main purpose of pooling is to spread the financial risk associated with the need to use health services. If funds are to be pooled, they have to be prepaid, before illness occurs, through taxes and/or insurance, for example. All health-financing systems include an element of pooling funded by prepayment, combined with direct payments from individuals to service providers, sometimes called cost sharing, co-payments, user charges, user fees or co-insurance.</p>
-                <p><strong>Health System Performance Assessment definition.</strong> Pooling refers to the accumulation of prepaid funds that can be used to purchase goods and services on behalf of a population. Some systems will have a single pool that may consolidate funding from different revenue-raising sources; other systems might have multiple pools. Pooling arrangements set the potential for prepaid funds to be redistributed across a particular population. Some form of resource-allocation or equalisation formula might be used to help ensure that each pool has an allocation appropriate for the population it covers.</p>
-              </div></details>
-              <details><summary>Purchasing</summary><div>
-                <p><strong>World Health Report 2010 definition.</strong> Purchasing is the process of paying for health services. There are three main ways to do this. One is for government to provide budgets directly to its own health-service providers, integrating purchasing and provision, using general government revenues and, sometimes, insurance contributions. The second is for an institutionally separate purchasing agency, such as a health-insurance fund or government authority, to purchase services on behalf of a population. The third is for individuals to pay a provider directly for services. Many countries use a combination. Within these broad areas, health-service providers can be paid in many different ways. Purchasing also includes deciding which services should be financed, including the mix between prevention, promotion, treatment and rehabilitation.</p>
-                <p><strong>Health System Performance Assessment definition.</strong> Purchasing, or commissioning, refers to payers using funds to pay for health care on behalf of a population; it reflects actual expenditures on behalf of different individuals in the population. Purchasing differs from procurement. Purchasing refers specifically to payment for services or items such as medicines and other supplies used in care provision, whereas procurement is the process of obtaining inputs and includes both commodities, such as medicines and laboratory supplies, and aspects of capital investment, such as medical devices. Procurement issues are considered under recurrent financing for the procurement and distribution of supply-chain inputs.</p>
-                <p><strong>Active purchasing</strong> includes choosing to purchase only from accredited providers, purchasing only cost-effective services, and using payment mechanisms that incentivise more or less provision.</p>
-                <p><strong>Passive purchasing</strong> includes arrangements in which funds, such as historical budget allocations or unmanaged fee-for-service payment to a provider, are not influenced by provider performance or efforts to influence the quantity or quality of health services.</p>
-              </div></details>
-              <details><summary>Benefits decisions</summary><div>
-                <p>Benefit design determines who can benefit from prepaid spending. Coverage policies determine who is covered, what the pooled public revenues will pay for, and any restrictions or conditions of access. All countries limit health-service entitlements in one way or another. Coverage-policy decisions determine the specifics of how benefits are rationed, and so influence health-system performance and progress towards universal health coverage goals.</p>
-              </div></details>
-              <details><summary>Public financial management</summary><div>
-                <p>Public financial management refers to the set of rules and mechanisms that govern the allocation, use and accountability of public funds. With respect to the health system in particular, the public financial management system plays a key role in the budgetary formulations that determine the level and allocation of public funding for health; the execution of that budget in terms of effectiveness and targeting of spending; and financial monitoring and transparency.</p>
-              </div></details>
-              <details><summary>Capital investment: infrastructure</summary><div>
-                <p>The policies and practices to acquire, upgrade or maintain infrastructure across the health system, inclusive of physical facilities, such as health centres and hospitals, medical equipment and digital infrastructure.</p>
-              </div></details>
-              <details><summary>Capital investment: other health-system inputs</summary><div>
-                <p>The policies and practices to train or grow the health workforce, inclusive of specialists, doctors, nurses, community health workers, carers and other health workers, and invest in the production of health products such as medicines and vaccines.</p>
-              </div></details>
-              <details><summary>Recurrent financing for supply-chain inputs</summary><div>
-                <p>The policies and practices necessary to provide financial resources to the supply chain, and ensure their optimal use, in order to achieve health-system goals. Supply chains include not just the commodities in the supply chain, but all the physical and informational resources required to deliver a good or service to the final consumer, including infrastructure such as warehouses, staffing, management, logistics and data systems. Policies and practices span four phases:</p>
-                <ul>
-                  <li><strong>Planning:</strong> developing strategic and operational plans to forecast demand, allocate resources and optimise supply-chain processes for effective health-care delivery.</li>
-                  <li><strong>Procurement:</strong> managing the sourcing, contracting and procurement of health commodities to ensure continuous availability and minimise supply disruptions.</li>
-                  <li><strong>Delivery:</strong> coordinating logistics, warehousing, transportation and inventory management to facilitate the efficient and timely distribution of health-care products.</li>
-                  <li><strong>Monitoring:</strong> assessing supply-chain performance by tracking product and information flows and using data and technologies, human resources and financial management.</li>
-                </ul>
-              </div></details>
-            </div>
-            <div class="methods-sources">
-              <h3>Definition sources</h3>
-              <p><a href="https://www.who.int/publications/i/item/9789241564021" target="_blank" rel="noopener">WHO, <em>The World Health Report 2010: Health Systems Financing: The Path to Universal Coverage</em> &nearr;</a></p>
-              <p><a href="https://www.who.int/publications/i/item/9789240042476" target="_blank" rel="noopener">WHO and the European Observatory on Health Systems and Policies, <em>Health System Performance Assessment: A Framework for Policy Analysis</em> &nearr;</a></p>
-              <p><a href="https://www.cgdev.org/sites/default/files/financing-healthcare-supply-chains-low-and-middle-income-countries-novel-conceptual.pdf" target="_blank" rel="noopener">Center for Global Development, <em>Financing of Healthcare Supply Chains in Low- and Middle-Income Countries</em> &nearr;</a></p>
-              <p class="methods-note">The capital-investment definitions are project definitions. The document notes that the Health System Performance Assessment definitions were supplemented with expert input from Joe Kutzin.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="methods-panel" data-methods-panel="outcomes">
-        <div class="card">
-          <div class="card-header">Outcome-domain definitions</div>
-          <div class="card-body">
-            <p>Seven definitions draw directly from, or use language from, the WHO Health System Performance Assessment framework. <strong>Economic development</strong> is defined specifically for this evidence map.</p>
-            <table class="methods-table outcome-definitions-table">
-              <thead><tr><th>Outcome domain</th><th>Definition and coding guidance</th></tr></thead>
-              <tbody>
-                <tr><td><strong>Equitable distribution of health-system resources</strong></td><td>The extent to which the distribution of health care and its benefits among a population is fair. Health-service equity refers to the distribution of care quality and ensuring that it does not vary because of personal characteristics such as gender, ethnicity, geographic location or socioeconomic status. Code this outcome when a study assesses an outcome for an equity-relevant group relative to another demographic or socioeconomic group, or uses an explicit comparative measure of inequality or equity. Do not code it solely because the study covers an equity-relevant or disadvantaged group.</td></tr>
-                <tr><td><strong>Efficiency in the use of resources</strong></td><td>The relationship between a specific product (output) of the health system and the resources (inputs) used to create the product, distinguishing technical and allocative efficiency.</td></tr>
-                <tr><td><strong>Quality of service provision</strong></td><td>The degree to which health services for individuals and populations increase the likelihood of desired health outcomes and are consistent with current medical knowledge.</td></tr>
-                <tr><td><strong>Transparency and accountability</strong></td><td>Transparency is about the public availability of usable information, which ultimately allows scrutiny of public actors and their decisions. Accountability refers to how well the system is governed overall, as well as how well the governance of financing, service delivery and resource generation performs. At the heart of accountability is an accountability relationship: someone is accountable to someone else for something.</td></tr>
-                <tr><td><strong>Improved level and distribution of health</strong></td><td>Health improvement refers to improvement in the health of the population, where health includes different parts of the life cycle, morbidity and premature mortality.</td></tr>
-                <tr><td><strong>Responsiveness to citizens</strong></td><td>The extent to which the service-user perspective and experience of health care is measured and valued as an outcome of service delivery, including outcomes related to the perspectives and social preferences of individuals, carers, families and communities as participants in, and beneficiaries of, trusted health systems organised around people's comprehensive needs rather than individual diseases.</td></tr>
-                <tr><td><strong>Financial protection</strong></td><td>Safeguarding people against the financial hardship associated with paying for health services.</td></tr>
-                <tr><td><strong>Economic development</strong></td><td>The process by which the economic wellbeing and quality of life of a nation, region, local community or individual are improved according to targeted goals and objectives. Examples of impacts that health financing may have on economic development include, but are not limited to, labour-force opportunities, job creation, job mobility, business growth, investment decisions or macroeconomic growth. Goals, objectives or outcomes related only to the bottom line or financial health of a health-care organisation or private-sector entity are not classified as economic development.</td></tr>
-              </tbody>
-            </table>
-            <div class="methods-classification-note">
-              <p><strong>Other:</strong> When a record contains outcomes that do not fit any of the eight predefined domains, we classify them as Other and then analyse those outcomes thematically.</p>
-              <p><strong>Unclear:</strong> The available title and abstract do not provide enough information to classify the outcome confidently.</p>
-            </div>
-            <p class="methods-note">Source: WHO, <a href="https://iris.who.int/server/api/core/bitstreams/266443fd-e3c2-4c02-ad69-a5e7d99b5e3d/content" target="_blank" rel="noopener"><em>Health System Performance Assessment: A framework for policy analysis</em> ↗</a></p>
-          </div>
-        </div>
-      </div>
-
     </div>
   </section>
 
@@ -589,22 +419,10 @@
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title" id="fig-modal-title"></h3>
-        <div class="figure-modal-actions">
-          <div class="figure-zoom-controls" aria-label="Figure zoom controls">
-            <button class="figure-zoom-button" id="fig-zoom-out" type="button"
-                    title="Zoom out" aria-label="Zoom out">−</button>
-            <button class="figure-zoom-level" id="fig-zoom-reset" type="button"
-                    title="Reset zoom" aria-label="Reset zoom">100%</button>
-            <button class="figure-zoom-button" id="fig-zoom-in" type="button"
-                    title="Zoom in" aria-label="Zoom in">+</button>
-          </div>
-          <button class="modal-close" id="fig-modal-close">Close</button>
-        </div>
+        <button class="modal-close" id="fig-modal-close">Close</button>
       </div>
       <div class="modal-body">
-        <div class="figure-zoom-viewport" id="fig-zoom-viewport">
-          <img class="modal-fig" id="fig-modal-img" src="" alt="">
-        </div>
+        <img class="modal-fig" id="fig-modal-img" src="" alt="">
         <p class="fig-caption" id="fig-modal-caption" style="margin-top:.6rem"></p>
         <div class="fig-footnote other-outcome-note" id="fig-modal-specific-note"></div>
       </div>
@@ -626,49 +444,17 @@
   </div>
 </div>
 
-<div class="modal-backdrop" id="functions-help-modal">
-  <div class="modal-dialog info-modal-dialog" role="dialog" aria-modal="true"
-       aria-labelledby="functions-help-title">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="functions-help-title">Health financing functions covered</h3>
-        <button class="modal-close" id="functions-help-close" type="button">Close</button>
-      </div>
-      <div class="modal-body info-modal-body">
-        <p>Empirical evidence on health systems financing functions and their links to outcomes. Specifically, our focus is on recurrent financing of health services (revenue raising, pooling, purchasing, decisions on benefits and their rationing, and public financial management); capital financing to generate health system resources (e.g., infrastructure, human resources for health, and the production of health products); and supply chain financing.</p>
-        <button class="info-modal-link methods-jump-button" type="button" data-methods-view="topics">View financing topics</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal-backdrop" id="outcomes-help-modal">
-  <div class="modal-dialog info-modal-dialog" role="dialog" aria-modal="true"
-       aria-labelledby="outcomes-help-title">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="outcomes-help-title">Outcome domains mapped</h3>
-        <button class="modal-close" id="outcomes-help-close" type="button">Close</button>
-      </div>
-      <div class="modal-body info-modal-body">
-        <p>The map covers eight outcome domains: <strong>equitable distribution of health-system resources; efficiency in the use of resources; quality of service provision; transparency and accountability; improved level and distribution of health; responsiveness to citizens; financial protection; and economic development.</strong></p>
-        <p>Apart from <strong>Economic development</strong>, definitions draw directly from, or use language from, the WHO Health System Performance Assessment framework.</p>
-        <p><strong>Other</strong> is used for identifiable outcomes outside these domains; <strong>Unclear</strong> is used when the available record does not support confident classification.</p>
-        <button class="info-modal-link methods-jump-button" type="button" data-methods-view="outcomes">View all definitions</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 
 <footer class="site-footer">
-  <strong>About the data:</strong> This release analyses 36,495 records from the HSF extraction dated 29 September, 2026. Classification is LLM-assisted with rigorous human verification. See <strong>Methods</strong> for details. · <strong>Sources:</strong> HFF extraction pipeline (LLM-assisted classification, GLM/Sonnet/DeepSeek consensus) · <a href="https://www.who.int/publications/i/item/9789240042476" target="_blank" rel="noopener">WHO Health System Performance Assessment framework</a> · World Bank (income groups, population) · IHME GBD 2023 &amp; IHME Health Spending 1995–2022 (country-level reference)
+  Sources: HFF extraction pipeline (LLM-assisted classification, GLM/Sonnet/DeepSeek consensus)
+  · World Bank (income groups, population) · IHME GBD 2023 &amp; IHME Health Spending 1995–2022
+  (country-level reference)
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js" integrity="sha384-EcVTHT5RdDTvzbTIbNOtaNxNALeJYDgmv5Crp3NBmcdrCPrDnqp6I1+ETJ/FCFHI" crossorigin="anonymous"></script>
-<script type="module" src="app.js?v=2026-10-07o"></script>
+<script type="module" src="app.js?v=2026-10-05c"></script>
 
 </body>
 </html>
