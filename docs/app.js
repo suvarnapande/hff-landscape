@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-07o";
+const BUILD = "2026-10-09a";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1573,8 +1573,13 @@ if (typeof document !== "undefined") {
     window.scrollTo(0, 0);
   }
 
+  // Figures drawn at least this many pixels wide are treated as dense, wide figures.
+  const WIDE_FIGURE_MIN_PX = 2300;
+
   function renderFigureGrid(sec, grid) {
     grid.textContent = "";
+    // A lone figure (e.g. the combined Methods & data figure) gets the full width.
+    grid.classList.toggle("fig-grid-single", sec.figs.length === 1);
     for (const f of sec.figs) {
       const card = el("div", "fig-card");
       const img = el("img");
@@ -1582,6 +1587,14 @@ if (typeof document !== "undefined") {
       img.alt = f.title;
       img.loading = "lazy";
       img.addEventListener("click", () => openModal(f.file));
+      // Dense, wide figures span two columns so they don't shrink to a thumbnail.
+      // content.json can force it with layout: "wide" or "normal".
+      if (f.layout === "wide") card.classList.add("fig-card-wide");
+      else if (f.layout !== "normal") {
+        img.addEventListener("load", () => {
+          card.classList.toggle("fig-card-wide", img.naturalWidth >= WIDE_FIGURE_MIN_PX);
+        }, { once: true });
+      }
       card.appendChild(img);
       const body = el("div", "fig-body");
       const ft = el("div", "fig-title");
