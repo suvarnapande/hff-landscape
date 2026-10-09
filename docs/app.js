@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-09f";
+const BUILD = "2026-10-09h";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -847,10 +847,96 @@ if (typeof document !== "undefined") {
     $("fig-zoom-in").disabled = figureZoom >= 3;
   }
 
+  // ---- Figure download: the PNG plus a citation strip along the bottom ----
+  const CITATION_URL = "https://3ieimpact.pages.dev/";
+
+  function figureCitation(title) {
+    const date = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    return `Source: 3ie (2026). Health Systems Financing (HSF) Evidence Map: ${title}. ` +
+      `${CITATION_URL}. Downloaded ${date}.`;
+  }
+
+  function wrapCanvasText(ctx, text, maxWidth) {
+    const lines = [];
+    let line = "";
+    for (const word of text.split(" ")) {
+      const test = line ? line + " " + word : word;
+      if (line && ctx.measureText(test).width > maxWidth) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function figureFileName(title) {
+    const slug = title.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    return (slug || "figure") + ".png";
+  }
+
+  async function downloadFigure(file, title) {
+    const img = new Image();
+    img.src = "figures/" + file + "?v=" + BUILD;
+    await img.decode();
+    const w = img.naturalWidth, h = img.naturalHeight;
+    const fontSize = Math.max(14, Math.round(w * 0.0105));
+    const pad = Math.round(fontSize * 1.1);
+    const lineH = Math.round(fontSize * 1.4);
+    const font = `${fontSize}px Inter, system-ui, -apple-system, sans-serif`;
+    const canvas = document.createElement("canvas");
+    let ctx = canvas.getContext("2d");
+    ctx.font = font;
+    const lines = wrapCanvasText(ctx, figureCitation(title), w - 2 * pad);
+    canvas.width = w;
+    canvas.height = h + pad * 2 + lines.length * lineH;
+    ctx = canvas.getContext("2d");  // resizing resets the context state
+    ctx.fillStyle = "#faf9f6";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+    ctx.fillStyle = "#e7e3da";
+    ctx.fillRect(pad, h, w - 2 * pad, Math.max(1, Math.round(fontSize * 0.08)));
+    ctx.font = font;
+    ctx.fillStyle = "#5a6472";
+    ctx.textBaseline = "top";
+    lines.forEach((line, i) => ctx.fillText(line, pad, h + pad + i * lineH));
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = figureFileName(title);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(link.href), 2000);
+  }
+
+  function downloadButton(file, title) {
+    const btn = el("button", "fig-download");
+    btn.type = "button";
+    btn.innerHTML = '<span aria-hidden="true">&#10515;</span> Download';
+    btn.title = "Download this figure as a PNG with a citation";
+    btn.setAttribute("aria-label", "Download figure: " + title);
+    btn.addEventListener("click", async event => {
+      event.stopPropagation();
+      btn.disabled = true;
+      try {
+        await downloadFigure(file, title);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+    return btn;
+  }
+
+  let modalFigure = null;
+
   function openModal(file) {
     const f = FIG_INDEX[file];
     if (!f) return;
     $("fig-modal-title").textContent = f.title;
+    modalFigure = f;
     const img = $("fig-modal-img");
     img.src = "figures/" + f.file + "?v=" + BUILD;
     img.alt = f.title;
@@ -1797,6 +1883,7 @@ if (typeof document !== "undefined") {
         note.textContent = OTHER_OUTCOME_NOTE;
         body.appendChild(note);
       }
+      body.appendChild(downloadButton(f.file, f.title));
       card.appendChild(body);
       grid.appendChild(card);
     }
@@ -2625,6 +2712,15 @@ if (typeof document !== "undefined") {
       }
     });
     $("gal-back").addEventListener("click", goBackFromSection);
+    $("fig-download").addEventListener("click", async () => {
+      if (!modalFigure) return;
+      $("fig-download").disabled = true;
+      try {
+        await downloadFigure(modalFigure.file, modalFigure.title);
+      } finally {
+        $("fig-download").disabled = false;
+      }
+    });
     for (const b of document.querySelectorAll("[data-trend-mode]")) {
       b.addEventListener("click", () => setOverviewTrendMode(b.dataset.trendMode));
     }
