@@ -1454,30 +1454,51 @@ if (typeof document !== "undefined") {
     const ser = trendSeries(db, flt, "none");
     const years = Object.keys(ser).map(Number).sort((a, b) => a - b);
     const annual = years.map(year => ser[year]);
+    // Gentle light-to-strong blue across the years for markers and fill.
+    const lerp = (a, b, t) => Math.round(a + (b - a) * t);
+    const span = Math.max(1, years[years.length - 1] - years[0]);
+    const markerColors = years.map(year => {
+      const t = (year - years[0]) / span;
+      return `rgb(${lerp(126, 26, t)},${lerp(166, 78, t)},${lerp(212, 138, t)})`;
+    });
     const traces = [{
       x: years, y: annual,
       mode: "lines+markers", type: "scatter", showlegend: false,
       line: { color: ACCENT, width: 3, shape: "spline", smoothing: 0.45 },
-      marker: { color: ACCENT, size: 6, line: { color: "white", width: 1 } },
+      marker: { color: markerColors, size: 7, line: { color: "white", width: 1 } },
       fill: "tozeroy", fillcolor: "rgba(31,95,168,.12)",
+      fillgradient: {
+        type: "horizontal",
+        colorscale: [[0, "rgba(31,95,168,.04)"], [1, "rgba(31,95,168,.22)"]]
+      },
       hovertemplate: "%{x}: %{y:,} studies<extra></extra>"
     }];
+    const annotations = [];
     const partialIndex = years.indexOf(2026);
     if (partialIndex >= 0) {
       traces.push({
         x: [2026], y: [annual[partialIndex]],
-        mode: "markers+text", type: "scatter", showlegend: false,
+        mode: "markers", type: "scatter", showlegend: false, cliponaxis: false,
         marker: { symbol: "triangle-up", color: "#b08d3e", size: 13, line: { color: "white", width: 1 } },
-        text: ["⚠ 2026 partial year"], textposition: "top left",
-        textfont: { color: "#8f702d", size: 11 },
         hovertemplate: "2026: %{y:,} studies captured so far<br>Partial publication year<extra></extra>"
+      });
+      // Label sits to the right of the last point, clear of the line.
+      annotations.push({
+        x: 2026, y: annual[partialIndex], xref: "x", yref: "y",
+        text: "<b>2026: partial year</b><br>studies still being added",
+        showarrow: true, arrowhead: 0, arrowwidth: 1.2, arrowcolor: "#c9a85f",
+        ax: 22, ay: 0, xanchor: "left", align: "left",
+        font: { color: "#6f5420", size: 12.5 },
+        bgcolor: "#fbf5e6", bordercolor: "#dcc48f", borderwidth: 1, borderpad: 5
       });
     }
     window.Plotly.react("ov-trend", traces, {
       font: BASE_FONT,
-      margin: { t: 10, b: 40, l: 50, r: 20 },
-      xaxis: { gridcolor: "#eeebe3" },
-      yaxis: { title: "studies", tickformat: ",d", gridcolor: "#eeebe3", zeroline: false },
+      margin: { t: 10, b: 40, l: 55, r: partialIndex >= 0 ? 175 : 20 },
+      annotations,
+      // Plot area ends just past the last year so gridlines stop there.
+      xaxis: { showgrid: false, range: [years[0] - 0.4, years[years.length - 1] + 0.3], dtick: 2 },
+      yaxis: { title: "studies", tickformat: ",d", dtick: 1000, gridcolor: "#eeebe3", zeroline: false, rangemode: "tozero" },
       plot_bgcolor: "rgba(0,0,0,0)",
       paper_bgcolor: "rgba(0,0,0,0)"
     }, PLOTLY_CFG);
@@ -2382,7 +2403,10 @@ if (typeof document !== "undefined") {
     db = loadData({ dict, studies, geo, func, outcome, countries, content });
     db.overviewMetrics = { openAccess, funderTypes };
 
-    GALLERY = db.content.gallery || [];
+    // Sections listed here stay in content.json (and their figures stay built)
+    // but are hidden from the Thematic analysis tab.
+    const HIDDEN_SECTIONS = new Set(["Pipeline"]);
+    GALLERY = (db.content.gallery || []).filter(sec => !HIDDEN_SECTIONS.has(sec.title));
     FIG_INDEX = {};
     for (const sec of GALLERY) {
       for (const f of sec.figs) FIG_INDEX[f.file] = { ...f, sectionTitle: sec.title };

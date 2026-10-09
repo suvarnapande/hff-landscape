@@ -2250,149 +2250,10 @@ if have_funders:
         color=GOLD, top=15, xlabel="studies", gradient=True
     )
 
+    # fig_wellcome_priorities.png now lives in build_hidden_figures_v5.py (hidden from the site).
+
     # Additional treemap option — editorial card style with tight gutters,
     # rounded tiles, contrast-aware typography, and automatic font fitting.
-    # --- fig_wellcome_priorities: evidence and funders across Wellcome themes ---
-    # These are independent flags rather than a partition: one study may address
-    # several priority themes. The rules deliberately reuse existing metadata.
-    priority_raw = pd.read_csv(
-        RAW_CSV,
-        usecols=["record_id", "mesh_theme", "ml_topics"],
-    )
-    priority_raw = priority_raw[priority_raw["record_id"].isin(ID_TO_IDX)]
-    infectious_keywords = MESH_DISEASE_KEYWORDS[0][1]
-    mental_keywords = [
-        "mental disorder", "mental health", "depress", "anxiety disorder",
-        "schizophrenia", "bipolar disorder", "substance-related disorder",
-        "substance abuse", "psychiatric", "autis", "attention deficit",
-    ]
-    climate_mesh_keywords = [
-        "climate change", "global warming", "extreme heat", "heat stress",
-        "hot temperature", "heatwave",
-    ]
-    priority_order = ["Infectious Diseases", "Mental Health", "Climate & Health"]
-    priority_colors = {
-        "Infectious Diseases": "#2f6fb0",
-        "Mental Health": "#2a9d8f",
-        "Climate & Health": "#67a65b",
-    }
-    priorities_of_s = {}
-    for row in priority_raw.itertuples(index=False):
-        mesh_text = str(row.mesh_theme).lower() if pd.notna(row.mesh_theme) else ""
-        topic_text = str(row.ml_topics).lower() if pd.notna(row.ml_topics) else ""
-        tags = set()
-        if any(keyword in mesh_text for keyword in infectious_keywords):
-            tags.add("Infectious Diseases")
-        if any(keyword in mesh_text for keyword in mental_keywords):
-            tags.add("Mental Health")
-        if (any(keyword in mesh_text for keyword in climate_mesh_keywords)
-                or "climate change and health impacts" in topic_text):
-            tags.add("Climate & Health")
-        if tags:
-            priorities_of_s[ID_TO_IDX[row.record_id]] = tags
-
-    priority_counts = Counter(
-        theme for themes in priorities_of_s.values() for theme in themes
-    )
-    donor_priority_counts = defaultdict(Counter)
-    for study_idx, themes in priorities_of_s.items():
-        for funder_key in funders_of_s.get(study_idx, set()):
-            donor = funder_display_name[funder_key]
-            for theme in themes:
-                donor_priority_counts[donor][theme] += 1
-
-    top_priority_donors = [name for name, _ in top_funders[:12]]
-    priority_matrix = np.array([
-        [donor_priority_counts[donor][theme] for theme in priority_order]
-        for donor in top_priority_donors
-    ])
-    leading_theme = max(priority_order, key=lambda theme: priority_counts[theme])
-    leading_donor = (max(top_priority_donors,
-                         key=lambda donor: sum(donor_priority_counts[donor].values()))
-                     if top_priority_donors else "No named funder")
-    priority_desc = (
-        "Panel A shows studies classified to each Wellcome priority theme; Panel B shows the top "
-        "funders of those studies by theme. Categories are not mutually exclusive."
-    )
-    priority_finding = (
-        f"{leading_theme} has the largest evidence base ({priority_counts[leading_theme]:,} studies); "
-        f"{leading_donor} funds the largest number of priority-theme study links."
-    )
-    FIG_META["fig_wellcome_priorities.png"] = (
-        "Indicative mapping of studies to Wellcome priority themes",
-        priority_desc,
-        priority_finding,
-    )
-
-    fig = plt.figure(figsize=(14.2, 8.4))
-    gs = fig.add_gridspec(1, 2, width_ratios=[0.82, 1.45], wspace=0.42)
-    ax_a = fig.add_subplot(gs[0, 0])
-    ax_b = fig.add_subplot(gs[0, 1])
-    fig.suptitle("Indicative mapping of studies to Wellcome priority themes", x=0.055, y=0.965,
-                 ha="left", fontsize=19, fontweight="bold", color=INK)
-    fig.text(0.055, 0.905, priority_desc, ha="left", va="top", fontsize=10.5,
-             color=SUBHEAD_COLOR)
-    fig.text(0.055, 0.852, priority_finding, ha="left", va="top", fontsize=11,
-             fontweight="bold", color=INK)
-
-    bar_values = [priority_counts[theme] for theme in priority_order]
-    bar_y = np.arange(len(priority_order))
-    ax_a.barh(bar_y, bar_values, color=[priority_colors[t] for t in priority_order],
-              height=0.58, zorder=3)
-    ax_a.set_yticks(bar_y, priority_order)
-    ax_a.invert_yaxis()
-    ax_a.set_xlabel(f"studies (share of all {N:,} studies)")
-    ax_a.set_title("Panel A - How much evidence addresses\nWellcome priority themes?",
-                   loc="left", fontsize=11.5, fontweight="bold", color=INK, pad=14)
-    for y, value in zip(bar_y, bar_values):
-        ax_a.text(value, y, f"  {value:,}  ({100 * value / N:.1f}% of all studies)",
-                  va="center", ha="left", fontsize=9.5, fontweight="bold", color=INK)
-    ax_a.set_xlim(0, max(bar_values) * 1.42 if bar_values else 1)
-    clean_axes(ax_a)
-    ax_a.grid(axis="y", visible=False)
-
-    vmax = max(int(priority_matrix.max()), 1) if priority_matrix.size else 1
-    cmap = mcolors.LinearSegmentedColormap.from_list(
-        "priority_funding", ["#f3f7f5", "#b7d9ce", "#25835f", "#114c3d"]
-    )
-    image = ax_b.imshow(priority_matrix, aspect="auto", cmap=cmap, vmin=0, vmax=vmax)
-    ax_b.set_xticks(np.arange(len(priority_order)), priority_order)
-    ax_b.set_yticks(
-        np.arange(len(top_priority_donors)),
-        ["\n".join(textwrap.wrap(name, width=28, break_long_words=False))
-         for name in top_priority_donors],
-    )
-    ax_b.set_title("Panel B - Which donors fund research\nin each priority theme?",
-                   loc="left", fontsize=11.5, fontweight="bold", color=INK, pad=14)
-    ax_b.tick_params(axis="x", rotation=0, labelsize=9)
-    ax_b.tick_params(axis="y", labelsize=8.5, length=0)
-    for row_idx in range(priority_matrix.shape[0]):
-        for col_idx in range(priority_matrix.shape[1]):
-            value = int(priority_matrix[row_idx, col_idx])
-            ax_b.text(col_idx, row_idx, f"{value:,}", ha="center", va="center",
-                      fontsize=8.5, fontweight="bold",
-                      color="white" if value > vmax * 0.55 else INK)
-    for spine in ax_b.spines.values():
-        spine.set_visible(False)
-    colorbar = fig.colorbar(image, ax=ax_b, fraction=0.035, pad=0.025)
-    colorbar.set_label("funded studies", fontsize=9, color=SUBHEAD_COLOR)
-    colorbar.ax.tick_params(labelsize=8)
-    colorbar.outline.set_visible(False)
-
-    fig.text(
-        0.055, 0.025,
-        f"Base and percentage denominator: all {N:,} studies in the evidence map. Themes are independent "
-        "flags and may overlap. Infectious Diseases and "
-        "Mental Health use explicit disease/mental-health terms in existing MeSH-derived metadata; Climate "
-        "& Health uses explicit climate/heat MeSH terms or the OpenAlex topic 'Climate Change and Health "
-        "Impacts'. Panel B disaggregates the top 12 normalized funders overall; a multi-funder study "
-        "counts once for each named funder.",
-        ha="left", va="bottom", fontsize=8.2, color=SUBHEAD_COLOR, wrap=True,
-    )
-    fig.subplots_adjust(left=0.055, right=0.97, top=0.73, bottom=0.16)
-    fig.savefig(FIGS / "fig_wellcome_priorities.png", dpi=150, bbox_inches="tight")
-    plt.close(fig)
-
     treemap_vals = [v for _, v in top_funders]
     scaled_vals = [v / sum(treemap_vals) * (100 * 100) for v in treemap_vals]
     rects = squarify_treemap_balanced(scaled_vals, 0, 0, 100, 100)
@@ -3166,51 +3027,10 @@ if HAVE_PLOTLY:
             [0, 25, 50, 75, 100], ["0%", "25%", "50%", "75%", "100%"], "% with a\nlocal author")
 
 # ---------------------------------------------------------------------------
-# 12. Pipeline funnel
+# 12. Load content.json (gallery is written at the end). The Pipeline funnel
+# figure now lives in build_hidden_figures_v5.py (hidden from the site).
 # ---------------------------------------------------------------------------
 content = load("content.json")
-funnel_raw = content["funnel"]
-
-
-def num(s):
-    return int(s.replace(",", ""))
-
-
-stages = []
-for row in funnel_raw:
-    lbl = row["label"]
-    if "Stage 0 input" in lbl:
-        stages.append(("Records in the v5 file", num(row["records"])))
-    elif "With a financing-function tag" in lbl:
-        stages.append(("Financing-function tag", num(row["records"])))
-    elif "DOI recovered" in lbl and "No DOI" not in lbl:
-        stages.append(("DOI recovered", num(row["records"])))
-
-mesh_pubmed = next(num(r["records"]) for r in funnel_raw if "PubMed MeSH" in r["label"])
-mesh_fallback = next(num(r["records"]) for r in funnel_raw if "OpenAlex fallback" in r["label"])
-stages.append(("MeSH/topic theme found", mesh_pubmed + mesh_fallback))
-n_ff_tag = next(v for k, v in stages if k == "Financing-function tag")
-n_doi = next(v for k, v in stages if k == "DOI recovered")
-
-labels = [s[0] for s in stages]
-values = [s[1] for s in stages]
-fig, ax = plt.subplots(figsize=(8, 4.6))
-ax.barh(labels[::-1], values[::-1], color=ACCENT, zorder=3)
-for y, v in enumerate(values[::-1]):
-    ax.text(v, y, f"  {v:,}", va="center", fontsize=9, color=INK)
-set_headline(ax, "Nearly every v5 record carries a financing-function tag",
-             "Record counts in the v5 file, from classification to DOI and topic-theme recovery.",
-             f"{pct(n_ff_tag, N)}% of {N:,} records have a financing-function tag; {pct(n_doi, N)}% have a DOI "
-             f"and {pct(mesh_pubmed + mesh_fallback, N)}% a MeSH or topic theme.",
-             "fig_funnel.png")
-ax.set_xlabel("records")
-clean_axes(ax)
-ax.xaxis.set_major_formatter(mticker.StrMethodFormatter("{x:,.0f}"))
-set_footnote(fig, f"Base: {SOURCE_NAME}, counted from the file itself (there is no v5 stage-funnel workbook). "
-                   "See the Methods tab for the\nstage-by-stage breakdown.")
-fig.tight_layout()
-fig.savefig(FIGS / "fig_funnel.png", dpi=150, bbox_inches="tight")
-plt.close(fig)
 
 # ---------------------------------------------------------------------------
 # 13-14. Topic landscape: UMAP coords from docs/dex_hff/topic_map.csv (supplied
@@ -5251,9 +5071,6 @@ gallery = [
             [fig_entry("fig_topicmap.png", "Thematic landscape"),
              fig_entry("fig_theme_rank.png", "Top 20 research themes"),
              fig_entry("fig_topicmap_income.png", "Themes by income skew")] if have_topics else []
-        ) + (
-            [fig_entry("fig_wellcome_priorities.png",
-                       "Indicative mapping of studies to Wellcome priority themes")] if have_funders else []
         ),
     } if (have_topics or have_taxonomy) else None,
     {
@@ -5341,12 +5158,7 @@ gallery = [
             ] if have_ihme else []
         ),
     } if have_ihme else None,
-    {
-        "title": "Pipeline",
-        "blurb": "Understand what information is available for the studies in this map and how completely "
-                 "key details, publication links and research themes were identified.",
-        "figs": [fig_entry("fig_funnel.png", "Pipeline funnel")],
-    },
+    # Pipeline section (fig_funnel.png) is hidden; see build_hidden_figures_v5.py.
 ]
 
 gallery = [sec for sec in gallery if sec is not None]
