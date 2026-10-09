@@ -1224,6 +1224,48 @@ if (typeof document !== "undefined") {
       .sort((a, b) => a.n - b.n)[0]?.label || "Not available";
   }
 
+  // "Type of analysis used in studies" card: shared by the Overview tile and the
+  // Methods & data section of Thematic analysis.
+  function fillAnalysisApproachCard(box) {
+    box.classList.add("analysis-approach-card");
+    const title = el("div", "value-box-title");
+    title.textContent = "Type of analysis used in studies";
+    box.appendChild(title);
+
+    const levels = db.levels.type_of_analysis;
+    const counts = Array(levels.length).fill(0);
+    for (const code of db.studies.type_of_analysis) {
+      if (Number.isInteger(code) && code >= 0 && code < counts.length) counts[code]++;
+    }
+    const total = db.studies.type_of_analysis.length || 1;
+    const approaches = ["Quantitative", "Qualitative", "Mixed methods"].map(label => {
+      const i = levels.indexOf(label);
+      return { label, pct: i < 0 ? 0 : 100 * counts[i] / total };
+    });
+    const bar = el("div", "analysis-approach-bar");
+    const metrics = el("div", "analysis-approach-metrics");
+    for (const approach of approaches) {
+      const key = approach.label.toLowerCase().replace(" methods", "");
+      const segment = el("div", "analysis-approach-segment analysis-" + key);
+      segment.style.width = approach.pct + "%";
+      bar.appendChild(segment);
+      const metric = el("div", "analysis-approach-metric");
+      metric.classList.add("analysis-metric-" + key);
+      metric.style.width = approach.pct + "%";
+      const pct = el("strong");
+      pct.textContent = approach.pct.toFixed(1) + "%";
+      const label = el("span");
+      label.textContent = approach.label;
+      metric.append(pct, label);
+      metrics.appendChild(metric);
+    }
+    const unclearCode = levels.indexOf("Unclear");
+    const unclearPct = unclearCode < 0 ? 0 : 100 * counts[unclearCode] / total;
+    const note = el("div", "analysis-approach-note");
+    note.textContent = unclearPct.toFixed(1) + "% could not be classified.";
+    box.append(bar, metrics, note);
+  }
+
   function renderOverview() {
     const m = db.dict.meta;
     $("nav-built").textContent = "Last update " + m.built;
@@ -1343,43 +1385,7 @@ if (typeof document !== "undefined") {
         continue;
       }
       if (display.label === "Studies using quantitative analysis") {
-        box.classList.add("analysis-approach-card");
-        const title = el("div", "value-box-title");
-        title.textContent = "Type of analysis used in studies";
-        box.appendChild(title);
-
-        const levels = db.levels.type_of_analysis;
-        const counts = Array(levels.length).fill(0);
-        for (const code of db.studies.type_of_analysis) {
-          if (Number.isInteger(code) && code >= 0 && code < counts.length) counts[code]++;
-        }
-        const total = db.studies.type_of_analysis.length || 1;
-        const approaches = ["Quantitative", "Qualitative", "Mixed methods"].map(label => {
-          const i = levels.indexOf(label);
-          return { label, pct: i < 0 ? 0 : 100 * counts[i] / total };
-        });
-        const bar = el("div", "analysis-approach-bar");
-        const metrics = el("div", "analysis-approach-metrics");
-        for (const approach of approaches) {
-          const key = approach.label.toLowerCase().replace(" methods", "");
-          const segment = el("div", "analysis-approach-segment analysis-" + key);
-          segment.style.width = approach.pct + "%";
-          bar.appendChild(segment);
-          const metric = el("div", "analysis-approach-metric");
-          metric.classList.add("analysis-metric-" + key);
-          metric.style.width = approach.pct + "%";
-          const pct = el("strong");
-          pct.textContent = approach.pct.toFixed(1) + "%";
-          const label = el("span");
-          label.textContent = approach.label;
-          metric.append(pct, label);
-          metrics.appendChild(metric);
-        }
-        const unclearCode = levels.indexOf("Unclear");
-        const unclearPct = unclearCode < 0 ? 0 : 100 * counts[unclearCode] / total;
-        const note = el("div", "analysis-approach-note");
-        note.textContent = unclearPct.toFixed(1) + "% could not be classified.";
-        box.append(bar, metrics, note);
+        fillAnalysisApproachCard(box);
         makeOverviewCardInteractive(box, display.label);
         wrap.appendChild(box);
         continue;
@@ -1556,6 +1562,13 @@ if (typeof document !== "undefined") {
     $("gal-section").style.display = "block";
     $("gal-sec-title").textContent = sec.title;
     $("gal-sec-blurb").textContent = sec.blurb.replace(/\s+/g, " ").trim();
+    const extra = $("gal-sec-extra");
+    extra.textContent = "";
+    if (sec.title === "Methods & data") {
+      const box = el("div", "value-box section-analysis-card");
+      fillAnalysisApproachCard(box);
+      extra.appendChild(box);
+    }
     renderFigureGrid(sec, $("gal-sec-grid"));
     window.scrollTo(0, 0);
   }

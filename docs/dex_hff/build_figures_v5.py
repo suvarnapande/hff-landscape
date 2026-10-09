@@ -946,35 +946,259 @@ fig.savefig(FIGS / "fig_outcome_lollipop.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
 
 # ---------------------------------------------------------------------------
-# 5-8. Study design / type of analysis / data type / data source
+# 5-8. Methodological characteristics: study design (dot plot), data type
+# (treemap) and data source (100% strip with callouts) in one figure. Each
+# study has exactly one code per dimension, so each panel sums to N. The four
+# separate bar charts this replaces (fig_design_bar, fig_analysis_bar,
+# fig_datatype_bar, fig_datasource_bar) now live in build_hidden_figures_v5.py.
 # ---------------------------------------------------------------------------
-top_design2, second_design = sorted(col_counts("study_design").items(), key=lambda kv: -kv[1])[:2]
-top_design, top_design_n = top_design2
-hbar(col_counts("study_design"), "Cross-sectional analysis dominates study design",
-     "Study design of the analysis population.",
-     f"{top_design} leads at {top_design_n:,} studies, well ahead of {second_design[0]}'s {second_design[1]:,}.",
-     "fig_design_bar.png", f"Base: {N:,} studies (analysis population).")
+METHOD_SHORT = {
+    "Cross-sectional and correlational analyses": "Cross-sectional & correlational",
+    "Experimental and quasi-experimental impact evaluations": "Experimental & quasi-experimental",
+    "Economic and efficiency analyses": "Economic & efficiency",
+    "Policy and implementation analyses": "Policy & implementation",
+    "Modelling studies linked to interventions": "Modelling linked to interventions",
+    "Qualitative exploratory studies": "Qualitative exploratory",
+    "Comparative health systems analyses": "Comparative health systems",
+    "Provider/payment system analyses": "Provider/payment system",
+    "Qualitative and mixed-methods evaluations": "Qualitative & mixed-methods eval.",
+    "Political economy and governance studies": "Political economy & governance",
+    "Forecasting studies": "Forecasting",
+    "Cross-sectional data": "Cross-sectional",
+    "Panel data": "Panel",
+    "Qualitative data": "Qualitative",
+    "Administrative data": "Administrative",
+    "Primary survey data": "Primary survey",
+    "National / international survey datasets": "National / international surveys",
+    "Financial / accounting data": "Financial / accounting",
+    "Programme / project data": "Programme / project",
+    "Price / market data": "Price / market",
+    "Web / digital data": "Web / digital",
+    "Geospatial / remote-sensing data": "Geospatial / remote sensing",
+}
+METHOD_THEMES = {
+    "design": dict(cols=["#dbe7f5", "#1f5fa8", "#123a6b"], card="#f7f9fc", band="#e9f1fa", accent="#1f5fa8"),
+    "type": dict(cols=["#d7efec", "#2a9d8f", "#145149"], card="#f6fbfa", band="#e4f3f1", accent="#1f7a70"),
+    "source": dict(cols=["#f1e4c6", "#b08d3e", "#6b5220"], card="#fdfaf4", band="#f8efdc", accent="#a07a2a"),
+}
+METHOD_GREY = "#cfd4da"
+METHOD_MUTED = "#7b8794"
 
-pct_quant = dict_json["meta"]["pct_quant"]
-hbar(col_counts("type_of_analysis"), "Most studies are quantitative",
-     "Type of analysis, deduced from the abstract text.",
-     f"{pct_quant}% of studies use a quantitative analysis — qualitative and mixed-methods work "
-     f"together make up the remaining {round(100 - pct_quant, 1)}%.",
-     "fig_analysis_bar.png", f"Base: {N:,} studies (analysis population).", color=GOLD)
 
-top_dt2, second_dt = sorted(col_counts("data_type").items(), key=lambda kv: -kv[1])[:2]
-top_datatype, top_datatype_n = top_dt2
-hbar(col_counts("data_type"), "Cross-sectional data is the norm",
-     "Data type used by the analysis population.",
-     f"{top_datatype} leads at {top_datatype_n:,} studies, ahead of {second_dt[0]}'s {second_dt[1]:,}.",
-     "fig_datatype_bar.png", f"Base: {N:,} studies (analysis population).")
+def method_rows(col):
+    """(display label, count) sorted by count, with Unclear last."""
+    rows = [(METHOD_SHORT.get(name, name), n) for name, n in col_counts(col).items()]
+    main = sorted([r for r in rows if r[0] != "Unclear"], key=lambda r: -r[1])
+    return main + [r for r in rows if r[0] == "Unclear"]
 
-top_dsr2, second_dsr = sorted(col_counts("data_source").items(), key=lambda kv: -kv[1])[:2]
-top_datasource, top_datasource_n = top_dsr2
-hbar(col_counts("data_source"), "Administrative records are the leading data source",
-     "Data source used by the analysis population.",
-     f"{top_datasource} leads at {top_datasource_n:,} studies, ahead of {second_dsr[0]}'s {second_dsr[1]:,}.",
-     "fig_datasource_bar.png", f"Base: {N:,} studies (analysis population).", color=GOLD)
+
+def method_pct(n):
+    p = 100 * n / N
+    return "<1%" if p < 1 else f"{p:.0f}%"
+
+
+def method_colors(rows, cols):
+    cmap = mcolors.LinearSegmentedColormap.from_list("method", cols)
+    n_main = sum(1 for r in rows if r[0] != "Unclear")
+    ramp = [cmap(0.95 - 0.75 * i / max(1, n_main - 1)) for i in range(n_main)]
+    return ramp + [METHOD_GREY] * (len(rows) - n_main)
+
+
+def method_text_color(col):
+    h = mcolors.rgb_to_hsv(mcolors.to_rgb(col))
+    return INK if (h[2] > 0.8 and h[1] < 0.35) else "white"
+
+
+def method_squarify(vals, x, y, w, h):
+    rects, vals = [], list(vals)
+    while vals:
+        horiz = w >= h
+        side = h if horiz else w
+        total = sum(vals)
+
+        def worst(r):
+            s = sum(r)
+            length = s / total * (w if horiz else h)
+            return max(max(side * v / s / length, length / (side * v / s)) for v in r)
+        row, i = [vals[0]], 1
+        while i < len(vals) and worst(row + [vals[i]]) <= worst(row):
+            row.append(vals[i])
+            i += 1
+        s = sum(row)
+        length = s / total * (w if horiz else h)
+        off = 0
+        for v in row:
+            seg = side * v / s
+            rects.append((x, y + off, length, seg) if horiz else (x + off, y, seg, length))
+            off += seg
+        if horiz:
+            x += length
+            w -= length
+        else:
+            y += length
+            h -= length
+        vals = vals[i:]
+    return rects
+
+
+design_rows = method_rows("study_design")
+dtype_rows = method_rows("data_type")
+dsource_rows = method_rows("data_source")
+mc_desc = (f"Distribution of {N:,} studies by study design, data type and data source. "
+           "Each study was assigned one category per dimension.")
+mc_finding = (f"{design_rows[0][0]} is the most common design ({method_pct(design_rows[0][1])}); "
+              f"{dtype_rows[0][0].lower()} data and {dsource_rows[0][0].lower()} sources lead their "
+              f"dimensions ({method_pct(dtype_rows[0][1])} and {method_pct(dsource_rows[0][1])}).")
+FIG_META["fig_methods_characteristics.png"] = (
+    "Methodological characteristics of included studies", mc_desc, mc_finding)
+
+fig = plt.figure(figsize=(16, 10))
+fig.text(0.022, 0.975, "Methodological characteristics of included studies", fontsize=22,
+         fontweight="bold", va="top")
+fig.text(0.022, 0.928, mc_desc, fontsize=11.5, color=SUBHEAD_COLOR, va="top")
+
+
+def method_card(theme, title, question, x0, y0, x1, y1, band_h=0.075, right_note=None):
+    t = METHOD_THEMES[theme]
+    fig.patches.append(FancyBboxPatch((x0, y0), x1 - x0, y1 - y0, transform=fig.transFigure,
+                                      boxstyle="round,pad=0,rounding_size=0.008",
+                                      fc=t["card"], ec="#e6e9ee", lw=0.8, zorder=0))
+    fig.patches.append(FancyBboxPatch((x0, y1 - band_h), x1 - x0, band_h, transform=fig.transFigure,
+                                      boxstyle="round,pad=0,rounding_size=0.008",
+                                      fc=t["band"], ec="none", zorder=0.5))
+    # Square off the bottom corners of the header band.
+    fig.patches.append(plt.Rectangle((x0, y1 - band_h), x1 - x0, 0.01, transform=fig.transFigure,
+                                     fc=t["band"], ec="none", zorder=0.5))
+    fig.text(x0 + 0.014, y1 - 0.018, title, fontsize=17, fontweight="bold", color=t["accent"], va="top")
+    fig.text(x0 + 0.014, y1 - 0.05, question, fontsize=10.5, color=SUBHEAD_COLOR, va="top")
+    if right_note:
+        fig.text(x1 - 0.012, y1 - 0.022, right_note, fontsize=9.5, color=SUBHEAD_COLOR,
+                 va="top", ha="right")
+
+
+# Study design: dot plot with % and n.
+method_card("design", "Study design", "How were the studies designed?", 0.015, 0.08, 0.468, 0.895,
+            right_note=f"% of studies\n(n = {N:,})")
+ax = fig.add_axes([0.19, 0.135, 0.25, 0.665])
+ys = list(range(len(design_rows)))[::-1]
+for (lab, n), y, c in zip(design_rows, ys, method_colors(design_rows, METHOD_THEMES["design"]["cols"])):
+    p = 100 * n / N
+    ax.hlines(y, 0, p, color=c, lw=2)
+    ax.scatter([p], [y], s=70, color=c, zorder=3, edgecolor="white", lw=1)
+    ax.text(p + 0.9, y + 0.13, method_pct(n), fontsize=10, fontweight="bold", va="center")
+    ax.text(p + 0.9, y - 0.27, f"(n = {n:,})", fontsize=8.6, color=METHOD_MUTED, va="center")
+ax.set_yticks(ys, [r[0] for r in design_rows], fontsize=10)
+ax.set_ylim(-0.7, len(design_rows) - 0.4)
+ax.set_xlim(0, 30)
+for s in ("top", "right", "left"):
+    ax.spines[s].set_visible(False)
+ax.spines["bottom"].set_color("#c9ced6")
+ax.tick_params(axis="y", length=0, pad=6)
+ax.tick_params(axis="x", labelsize=9, color="#c9ced6")
+ax.set_xlabel("% of studies", fontsize=9, color=SUBHEAD_COLOR)
+ax.grid(axis="x", color="#eceff3")
+ax.set_axisbelow(True)
+
+# Data type: treemap with name, % and n in every block.
+method_card("type", "Data type", "What types of data were analysed?", 0.482, 0.425, 0.985, 0.895)
+tm_rect = [0.488, 0.435, 0.491, 0.37]
+axb = fig.add_axes(tm_rect)
+W, H = 100 * (tm_rect[2] * 16) / (tm_rect[3] * 10), 100
+tm_boxes = method_squarify([r[1] / N * W * H for r in dtype_rows], 0, 0, W, H)
+for (lab, n), (rx, ry, rw, rh), c in zip(dtype_rows, tm_boxes,
+                                         method_colors(dtype_rows, METHOD_THEMES["type"]["cols"])):
+    ry = H - ry - rh
+    axb.add_patch(FancyBboxPatch((rx + 0.6, ry + 0.6), rw - 1.2, rh - 1.2,
+                                 boxstyle="round,pad=0,rounding_size=1.2", fc=c, ec="none"))
+    tc = method_text_color(c)
+    big = rw * rh > 2500
+    name = lab if len(lab) * 1.75 < rw - 6 else lab.replace(" / ", " /\n")
+    axb.text(rx + 3, ry + rh - 4, name, fontsize=12.5 if big else 11, fontweight="bold",
+             va="top", color=tc, linespacing=1.1)
+    if rh > 30:
+        axb.text(rx + 3, ry + 13, method_pct(n), fontsize=16 if big else 14, fontweight="bold",
+                 va="bottom", color=tc)
+        axb.text(rx + 3, ry + 4, f"(n = {n:,})", fontsize=10.5, va="bottom", color=tc, alpha=0.9)
+    else:
+        axb.text(rx + 3, ry + 4, method_pct(n), fontsize=13, fontweight="bold", va="bottom", color=tc)
+        axb.text(rx + rw - 3, ry + 4, f"(n = {n:,})", fontsize=9.5, va="bottom", ha="right",
+                 color=tc, alpha=0.9)
+axb.set_xlim(0, W)
+axb.set_ylim(0, H)
+axb.axis("off")
+
+# Data source: 100% strip. Wide segments are labelled inside; mid-sized ones get a
+# leader line to a label below; the smallest are grouped into a list on the right.
+method_card("source", "Data source", "What were the sources of data?", 0.482, 0.08, 0.985, 0.405)
+axc = fig.add_axes([0.488, 0.228, 0.491, 0.09])
+axc.set_xlim(0, 1)
+axc.set_ylim(0, 1)
+axc.axis("off")
+x, medium, small = 0, [], []
+for (lab, n), c in zip(dsource_rows, method_colors(dsource_rows, METHOD_THEMES["source"]["cols"])):
+    w = n / N
+    axc.add_patch(FancyBboxPatch((x + 0.0015, 0), max(w - 0.003, 0.0008), 1,
+                                 boxstyle="round,pad=0,rounding_size=0.006", fc=c, ec="none",
+                                 mutation_aspect=4))
+    tc = method_text_color(c)
+    mid = x + w / 2
+    if len(lab) * 0.0115 < w - 0.02:
+        axc.text(x + 0.01, 0.78, lab, fontsize=10.5, fontweight="bold", va="center", color=tc)
+        axc.text(x + 0.01, 0.47, method_pct(n), fontsize=13, fontweight="bold", va="center", color=tc)
+        axc.text(x + 0.01, 0.17, f"(n = {n:,})" if w > 0.15 else f"({n:,})", fontsize=9.5,
+                 va="center", color=tc)
+    elif w >= 0.045:
+        axc.text(mid, 0.6, method_pct(n), fontsize=12, fontweight="bold", ha="center", va="center",
+                 color=tc)
+        axc.text(mid, 0.27, f"({n:,})", fontsize=8 if w < 0.07 else 8.8, ha="center", va="center",
+                 color=tc)
+        medium.append((lab, n, mid))
+    else:
+        small.append((lab, n, mid, c))
+    x += w
+
+lead_col = METHOD_THEMES["source"]["accent"]
+label_y = -0.62
+label_xs = [0.11 + i * 0.165 for i in range(len(medium))]  # first label clears the card edge
+# Each leader turns at its own height (leftmost highest) so no two lines share a path.
+for i, ((lab, n, mid), lx) in enumerate(zip(medium, label_xs)):
+    turn_y = -0.2 - 0.11 * i
+    axc.plot([mid, mid], [-0.05, turn_y], color=lead_col, lw=1, clip_on=False)
+    axc.plot([mid, lx], [turn_y, turn_y], color=lead_col, lw=1, clip_on=False)
+    axc.plot([lx, lx], [turn_y, label_y + 0.08], color=lead_col, lw=1, clip_on=False)
+    axc.scatter([mid], [-0.05], s=14, color=lead_col, clip_on=False, zorder=3)
+    axc.text(lx, label_y, lab.replace(" / ", " /\n", 1) if len(lab) > 18 else lab, fontsize=9.8,
+             fontweight="bold", ha="center", va="top", clip_on=False, linespacing=1.05)
+    axc.text(lx, label_y - 0.48, f"{method_pct(n)}  (n = {n:,})", fontsize=9, ha="center", va="top",
+             color=SUBHEAD_COLOR, clip_on=False)
+if small:
+    sx0, sx1 = min(s[2] for s in small), max(s[2] for s in small)
+    for _, _, m, _ in small:
+        axc.plot([m, m], [-0.05, -0.2], color=lead_col, lw=1, clip_on=False)
+    axc.plot([sx0, sx1], [-0.2, -0.2], color=lead_col, lw=1, clip_on=False)
+    bx_mid = (sx0 + sx1) / 2
+    list_x = 0.575
+    axc.plot([bx_mid, bx_mid], [-0.2, -0.5], color=lead_col, lw=1, clip_on=False)
+    axc.plot([list_x - 0.012, bx_mid], [-0.5, -0.5], color=lead_col, lw=1, clip_on=False)
+    for i, (lab, n, _, c) in enumerate(small):
+        ly = -0.6 - i * 0.24
+        axc.plot([list_x - 0.012, list_x - 0.012], [-0.5, ly], color=lead_col, lw=1, clip_on=False)
+        axc.scatter([list_x - 0.003], [ly], s=16, color=c, clip_on=False)
+        axc.text(list_x + 0.006, ly, f"{lab}  ", fontsize=9.2, va="center", clip_on=False)
+        axc.text(0.995, ly, f"{method_pct(n)} (n = {n:,})", fontsize=9, va="center", ha="right",
+                 color=SUBHEAD_COLOR, clip_on=False)
+
+fig.text(0.022, 0.045, f"Note: Based on {N:,} studies. Each study was assigned one category per dimension "
+         "(study design, data type and data source). Percentages may not sum to 100% due to rounding.",
+         fontsize=9, color=SUBHEAD_COLOR)
+fig.text(0.022, 0.022, "Unclear: no category could be assigned because the study's title and abstract did not "
+         "give enough information to classify it confidently (the field was left blank at extraction).",
+         fontsize=9, color=SUBHEAD_COLOR)
+# Cards are figure-level patches; keep every chart drawn above them.
+for a in fig.axes:
+    a.set_zorder(5)
+fig.savefig(FIGS / "fig_methods_characteristics.png", dpi=150)
+plt.close(fig)
 
 # ---------------------------------------------------------------------------
 # 9. Geographic scope
@@ -5078,10 +5302,8 @@ gallery = [
         "blurb": "See how studies were designed, whether they used quantitative, qualitative or mixed "
                  "methods, and what kinds of data they analysed.",
         "figs": [
-            fig_entry("fig_design_bar.png", "Study design"),
-            fig_entry("fig_analysis_bar.png", "Type of analysis"),
-            fig_entry("fig_datatype_bar.png", "Data type"),
-            fig_entry("fig_datasource_bar.png", "Data source"),
+            fig_entry("fig_methods_characteristics.png",
+                      "Methodological characteristics of included studies"),
         ],
     },
     {

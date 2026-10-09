@@ -505,6 +505,40 @@ main { padding: 1.4rem 1.5rem 2.5rem; max-width: 1500px; margin: 0 auto; }
   border-color: var(--tile-accent);
   color: #fff;
 }
+/* Copy of the Overview "Type of analysis" tile, shown at the top of the
+   Methods & data section (mirrors the #ov-tiles tile styling). */
+#gal-sec-extra:empty { display: none; }
+#gal-sec-extra { margin: 0 0 1.25rem; }
+.value-box.section-analysis-card {
+  --tile-accent: #25835f;
+  --tile-bg: #eff8f3;
+  position: relative;
+  max-width: 720px;
+  min-height: 0;
+  padding: 1rem 1.1rem .9rem 1.3rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--tile-accent) 22%, white);
+  border-radius: 8px;
+  background: var(--tile-bg);
+  box-shadow: 0 4px 14px rgba(16, 36, 62, .06);
+  color: var(--hff-ink);
+}
+.value-box.section-analysis-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: var(--tile-accent);
+}
+.value-box.section-analysis-card .value-box-title {
+  margin: 0 0 .55rem;
+  color: var(--tile-accent);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  opacity: 1;
+}
 .glance-head {
   display: flex;
   flex-wrap: wrap;
