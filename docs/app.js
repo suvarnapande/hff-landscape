@@ -850,7 +850,7 @@ if (typeof document !== "undefined") {
   const state = {
     filt: null,
     result: null,
-    country: "IND",
+    country: "AFG",
     ts: {},
     textCache: {}
   };
@@ -2955,15 +2955,20 @@ if (typeof document !== "undefined") {
 
   function setupCountryPane() {
     const sel = $("c-picker");
-    for (const r of db.countries) {
+    const byName = db.countries.slice()
+      .sort((a, b) => a.country.localeCompare(b.country, "en", { sensitivity: "base" }));
+    for (const r of byName) {
       const o = document.createElement("option");
       o.value = r.iso3;
       o.textContent = r.country;
-      if (r.iso3 === "IND") o.selected = true;
+      if (r.iso3 === "AFG") o.selected = true;
       sel.appendChild(o);
     }
     new window.TomSelect(sel, {
       placeholder: "Pick a country…",
+      // Tom Select caps the dropdown at 50 options by default; list them all.
+      maxOptions: null,
+      sortField: [{ field: "$order" }],
       onChange: val => {
         if (!val) return;
         state.country = val;

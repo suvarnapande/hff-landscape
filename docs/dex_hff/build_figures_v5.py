@@ -5448,15 +5448,15 @@ gallery = [
             fig_entry("fig_function_bar.png", "Financing function"),
             fig_entry("fig_outcome_lollipop.png", "Outcome domain"),
             fig_entry("fig_function_outcome_heatmap.png", "Function vs. outcome"),
-        ] + ([
-            # Study design -> financing function -> outcome (moved from Methods & data).
-            fig_entry("fig_alluvial.png", "Evidence flow: design to function to outcome"),
-        ] if have_taxonomy else []) + [
-            # The two trend figures are shown as one tabbed card (FIGURE_TAB_GROUPS in app.js).
+            # The two trend figures are shown as one tabbed card (FIGURE_TAB_GROUPS in app.js),
+            # placed before the evidence-flow Sankey.
             fig_entry("fig_function_time_lines.png", "Financing-function mix over time"),
             fig_entry("fig_method_stream.png", "Financing-function output over time"),
             # fig_function_time.png (stacked-area mix) is still built but hidden.
-        ],
+        ] + ([
+            # Study design -> financing function -> outcome (moved from Methods & data).
+            fig_entry("fig_alluvial.png", "Evidence flow: design to function to outcome"),
+        ] if have_taxonomy else []),
     },
     # "Topics & themes" is shown as a group card (SECTION_GROUPS in app.js) holding
     # Topic clusters and Disease focus; app.js also adds a plain-language method note
