@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-11c";
+const BUILD = "2026-10-11d";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -2691,6 +2691,7 @@ if (typeof document !== "undefined") {
     fillSelect($("x-scatter-x"), [...REG.SCAT_X.keys()], ["Total DALYs (GBD 2023)"]);
     fillSelect($("x-scatter-y"), [...REG.SCAT_Y.keys()], ["Studies per 100k DALYs"]);
 
+    $("x-download").addEventListener("click", downloadFilteredStudies);
     $("x-trend-by").addEventListener("change", renderTrend);
     $("x-map-metric").addEventListener("change", renderMap);
     $("x-comp-var").addEventListener("change", renderComp);
@@ -2698,6 +2699,101 @@ if (typeof document !== "undefined") {
     $("x-comp-mode").addEventListener("change", renderComp);
     $("x-scatter-x").addEventListener("change", renderScatter);
     $("x-scatter-y").addEventListener("change", renderScatter);
+  }
+
+  // "Download filtered studies (CSV)": one row per study matching the Explorer filters.
+  // Titles/authors/DOIs live in data/study_meta.json, fetched only on first click.
+  let studyMetaPromise = null;
+
+  function csvCell(v) {
+    const t = v == null ? "" : String(v);
+    return /[",\r\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+  }
+
+  function studyTagLists(table, groups) {
+    const out = new Map();
+    for (let i = 0; i < table.s.length; i++) {
+      const s = table.s[i];
+      if (!out.has(s)) out.set(s, []);
+      const name = groups[table.g[i]];
+      if (!out.get(s).includes(name)) out.get(s).push(name);
+    }
+    return out;
+  }
+
+  async function downloadFilteredStudies() {
+    const btn = $("x-download");
+    const status = $("x-download-status");
+    const rows = state.result.studies;
+    if (!rows.length) {
+      status.textContent = "No studies match the current filters.";
+      return;
+    }
+    btn.disabled = true;
+    status.textContent = "Preparing " + fmtNum(rows.length) + " studies…";
+    try {
+      if (!studyMetaPromise) {
+        studyMetaPromise = fetch("data/study_meta.json?v=" + BUILD).then(r => {
+          if (!r.ok) throw new Error("failed to load data/study_meta.json: " + r.status);
+          return r.json();
+        });
+      }
+      let meta;
+      try {
+        meta = await studyMetaPromise;
+      } catch (err) {
+        studyMetaPromise = null;
+        throw err;
+      }
+      const st = db.studies;
+      const lv = db.levels;
+      const functions = studyTagLists(db.function, db.function_grps);
+      const outcomes = studyTagLists(db.outcome, db.outcome_grps);
+      const countriesOf = new Map();
+      for (let i = 0; i < db.geo.s.length; i++) {
+        const s = db.geo.s[i];
+        if (!countriesOf.has(s)) countriesOf.set(s, new Set());
+        countriesOf.get(s).add(db.geo.c[i]);
+      }
+      const header = ["record_id", "year", "title", "authors", "journal", "doi", "link",
+        "financing_functions", "outcome_domains", "study_design", "type_of_analysis", "data_type",
+        "data_source", "unit_of_observation", "geographic_scope", "countries", "country_income_groups"];
+      const lines = [header.join(",")];
+      for (const s of rows) {
+        const cs = [...(countriesOf.get(s) || [])].map(c => db.countries[c]);
+        const doi = meta.doi[s];
+        lines.push([
+          st.id[s], st.year[s], meta.title[s], meta.authors[s], meta.journal[s], doi,
+          doi ? "https://doi.org/" + doi : meta.url[s],
+          (functions.get(s) || []).join("; "), (outcomes.get(s) || []).join("; "),
+          lv.study_design[st.study_design[s]], lv.type_of_analysis[st.type_of_analysis[s]],
+          lv.data_type[st.data_type[s]], lv.data_source[st.data_source[s]],
+          lv.unit_of_observation[st.unit_of_observation[s]], lv.geo_scope[st.geo_scope[s]],
+          cs.map(r => r.country).join("; "), [...new Set(cs.map(r => r.income).filter(Boolean))].join("; ")
+        ].map(csvCell).join(","));
+      }
+      // BOM so Excel opens the UTF-8 file with accents intact.
+      const blob = new Blob(["\ufeff" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "hff_studies_filtered_" + new Date().toISOString().slice(0, 10) + ".csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(link.href), 2000);
+      status.textContent = "Downloaded " + fmtNum(rows.length) + " studies.";
+    } catch (err) {
+      console.error(err);
+      status.textContent = "Download failed. Please try again.";
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function updateDownloadLabel() {
+    const n = state.result ? state.result.studies.length : 0;
+    $("x-download").title = "Download the " + fmtNum(n) + " studies matching the current filters as a CSV file";
+    $("x-download-status").textContent = fmtNum(n) + " studies match the current filters.";
   }
 
   function refreshExplorer() {
@@ -2709,6 +2805,7 @@ if (typeof document !== "undefined") {
     renderScatter();
     renderTable();
     renderStudiesStrip();
+    updateDownloadLabel();
   }
 
   function renderValueBoxes() {

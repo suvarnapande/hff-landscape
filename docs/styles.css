@@ -1797,3 +1797,8 @@ table.dataTable thead th.num { text-align: right; }
 .fig-grid-stack .fig-card > img,
 .fig-grid-stack .fig-card-tabbed img { max-height: 600px; object-fit: contain; background: #fff; }
 .fig-grid-stack .fig-card-tabbed img { aspect-ratio: auto; height: 560px; }
+
+/* Explorer: download the filtered studies as CSV. */
+.x-download { display: block; width: 100%; margin-top: .5rem; }
+.x-download:disabled { opacity: .6; cursor: progress; }
+.x-download-status { font-size: .78rem; margin-top: .35rem; min-height: 1.1em; }
