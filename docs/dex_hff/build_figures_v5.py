@@ -5532,7 +5532,15 @@ gallery = [
         "blurb": "Whether research is distributed in proportion to health needs: where evidence falls short "
                  "of disease burden, how concentrated the L&MICs evidence base is, and where evidence "
                  "deserts remain.",
-        "figs": ([
+        # Interactive HTML page written by build_glance_regions_v5.py (run that first).
+        "figs": ([{
+            "file": "fig_glance_regions.html", "title": "(Un)equal weight at a glance",
+            "caption": "Interactive page: HFF studies per US$1bn of total health expenditure by country, and a "
+                       "profile card for each World Bank region (disease focus, top financing functions, financial "
+                       "protection as an outcome, country coverage over time). Sub-Saharan Africa has the most "
+                       "studies per dollar spent (9.8 per US$1bn), because its health spending is so small, not "
+                       "because its evidence base is large.",
+        }] if (FIGS / "fig_glance_regions.html").exists() else []) + ([
             fig_entry("fig_map_bivariate.png", "Where high burden meets low evidence"),
             fig_entry("fig_map_burden.png", "Research intensity against disease burden (map)"),
             fig_entry("fig_map_deserts.png", "Evidence deserts"),

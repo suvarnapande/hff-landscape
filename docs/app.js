@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-10v";
+const BUILD = "2026-10-11a";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -2047,7 +2047,7 @@ if (typeof document !== "undefined") {
       const i = GALLERY.findIndex(x => x.title === title);
       if (i < 0) continue;
       const sec = GALLERY[i];
-      grid.appendChild(thematicCard(sec.title, sec.blurb, sec.figs[0].file, sec.figs.length + " figures",
+      grid.appendChild(thematicCard(sec.title, sec.blurb, thumbnailOf(sec), sec.figs.length + " figures",
         () => showSection(i, { group })));
     }
     window.scrollTo(0, 0);
@@ -2065,7 +2065,7 @@ if (typeof document !== "undefined") {
         if (shownGroups.has(group)) return;
         shownGroups.add(group);
         const members = group.members.map(t => GALLERY.find(x => x.title === t)).filter(Boolean);
-        idx.appendChild(thematicCard(group.title, group.blurb, sec.figs[0].file,
+        idx.appendChild(thematicCard(group.title, group.blurb, thumbnailOf(sec),
           members.reduce((n, m) => n + m.figs.length, 0) + " figures in " + members.length + " sections",
           () => showGroup(group)));
         const item = el("button", "nav-theme-link");
@@ -2083,7 +2083,7 @@ if (typeof document !== "undefined") {
       const card = el("button", "thematic-card");
       card.type = "button";
       const img = el("img", "thematic-card-image");
-      img.src = "figures/" + sec.figs[0].file + "?v=" + BUILD;
+      img.src = "figures/" + thumbnailOf(sec) + "?v=" + BUILD;
       img.alt = "";
       img.loading = "lazy";
       const body = el("div", "thematic-card-body");
@@ -2186,6 +2186,40 @@ if (typeof document !== "undefined") {
 
   // Figures drawn at least this many pixels wide are treated as dense, wide figures.
   const WIDE_FIGURE_MIN_PX = 2300;
+
+  // Interactive figures are whole HTML pages (e.g. fig_glance_regions.html): shown
+  // full width in an iframe, never as a thumbnail.
+  const isPageFigure = file => file.endsWith(".html");
+  const thumbnailOf = sec => (sec.figs.find(f => !isPageFigure(f.file)) || sec.figs[0]).file;
+
+  function renderPageFigureCard(f, grid) {
+    const card = el("div", "fig-card fig-card-wide");
+    card.style.gridColumn = "1 / -1";
+    const frame = el("iframe");
+    frame.src = "figures/" + f.file + "?v=" + BUILD;
+    frame.title = f.title;
+    frame.loading = "lazy";
+    frame.style.cssText = "display:block;width:100%;height:1900px;border:0;background:#f7f3ec;";
+    // Grow the frame to its page's height (same origin when served; keeps the fallback otherwise).
+    const fit = () => {
+      try { frame.style.height = frame.contentDocument.documentElement.scrollHeight + "px"; } catch (e) { /* cross-origin */ }
+    };
+    frame.addEventListener("load", () => { fit(); setTimeout(fit, 1500); });
+    window.addEventListener("resize", fit);
+    const body = el("div", "fig-body");
+    const ft = el("div", "fig-title");
+    ft.textContent = f.title;
+    const fc = el("div", "fig-caption");
+    fc.textContent = f.caption.replace(/\s+/g, " ").trim();
+    const open = el("a", "fig-download");
+    open.href = frame.src;
+    open.target = "_blank";
+    open.rel = "noopener";
+    open.innerHTML = '<span aria-hidden="true">&#8599;</span> Open full page';
+    body.append(ft, fc, open);
+    card.append(frame, body);
+    grid.appendChild(card);
+  }
 
   // Figures shown together as one card with mini-tabs (in this order).
   const FIGURE_TAB_GROUPS = [{
@@ -2339,6 +2373,10 @@ if (typeof document !== "undefined") {
     grid.classList.toggle("fig-grid-stack", STACKED_SECTIONS.has(sec.title));
     const doneGroups = new Set();
     for (const f of sec.figs) {
+      if (isPageFigure(f.file)) {
+        renderPageFigureCard(f, grid);
+        continue;
+      }
       const panelGroup = FIGURE_PANEL_GROUPS.find(g => g.rows.some(r => r.includes(f.file)));
       if (panelGroup) {
         if (doneGroups.has(panelGroup)) continue;
