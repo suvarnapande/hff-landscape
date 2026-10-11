@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-11a";
+const BUILD = "2026-10-11b";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -17,7 +17,39 @@ const OTHER_OUTCOME_NOTE_FIGURES = new Set([
   "fig_outcome_lollipop.png",
   "fig_function_outcome_heatmap.png"
 ]);
-const OUTCOME_CATEGORY_NOTE = '"Other" indicates an identifiable outcome that falls outside the predefined outcome categories; "Unclear" indicates that the available record did not provide sufficient information to classify the study confidently.';
+// Plain-language note on why the main "Other" themes don't belong to a named outcome
+// domain. Shown under the outcome-domain and "Other" themes figures. Counts match
+// fig_outcome_other_themes_v5.png (fcas_outcomes_v5.json "other_themes").
+const OTHER_OUTCOME_EXPLAINER = {
+  title: 'Why are these outcomes "Other"?',
+  intro: 'A study\'s outcome is coded "Other" when the study clearly says what it measured, but that outcome does '
+    + 'not fit the definition of any of the eight outcome domains. Several "Other" themes sound close to a named '
+    + 'domain. What decides it is what the study actually measured:',
+  items: [
+    { theme: "Service use, access and coverage", n: "4,518", near: "Equitable distribution",
+      why: "These studies report how many people use services or are covered. They count as equitable distribution "
+        + "only when they compare groups (for example richer and poorer, or rural and urban) or use a measure of "
+        + "inequality. Without that comparison, they are \"Other\"." },
+    { theme: "Levels, trends and drivers of spending, prices or funding", n: "3,944",
+      near: "Efficiency or Financial protection",
+      why: "Describing how much is spent, or why spending changes, is neither. Efficiency needs spending set against "
+        + "what it produces; financial protection needs evidence of financial hardship for households, such as "
+        + "catastrophic out-of-pocket payments." },
+    { theme: "Adequacy or sufficiency of financing", n: "1,322", near: "Efficiency",
+      why: "These studies ask whether there is enough money, not how well money is turned into services or health." },
+    { theme: "Insurance markets and enrolment behaviour", n: "1,292", near: "Financial protection",
+      why: "Who enrols in insurance, or how insurance markets behave, does not by itself show whether people were "
+        + "protected from financial hardship." },
+    { theme: "Stakeholder perceptions and implementation experience", n: "884",
+      near: "Quality of service provision or Responsiveness",
+      why: "These studies report what health workers, managers or policymakers think, for example health workers' "
+        + "views on how pay-for-performance affects quality of care. Quality itself was not measured, so the "
+        + "outcome is their views. Responsiveness covers the experience of people using services, not providers." }
+  ],
+  outro: 'The themes come from grouping the reasons given for each "Other" code; 6,524 "Other" studies did not '
+    + "fit any theme."
+};
+const OUTCOME_CATEGORY_NOTE ='"Other" indicates an identifiable outcome that falls outside the predefined outcome categories; "Unclear" indicates that the available record did not provide sufficient information to classify the study confidently.';
 
 const OVERVIEW_TILE_COPY = {
   "Records analysed": { label: "Studies captured in the map", sub: null },
@@ -2243,9 +2275,6 @@ if (typeof document !== "undefined") {
     files: ["fig_transition.png", "fig_funder_trajectory.png", "fig_map_disease.png"],
     tabs: ["Shift to NCDs", "Share by era", "Disease atlas (map)"]
   }, {
-    files: ["fig_outcome_trend_v5.png", "fig_outcome_other_themes_v5.png"],
-    tabs: ["Outcome trends", "'Other' outcome themes"]
-  }, {
     // Same top funders and the same heatmap layout, so switching changes content only.
     files: ["fig_funder_function_heatmap.png", "fig_funder_outcome_heatmap.png"],
     tabs: ["Financing functions", "Outcomes measured"]
@@ -2318,8 +2347,41 @@ if (typeof document !== "undefined") {
   // figures that sit next to each other.
   const FIGURE_PANEL_GROUPS = [{
     title: "Financing functions and outcomes studied",
-    rows: [["fig_function_bar.png", "fig_outcome_lollipop.png"], ["fig_function_outcome_heatmap.png"]]
+    // The outcome-domain figure sits next to the breakdown of its largest bar ("Other"),
+    // with the plain-language "why Other" note straight underneath.
+    rows: [["fig_function_bar.png"], ["fig_outcome_lollipop.png", "fig_outcome_other_themes_v5.png"],
+      ["fig_function_outcome_heatmap.png"]],
+    rowNotes: { 1: () => otherOutcomeExplainer() }
   }];
+
+  function otherOutcomeExplainer() {
+    const x = OTHER_OUTCOME_EXPLAINER;
+    const box = el("div", "other-explainer");
+    const h = el("div", "other-explainer-title");
+    h.textContent = x.title;
+    const intro = el("p");
+    intro.textContent = x.intro;
+    const list = el("dl", "other-explainer-list");
+    for (const item of x.items) {
+      const dt = el("dt");
+      dt.textContent = item.theme + " (" + item.n + ")";
+      const near = el("span", "other-explainer-near");
+      near.textContent = "Sounds like: " + item.near;
+      dt.appendChild(near);
+      const dd = el("dd");
+      dd.textContent = item.why;
+      list.append(dt, dd);
+    }
+    const outro = el("p", "other-explainer-outro");
+    outro.textContent = x.outro + " ";
+    const link = el("button", "other-explainer-link");
+    link.type = "button";
+    link.textContent = "Read the full outcome domain definitions";
+    link.addEventListener("click", () => openScopePanel("outcomes", "Financing functions & outcomes"));
+    outro.appendChild(link);
+    box.append(h, intro, list, outro);
+    return box;
+  }
 
   function renderPanelFigureCard(group, figsByFile, sec, grid) {
     const card = el("div", "fig-card fig-card-panels");
@@ -2328,7 +2390,7 @@ if (typeof document !== "undefined") {
     title.textContent = group.title;
     head.appendChild(title);
     card.appendChild(head);
-    for (const row of group.rows) {
+    group.rows.forEach((row, rowIndex) => {
       const rowEl = el("div", "fig-panels-row");
       for (const file of row) {
         const f = figsByFile[file];
@@ -2350,14 +2412,13 @@ if (typeof document !== "undefined") {
         rowEl.appendChild(panel);
       }
       card.appendChild(rowEl);
-    }
+      if (group.rowNotes && group.rowNotes[rowIndex]) card.appendChild(group.rowNotes[rowIndex]());
+    });
     if (UNCLEAR_FOOTNOTE_SECTIONS.has(sec.title)) {
       const body = el("div", "fig-body");
       const note = el("div", "fig-footnote");
       note.textContent = OUTCOME_CATEGORY_NOTE;
-      const other = el("div", "fig-footnote other-outcome-note");
-      other.textContent = OTHER_OUTCOME_NOTE;
-      body.append(note, other);
+      body.append(note);
       card.appendChild(body);
     }
     grid.appendChild(card);
