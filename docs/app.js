@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-11b";
+const BUILD = "2026-10-11c";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -2348,17 +2348,28 @@ if (typeof document !== "undefined") {
   const FIGURE_PANEL_GROUPS = [{
     title: "Financing functions and outcomes studied",
     // The outcome-domain figure sits next to the breakdown of its largest bar ("Other"),
-    // with the plain-language "why Other" note straight underneath.
+    // with a "why Other" button above them that opens the plain-language note.
     rows: [["fig_function_bar.png"], ["fig_outcome_lollipop.png", "fig_outcome_other_themes_v5.png"],
       ["fig_function_outcome_heatmap.png"]],
-    rowNotes: { 1: () => otherOutcomeExplainer() }
+    rowIntros: { 1: () => otherOutcomeExplainer() }
   }];
 
   function otherOutcomeExplainer() {
     const x = OTHER_OUTCOME_EXPLAINER;
+    const wrap = el("div", "other-explainer-wrap");
+    const toggle = el("button", "other-explainer-toggle");
+    toggle.type = "button";
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.innerHTML = '<span class="other-explainer-icon" aria-hidden="true">?</span>';
+    toggle.append(x.title);
     const box = el("div", "other-explainer");
-    const h = el("div", "other-explainer-title");
-    h.textContent = x.title;
+    box.id = "other-explainer-details";
+    box.hidden = true;
+    toggle.setAttribute("aria-controls", box.id);
+    toggle.addEventListener("click", () => {
+      box.hidden = !box.hidden;
+      toggle.setAttribute("aria-expanded", String(!box.hidden));
+    });
     const intro = el("p");
     intro.textContent = x.intro;
     const list = el("dl", "other-explainer-list");
@@ -2379,8 +2390,9 @@ if (typeof document !== "undefined") {
     link.textContent = "Read the full outcome domain definitions";
     link.addEventListener("click", () => openScopePanel("outcomes", "Financing functions & outcomes"));
     outro.appendChild(link);
-    box.append(h, intro, list, outro);
-    return box;
+    box.append(intro, list, outro);
+    wrap.append(toggle, box);
+    return wrap;
   }
 
   function renderPanelFigureCard(group, figsByFile, sec, grid) {
@@ -2391,6 +2403,7 @@ if (typeof document !== "undefined") {
     head.appendChild(title);
     card.appendChild(head);
     group.rows.forEach((row, rowIndex) => {
+      if (group.rowIntros && group.rowIntros[rowIndex]) card.appendChild(group.rowIntros[rowIndex]());
       const rowEl = el("div", "fig-panels-row");
       for (const file of row) {
         const f = figsByFile[file];
@@ -2412,7 +2425,6 @@ if (typeof document !== "undefined") {
         rowEl.appendChild(panel);
       }
       card.appendChild(rowEl);
-      if (group.rowNotes && group.rowNotes[rowIndex]) card.appendChild(group.rowNotes[rowIndex]());
     });
     if (UNCLEAR_FOOTNOTE_SECTIONS.has(sec.title)) {
       const body = el("div", "fig-body");
