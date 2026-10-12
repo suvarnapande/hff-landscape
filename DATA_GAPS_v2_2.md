@@ -1,7 +1,7 @@
 # HFF evidence map: open data gaps after the v2.2 update
 
-The map was rebuilt from the HFF dataset v2.2 in October 2026. v2.2 includes 53,782 studies; the
-map's analysis population is 53,779, after excluding three studies published before 2010 (item 5).
+The map was rebuilt from the HFF dataset v2.2.1 in October 2026: v2.2 (53,782 included studies)
+with three studies published before 2010 excluded (item 5), so **53,779 included studies**.
 Most figures now use v2.2. The items below are still open, except item 5, which records a decision.
 Each one says what is missing or what was decided, what it affects on the site, and how to close it.
 
@@ -93,19 +93,24 @@ the analysis population under the 2010-onwards criterion. (Their DOIs were regis
 August 2011, which is a registration date, not a publication date, and may be why the year was
 missing.)
 
-**Where this is applied:** `PRE_2010` in `docs/dex_hff/make_v2_2_csv.py` (the build stops if
-any other study falls outside 2010-2026), and the Methods funnel on the site, which shows
-53,782 included, 3 excluded as published before 2010, 53,779 in the analysis.
+**Where this is applied:** in a new dataset version, **v2.2.1**, made by
+`docs/dex_hff/make_v2_2_1.py` (the v2.2 files are unchanged). In v2.2.1 the three records have
+`analysis_include = False` and `exclusion_reason_v2 = published_before_2010`, the selection flow
+(`PRISMA_v2_2_1.json`) has a matching exclusion line, and **53,779 studies are included**; the
+change is described in `docs/dex_hff/v2_2/CHANGES_v2_2_1.md`. The site is built from v2.2.1, and
+its Methods funnel lists the three among the exclusions. `make_v2_2_csv.py` stops the build if
+any study falls outside 2010-2026.
 
-**For the dataset owners:** the v2.2 file still has these three with `analysis_include ==
-True`. Consider excluding them there too, so the headline count and the map agree.
+**For the dataset owners:** please take v2.2.1 (or the same change) into the master dataset, so
+the dataset's headline count and the map agree at 53,779.
 
 ## How to rebuild
 
 From `docs/`, after changing any input:
 
 ```bash
-python dex_hff/make_v2_2_csv.py                  # v2.2 analysis file -> site layout
+python dex_hff/make_v2_2_1.py                    # v2.2 -> v2.2.1 (excludes the three pre-2010 studies)
+python dex_hff/make_v2_2_csv.py                  # v2.2.1 analysis file -> site layout
 python dex_hff/build_data_v2_2.py                # data/*.json, Overview tiles, Methods funnel
 python dex_hff/build_study_meta_v2_2.py          # Explorer CSV download
 python dex_hff/build_texts_v2_2.py               # Country profile titles and abstracts
