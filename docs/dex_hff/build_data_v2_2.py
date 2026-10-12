@@ -199,13 +199,28 @@ geo_s, geo_c, geo_y = [], [], []
 # Income group of each study-country pair in the publication year, from v2.2's
 # income_level_bundled (World Bank classification in the publication year; "MIC" = upper
 # middle). That field lists the distinct groups of the countries a study names, not one per
-# country, so: one group listed -> every country of the study gets it; no value, or several
-# groups -> the country's current (FY2027) group from countries.json. geo.json "i" indexes
-# dict levels.income (-1 = no group). Used by the Explorer's income filter and breakdowns.
+# country, so: one group listed -> every country of the study gets it. No value (mostly 2026
+# studies: v2.2's lookup stops at 2025), or several groups -> the World Bank's historical
+# classification (OGHIST_wb_income_history.xlsx, fiscal year Y+1 = published July of the
+# publication year Y, the convention that best matches v2.2: 97.9% of single-country studies);
+# where that has no value (publications 2025-26: the file runs to FY2025), the current (FY2027) group from
+# countries.json. geo.json "i" indexes dict levels.income (-1 = no group). Used by the
+# Explorer's income filter and breakdowns and the income figures.
 INCOME_LV = ["Low income", "Lower middle income", "Upper middle income", "High income"]
 PUB_INCOME = {"LIC": "Low income", "LMIC": "Lower middle income", "MIC": "Upper middle income", "HIC": "High income"}
 geo_i = []
 n_pub_income = Counter()
+_oghist = pd.read_excel(DEX / "OGHIST_wb_income_history.xlsx", sheet_name="Country Analytical History",
+                        header=None)
+_fy_col = {j: 2000 + int(str(v)[2:]) if int(str(v)[2:]) < 80 else 1900 + int(str(v)[2:])
+           for j, v in enumerate(_oghist.iloc[4]) if str(v).startswith("FY")}
+_OGHIST_GROUP = {"L": "Low income", "LM": "Lower middle income", "UM": "Upper middle income", "H": "High income"}
+wb_income_history = {}  # (iso3, fiscal year) -> group
+for _, _row in _oghist.iloc[11:].iterrows():
+    if isinstance(_row[0], str) and len(_row[0]) == 3:
+        for j, fy in _fy_col.items():
+            if str(_row[j]).strip() in _OGHIST_GROUP:
+                wb_income_history[(_row[0], fy)] = _OGHIST_GROUP[str(_row[j]).strip()]
 unmatched = Counter()
 country_order = list(ref_by_name.keys())  # preserves existing countries.json row order
 name_to_idx = {n: i for i, n in enumerate(country_order)}
@@ -229,12 +244,16 @@ for i, raw in enumerate(pop["geo_final"]):
         geo_s.append(i)
         geo_c.append(name_to_idx[name])
         geo_y.append(int(year.iloc[i]))
+        hist = wb_income_history.get((ref_by_name[name]["iso3"], int(year.iloc[i]) + 1))
         if len(pub_groups) == 1:
             inc = PUB_INCOME[next(iter(pub_groups))]
-            n_pub_income["publication year"] += 1
+            n_pub_income["publication year (v2.2)"] += 1
+        elif hist:
+            inc = hist
+            n_pub_income["publication year (World Bank history, filling a v2.2 gap)"] += 1
         else:
             inc = ref_by_name[name].get("income")
-            n_pub_income["current (no single publication-year group)"] += 1
+            n_pub_income["current (2025-26 publications or not in World Bank history)"] += 1
         geo_i.append(INCOME_LV.index(inc) if inc in INCOME_LV else -1)
     if len(matched) >= 2:
         geo_scope_vals.append("Multi-country")

@@ -131,6 +131,21 @@ df["is_fcas"] = df["fcas_list"].map(bool)
 # FCAS and income group are both looked up per geo country per publication year,
 # so "has a country-level lookup" (income_level set) is the base FCAS is a share of.
 df["has_country"] = df["income_list"].map(bool)
+# For the income-setting comparison only, fill studies with no v2.2 publication-year group from
+# the site's per-pair publication-year groups (geo.json "i": v2.2 where it has one, else the World
+# Bank's historical classification, else current; see build_data_v2_2.py). The FCAS share keeps
+# v2.2's own lookup as its base, because FCAS status comes from that same lookup.
+_geo = json.loads((DATA / "geo.json").read_text(encoding="utf-8"))
+_ids = json.loads((DATA / "studies.json").read_text(encoding="utf-8"))["id"]
+_inc_lv = json.loads((DATA / "dict.json").read_text(encoding="utf-8"))["levels"]["income"]
+_CODE = {"Low income": "LIC", "Lower middle income": "LMIC", "Upper middle income": "MIC", "High income": "HIC"}
+_pair_groups = {}
+for _s, _k in zip(_geo["s"], _geo["i"]):
+    if _k >= 0:
+        _pair_groups.setdefault(str(_ids[_s]), set()).add(_CODE[_inc_lv[_k]])
+df["income_ctx"] = [l if l else sorted(_pair_groups.get(str(r), ())) for l, r in zip(df["income_list"], df["record_id"])]
+print(f"Income settings: {int(df['income_list'].map(bool).sum()):,} studies from v2.2, "
+      f"{int((~df['income_list'].map(bool) & df['income_ctx'].map(bool)).sum()):,} filled from geo.json")
 N_FCAS = int(df["is_fcas"].sum())
 N_COUNTRY = int(df["has_country"].sum())
 LAST_WB_YEAR = int(df.loc[df["has_country"], "year"].max())
@@ -349,7 +364,7 @@ summary["outcome_share_2010_vs_2025_pct"] = {k: [round(a, 1), round(b, 1)] for k
 
 # ---------------------------------------------------------------- OUTCOME x CONTEXT heatmap
 groups = [("FCAS", df["is_fcas"])] + [
-    (INCOME_LABEL[g], df["income_list"].map(lambda l, g=g: g in l)) for g in ("LIC", "LMIC", "MIC", "HIC")]
+    (INCOME_LABEL[g], df["income_ctx"].map(lambda l, g=g: g in l)) for g in ("LIC", "LMIC", "MIC", "HIC")]
 rows = named_order
 mat = np.array([[100 * df.loc[m, "outcomes"].map(lambda l, k=k: k in l).mean() for _, m in groups] for k in rows])
 ns = [int(m.sum()) for _, m in groups]

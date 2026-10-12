@@ -260,67 +260,67 @@
   "outcome_by_context_pct": {
     "Equitable distribution of health system resources": {
       "FCAS": 10.0,
-      "Low income": 11.7,
-      "Lower-middle": 12.0,
+      "Low income": 11.5,
+      "Lower-middle": 11.9,
       "Upper-middle": 12.0,
-      "High income": 12.9
+      "High income": 13.0
     },
     "Efficiency in the use of resources": {
       "FCAS": 8.4,
-      "Low income": 10.2,
-      "Lower-middle": 8.4,
-      "Upper-middle": 11.4,
+      "Low income": 10.3,
+      "Lower-middle": 8.7,
+      "Upper-middle": 11.6,
       "High income": 12.5
     },
     "Improved level and distribution of health": {
       "FCAS": 7.9,
-      "Low income": 7.6,
-      "Lower-middle": 7.6,
-      "Upper-middle": 9.7,
-      "High income": 11.9
+      "Low income": 7.9,
+      "Lower-middle": 7.9,
+      "Upper-middle": 9.8,
+      "High income": 12.0
     },
     "Financial protection": {
       "FCAS": 12.3,
-      "Low income": 11.1,
+      "Low income": 11.3,
       "Lower-middle": 17.4,
       "Upper-middle": 14.6,
-      "High income": 5.5
+      "High income": 5.6
     },
     "Quality of service provision": {
       "FCAS": 7.0,
-      "Low income": 8.1,
-      "Lower-middle": 5.7,
-      "Upper-middle": 4.6,
+      "Low income": 7.8,
+      "Lower-middle": 5.9,
+      "Upper-middle": 4.7,
       "High income": 6.5
     },
     "Responsiveness to citizens": {
       "FCAS": 4.9,
-      "Low income": 4.1,
+      "Low income": 4.4,
       "Lower-middle": 4.7,
-      "Upper-middle": 2.7,
-      "High income": 3.3
+      "Upper-middle": 2.9,
+      "High income": 3.4
     },
     "Transparency and accountability": {
       "FCAS": 4.6,
-      "Low income": 5.2,
-      "Lower-middle": 3.7,
+      "Low income": 5.1,
+      "Lower-middle": 3.6,
       "Upper-middle": 2.0,
-      "High income": 1.3
+      "High income": 1.4
     },
     "Economic development": {
       "FCAS": 0.9,
       "Low income": 1.4,
       "Lower-middle": 1.3,
-      "Upper-middle": 1.6,
+      "Upper-middle": 1.7,
       "High income": 1.2
     }
   },
   "context_n": {
     "FCAS": 1452,
-    "Low income": 1817,
-    "Lower-middle": 5296,
-    "Upper-middle": 8207,
-    "High income": 27181
+    "Low income": 1977,
+    "Lower-middle": 5664,
+    "Upper-middle": 9135,
+    "High income": 28639
   },
   "figures": [
     {
@@ -351,7 +351,7 @@
     {
       "file": "fig_outcome_by_context_v5.png",
       "title": "FCAS studies look more like low-income than high-income evidence",
-      "caption": "Share of studies in each setting that investigate each health-system goal. Versus high-income settings, FCAS studies focus more on financial protection (12% vs 6%) and less on efficiency in resource use (8% vs 12%)."
+      "caption": "Share of studies in each setting that investigate each health-system goal. Versus high-income settings, FCAS studies focus more on financial protection (12% vs 6%) and less on improved level/distribution of health (8% vs 12%)."
     }
   ]
 }

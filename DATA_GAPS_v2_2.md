@@ -119,10 +119,16 @@ single-country studies would be grouped differently).
   country-level figures (research vs. burden, the scorecards, research vs. spending, aid vs.
   evidence by region), where each country appears once.
 - **Source:** v2.2's `income_level_bundled`, stored per study-country pair as `i` in
-  `docs/data/geo.json` by `build_data_v2_2.py` (and read directly by
-  `build_fcas_outcomes_v2_2.py`). It lists the distinct groups of the countries a study names,
-  not one per country, so where it is empty or lists several groups the country's current group
-  is used (5,243 of 48,002 pairs).
+  `docs/data/geo.json` by `build_data_v2_2.py` (42,759 of 48,002 pairs). That field lists the
+  distinct groups of the countries a study names, not one per country, and v2.2's lookup stops
+  at 2025. Where it is empty or lists several groups, the World Bank's historical classification
+  fills the gap (`docs/dex_hff/OGHIST_wb_income_history.xlsx`, downloaded 13 October 2026 from
+  datacatalogfiles.worldbank.org; 2,384 pairs). The convention is the classification published in
+  July of the publication year (fiscal year Y+1), which matches v2.2 for 97.9% of single-country
+  studies. The file runs to FY2025, so 2025-26 publications without a v2.2 value use the current
+  (FY2027) group (2,858 pairs; for 2026 that is the publication-year group).
+- **FCAS figures:** the FCAS share keeps v2.2's own lookup as its base (FCAS status comes from
+  it); the comparison by income setting fills studies without a v2.2 group from `geo.json`.
 - **Still open:** the figures kept at v5 (forest plot, topic map by income, disease transition,
   disease atlas) use v5's grouping until they are rebuilt from v2.2 metadata (item 1).
 

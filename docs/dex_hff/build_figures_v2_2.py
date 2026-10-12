@@ -1519,7 +1519,7 @@ ax.yaxis.set_major_formatter(mticker.StrMethodFormatter("{x:,.0f}"))
 clean_axes(ax)
 ax.grid(axis="y", color="#e7e3da", linewidth=0.8, zorder=0)
 set_footnote(fig, f"Base: {inc_total:,} pairs; countries without an income group are excluded. Income group in the "
-                   f"publication year (v2.2), or the current group where that is not recorded.")
+                   f"publication year (v2.2, gaps filled from the World Bank's historical classification).")
 fig.tight_layout()
 fig.savefig(FIGS / "fig_income_bar.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
@@ -1757,8 +1757,8 @@ ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True, nbins=8))
 clean_axes(ax)
 ax.grid(axis="y", color="#e7e3da", linewidth=0.8, zorder=0)
 set_footnote(fig, f"Base: single-country studies with a known income group, by publication year; "
-                   f"{yrs_eq[-1] + 1} (partial) omitted. Income group in the publication year (v2.2), or the current "
-                   f"group where that is not recorded. Burden reference: L&MICs share of GBD 2023 all-cause DALYs.")
+                   f"{yrs_eq[-1] + 1} (partial) omitted. Income group in the publication year (v2.2, gaps filled "
+                   f"from the World Bank's historical classification). Burden reference: L&MICs share of GBD 2023 all-cause DALYs.")
 fig.tight_layout()
 fig.savefig(FIGS / "fig_equity_time.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
