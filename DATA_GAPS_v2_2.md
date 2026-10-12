@@ -104,23 +104,27 @@ any study falls outside 2010-2026.
 **For the dataset owners:** please take v2.2.1 (or the same change) into the master dataset, so
 the dataset's headline count and the map agree at 53,779.
 
-## 6. Income groups: publication year in the Explorer, current elsewhere
+## 6. Income groups: publication year for study counts, current for country comparisons
 
-Income groups are the World Bank's. Some countries changed group during 2010-2026 (56 of the
-countries in the map; about 5% of single-country studies would be grouped differently).
+Income groups follow the World Bank classification. **Analyses that count studies use each study
+country's group in the study's publication year (or the current group where that is not
+recorded); comparisons between countries use the current (FY2027) classification.** Some
+countries changed group during 2010-2026 (56 of the countries in the map; about 5% of
+single-country studies would be grouped differently).
 
-- **Explorer income filter and income breakdowns:** each study-country pair uses the group in
-  the study's publication year, from v2.2's `income_level_bundled` (stored as `i` in
-  `docs/data/geo.json`, built by `build_data_v2_2.py`). That field lists the distinct groups of
-  the countries a study names, not one per country, so where it is empty or lists several
-  groups, the country's current group is used instead (5,243 of 48,002 pairs).
-- **Fragile & conflict-affected settings figures:** publication year too, as in v5: each year's
-  World Bank FCAS list and income group (`fcas` and `income_level_bundled`, read by
-  `build_fcas_outcomes_v2_2.py`).
-- **Country profiles, peer comparisons, maps and the other Thematic analysis figures:** the
-  current (FY2027) group, one per country. The Methods tab says so.
-- **Open:** moving the other income-based figures to publication-year groups (for example the
-  income bar, the L&MICs share over time and the burden-by-income figures) is not done yet.
+- **Publication year:** the Explorer's income filter and income breakdowns; "Study-country pairs
+  by income group"; "L&MICs research share over time"; the three Fragile & conflict-affected
+  settings figures (which also use each year's FCAS list).
+- **Current (FY2027):** country profiles and peer comparisons, maps and country tables, and the
+  country-level figures (research vs. burden, the scorecards, research vs. spending, aid vs.
+  evidence by region), where each country appears once.
+- **Source:** v2.2's `income_level_bundled`, stored per study-country pair as `i` in
+  `docs/data/geo.json` by `build_data_v2_2.py` (and read directly by
+  `build_fcas_outcomes_v2_2.py`). It lists the distinct groups of the countries a study names,
+  not one per country, so where it is empty or lists several groups the country's current group
+  is used (5,243 of 48,002 pairs).
+- **Still open:** the figures kept at v5 (forest plot, topic map by income, disease transition,
+  disease atlas) use v5's grouping until they are rebuilt from v2.2 metadata (item 1).
 
 ## How to rebuild
 
@@ -137,6 +141,16 @@ python dex_hff/build_figures_v2_2.py             # gallery figures (about 15 min
 python dex_hff/build_fcas_outcomes_v2_2.py       # FCAS and outcome figures
 python dex_hff/keep_v5_metadata_figures_v2_2.py  # keeps the metadata figures at v5 (item 1)
 ```
+
+To change only a few figures, use quick mode (about 2 minutes instead of 15). It writes only the
+named images and updates only their gallery entries in `content.json`:
+
+```bash
+python dex_hff/build_figures_v2_2.py --only fig_income_bar.png,fig_equity_time.png
+```
+
+Quick mode is for figures made by `build_figures_v2_2.py`, not for the figures kept at v5 (item 1).
+After `build_data_v2_2.py` changes data that many figures use, run the full build instead.
 
 `make_country_additions_v2_2.py` fetches population and spending online and only needs rerunning
 if the country list changes. The raw v2.2 files live in `docs/dex_hff/v2_2/`, which is

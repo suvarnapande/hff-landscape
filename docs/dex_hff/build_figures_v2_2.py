@@ -37,6 +37,44 @@ ROOT = Path(__file__).resolve().parent.parent  # docs/
 DATA = ROOT / "data"
 FIGS = ROOT / "figures"
 DEX = ROOT / "dex_hff"
+
+# ---------------------------------------------------------------------------
+# Quick mode: python build_figures_v2_2.py --only fig_a.png,fig_b.png
+# Every figure is still computed (later figures reuse earlier results), but only the named
+# PNGs are written and only their gallery entries in content.json are updated. Plotly maps
+# that were not asked for get a blank placeholder instead of a Kaleido/Chrome render, which
+# is most of the full run's time. Not for the figures kept at v5 (keep_v5_metadata_figures_v2_2.py).
+# ---------------------------------------------------------------------------
+import sys
+
+ONLY = None
+if "--only" in sys.argv:
+    ONLY = {n.strip() for n in sys.argv[sys.argv.index("--only") + 1].split(",") if n.strip()}
+    print(f"Quick mode: writing only {sorted(ONLY)}")
+    from matplotlib.figure import Figure as _Figure
+    _full_savefig = _Figure.savefig
+
+    def _savefig_only(self, fname, *args, **kwargs):
+        name = Path(str(fname)).name
+        if name in ONLY or name.startswith("_tmp_"):
+            return _full_savefig(self, fname, *args, **kwargs)
+
+    _Figure.savefig = _savefig_only
+    if HAVE_PLOTLY:
+        import plotly.basedatatypes as _pbd
+        _full_write_image = _pbd.BaseFigure.write_image
+        # temporary Plotly renders -> the figure they end up in
+        _TMP_TARGET = {"_tmp_bivariate_map.png": "fig_map_bivariate.png",
+                       "_tmp_map_disease.png": "fig_map_disease.png"}
+
+        def _write_image_only(self, file, *args, **kwargs):
+            name = Path(str(file)).name
+            target = _TMP_TARGET.get(name, name[len("_tmp_"):] if name.startswith("_tmp_") else name)
+            if target in ONLY:
+                return _full_write_image(self, file, *args, **kwargs)
+            plt.imsave(str(file), np.ones((40, 80, 3)))  # blank stand-in; the figure is not saved
+
+        _pbd.BaseFigure.write_image = _write_image_only
 # v2.2 copy of build_figures_v5.py: reads the HFF dataset v2.2 (via make_v2_2_csv.py).
 # Run after build_data_v2_2.py. Adds fig_function_second_opinion_v2_2.png, the
 # with/without second-opinion check the v2.2 README asks for on function results.
@@ -1443,9 +1481,11 @@ hbar(col_counts("geo_scope"), "Most research names a single country",
 # ---------------------------------------------------------------------------
 # 10. Studies by income group
 # ---------------------------------------------------------------------------
+# Income group of each study-country pair in the publication year (geo.json "i", built by
+# build_data_v2_2.py from v2.2's income_level_bundled; the current group where that is missing).
+PAIR_INCOME = [LV["income"][k] if k >= 0 else None for k in geo_j["i"]]
 income_counts = Counter()
-for s, c in zip(geo_j["s"], geo_j["c"]):
-    inc = countries[c]["income"]
+for inc in PAIR_INCOME:
     if inc:
         income_counts[inc] += 1
 inc_order = dict_json["meta"]["inc_lv"]
@@ -1470,14 +1510,16 @@ for bar, v in zip(bars, inc_values):
 ax.margins(x=0.04)
 ax.set_ylim(0, max(inc_values) * 1.18)
 set_headline(ax, f"{top_income} settings carry the largest share of study-country pairs",
-             "Each study counts once for every country it examines, grouped by World Bank income level.",
+             "Each study counts once for every country it examines, grouped by the country's World Bank income "
+             "level in the study's publication year.",
              f"{top_income} accounts for {top_income_n:,} pairs, ahead of "
              f"{second_income}'s {second_income_n:,}.", "fig_income_bar.png")
 ax.set_ylabel("study-country pairs")
 ax.yaxis.set_major_formatter(mticker.StrMethodFormatter("{x:,.0f}"))
 clean_axes(ax)
 ax.grid(axis="y", color="#e7e3da", linewidth=0.8, zorder=0)
-set_footnote(fig, f"Base: {inc_total:,} pairs; countries without an income group are excluded.")
+set_footnote(fig, f"Base: {inc_total:,} pairs; countries without an income group are excluded. Income group in the "
+                   f"publication year (v2.2), or the current group where that is not recorded.")
 fig.tight_layout()
 fig.savefig(FIGS / "fig_income_bar.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
@@ -1681,11 +1723,13 @@ s_to_cs = defaultdict(set)
 for s, c in zip(geo_j["s"], geo_j["c"]):
     s_to_cs[s].add(c)
 income_of_c = {i: r["income"] for i, r in enumerate(countries)}
+# income group in the publication year, per study-country pair (see PAIR_INCOME above)
+pub_income_of_s = {s: inc for s, inc in zip(geo_j["s"], PAIR_INCOME)}
 by_year_tot_eq, by_year_lmic_eq = Counter(), Counter()
 for s, cs in s_to_cs.items():
     if studies["geo_scope"][s] != single_code or len(cs) != 1:
         continue
-    inc = income_of_c.get(next(iter(cs)))
+    inc = pub_income_of_s.get(s)
     if inc is None:
         continue
     y = studies["year"][s]
@@ -1713,7 +1757,8 @@ ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True, nbins=8))
 clean_axes(ax)
 ax.grid(axis="y", color="#e7e3da", linewidth=0.8, zorder=0)
 set_footnote(fig, f"Base: single-country studies with a known income group, by publication year; "
-                   f"{yrs_eq[-1] + 1} (partial) omitted. Burden reference: L&MICs share of GBD 2023 all-cause DALYs.")
+                   f"{yrs_eq[-1] + 1} (partial) omitted. Income group in the publication year (v2.2), or the current "
+                   f"group where that is not recorded. Burden reference: L&MICs share of GBD 2023 all-cause DALYs.")
 fig.tight_layout()
 fig.savefig(FIGS / "fig_equity_time.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
@@ -5705,6 +5750,20 @@ gallery = [
 ]
 
 gallery = [sec for sec in gallery if sec is not None]
-content["gallery"] = gallery
-(DATA / "content.json").write_text(json.dumps(content, allow_nan=False, ensure_ascii=False), encoding="utf-8")
-print(f"\nWrote gallery ({sum(len(s['figs']) for s in gallery)} figures across {len(gallery)} sections) into content.json")
+if ONLY:
+    # quick mode: keep the published gallery, refresh only the named figures' entries
+    new_entry = {f["file"]: f for sec in gallery for f in sec["figs"]}
+    content = json.loads((DATA / "content.json").read_text(encoding="utf-8"))
+    updated = set()
+    for sec in content["gallery"]:
+        for i, f in enumerate(sec["figs"]):
+            if f["file"] in ONLY and f["file"] in new_entry:
+                sec["figs"][i] = new_entry[f["file"]]
+                updated.add(f["file"])
+    (DATA / "content.json").write_text(json.dumps(content, allow_nan=False, ensure_ascii=False), encoding="utf-8")
+    print(f"\nQuick mode: updated gallery entries for {sorted(updated)}; "
+          f"not in the gallery (image only): {sorted(ONLY - updated)}")
+else:
+    content["gallery"] = gallery
+    (DATA / "content.json").write_text(json.dumps(content, allow_nan=False, ensure_ascii=False), encoding="utf-8")
+    print(f"\nWrote gallery ({sum(len(s['figs']) for s in gallery)} figures across {len(gallery)} sections) into content.json")
