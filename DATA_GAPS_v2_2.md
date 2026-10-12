@@ -113,7 +113,7 @@ python dex_hff/make_v2_2_1.py                    # v2.2 -> v2.2.1 (excludes the 
 python dex_hff/make_v2_2_csv.py                  # v2.2.1 analysis file -> site layout
 python dex_hff/build_data_v2_2.py                # data/*.json, Overview tiles, Methods funnel
 python dex_hff/build_study_meta_v2_2.py          # Explorer CSV download
-python dex_hff/build_texts_v2_2.py               # Country profile titles and abstracts
+python dex_hff/build_texts_v2_2.py               # Country profile titles and abstracts (splits files over ~20 MB; see README)
 python dex_hff/build_glance_regions_v2_2.py      # "(Un)equal weight at a glance" page
 python dex_hff/build_figures_v2_2.py             # gallery figures (about 15 minutes)
 python dex_hff/build_fcas_outcomes_v2_2.py       # FCAS and outcome figures

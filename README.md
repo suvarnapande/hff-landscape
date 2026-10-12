@@ -37,6 +37,20 @@ studies belong to which country). Unlike `docs/dex_hff/`'s raw CSV/xlsx inputs, 
 writes under `docs/data/texts/` are published output and are committed like the rest of
 `docs/data/*.json`.
 
+**Large country files are split (since October 2026).** GitHub Pages rejects any file over
+25 MiB, and with v2.2 the United States file reached about 28 MB. `build_texts_v2_2.py`
+therefore splits any country file over about 20 MB into numbered parts: `USA.json` becomes a
+small pointer, `{"parts": 2}`, and the data sits in `USA.1.json` and `USA.2.json` (about 14 MB
+each). The site's `openStudiesModal` in `docs/app.js` sees the pointer, loads the parts and
+joins them; countries under the limit keep a single file and load as before. When working on
+this:
+- always rebuild the files with `build_texts_v2_2.py` (the older `build_texts.py` and
+  `build_texts_v5.py` do not split, and would write a USA file too large to publish);
+- commit the `<ISO3>.N.json` part files together with the pointer `<ISO3>.json`;
+- if any other code reads `docs/data/texts/`, it must handle the `{"parts": n}` pointer too;
+- after changing what the files contain, bump `BUILD` at the top of `docs/app.js`, so browsers
+  fetch the new files instead of cached ones.
+
 Runtime deps are pinned jsdelivr CDNs: plotly.js-dist-min 2.35.2, tom-select 2.3.1,
 noUiSlider 15.8.1, Google Fonts (Newsreader + Inter). No build step, no bundler.
 

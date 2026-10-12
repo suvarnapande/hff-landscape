@@ -65,7 +65,23 @@ for c, row in enumerate(countries):
         "abstract": [clean(abstract_of.get(ids[s])) for s in s_sorted],
     }
     path = OUT / f"{row['iso3']}.json"
-    path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    for old_part in OUT.glob(f"{row['iso3']}.*.json"):  # parts from an earlier, larger build
+        old_part.unlink()
+    # GitHub Pages rejects files over 25 MiB, so a shard over ~20 MB is split into numbered
+    # parts (<ISO3>.1.json, ...) and <ISO3>.json becomes {"parts": n}; app.js
+    # (openStudiesModal) loads the parts and joins them. See DATA_GAPS_v2_2.md.
+    text = json.dumps(payload, ensure_ascii=False)
+    n_parts = -(-len(text.encode("utf-8")) // 20_000_000)  # stay well under Pages' 25 MiB cap
+    if n_parts == 1:
+        path.write_text(text, encoding="utf-8")
+    else:
+        k = -(-len(s_sorted) // n_parts)
+        for i in range(n_parts):
+            part = {key: v[i * k:(i + 1) * k] for key, v in payload.items()}
+            (OUT / f"{row['iso3']}.{i + 1}.json").write_text(
+                json.dumps(part, ensure_ascii=False), encoding="utf-8")
+        path.write_text(json.dumps({"parts": n_parts}), encoding="utf-8")
+        print(f"  split {row['iso3']}.json into {n_parts} parts")
     n_written += 1
 
 print(f"wrote {n_written} country text shards to {OUT}")

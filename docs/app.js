@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-11d";
+const BUILD = "2026-10-12a";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1080,7 +1080,21 @@ if (typeof document !== "undefined") {
       if (!shard) {
         const r = await fetch("data/texts/" + iso3 + ".json?v=" + BUILD);
         if (!r.ok) throw new Error("HTTP " + r.status);
-        const raw = await r.json();
+        let raw = await r.json();
+        // Shards over ~20 MB are split by build_texts_v2_2.py (GitHub Pages caps files at
+        // 25 MiB): <ISO3>.json is then {"parts": n} and the data is in <ISO3>.1.json ... .n.json.
+        if (raw.parts) {
+          const parts = await Promise.all(Array.from({ length: raw.parts }, (_, i) =>
+            fetch("data/texts/" + iso3 + "." + (i + 1) + ".json?v=" + BUILD).then(p => {
+              if (!p.ok) throw new Error("HTTP " + p.status);
+              return p.json();
+            })));
+          raw = {
+            s: parts.flatMap(p => p.s),
+            title: parts.flatMap(p => p.title),
+            abstract: parts.flatMap(p => p.abstract),
+          };
+        }
         shard = { ...raw, posOf: new Map(raw.s.map((sv, i) => [sv, i])) };
         state.textCache[iso3] = shard;
       }
