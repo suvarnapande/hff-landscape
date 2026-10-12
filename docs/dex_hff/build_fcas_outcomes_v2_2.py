@@ -7,7 +7,10 @@ without it.
 
 v5 fields used:
   fcas                  geo countries on the WB FCAS list in the publication year ('; '-sep)
-  income_level          WB income group per geo country (LIC / LMIC / MIC = upper-middle / HIC)
+  income_level_bundled  WB income group per geo country in the publication year (LIC / LMIC /
+                        MIC = upper-middle / HIC). v2.2 keeps the current group in income_level
+                        (make_v2_2_csv.py recodes it); the publication-year one is this column,
+                        the same lookup as fcas, which is what v5's income_level held.
   outcome_domain_final  multi-label outcome domains ('; '-sep)
   outcome_other_theme   non-LLM theme for studies tagged 'Other' ('; '-sep)
 
@@ -117,12 +120,12 @@ def save(fig, fname):
 
 
 df = pd.read_csv(V4, low_memory=False, dtype=str,
-                   usecols=["record_id", "year", "fcas", "income_level", "outcome_domain_final",
+                   usecols=["record_id", "year", "fcas", "income_level_bundled", "outcome_domain_final",
                             "outcome_other_theme"])
 df["year"] = pd.to_numeric(df["year"], errors="coerce").astype("Int64")
 N = len(df)
 df["fcas_list"] = df["fcas"].map(lambda v: sorted({COUNTRY_ALIASES.get(c, c) for c in split(v)}))
-df["income_list"] = df["income_level"].map(lambda v: sorted(set(split(v))))
+df["income_list"] = df["income_level_bundled"].map(lambda v: sorted(set(split(v))))
 df["outcomes"] = df["outcome_domain_final"].map(lambda v: sorted(set(split(v))))
 df["is_fcas"] = df["fcas_list"].map(bool)
 # FCAS and income group are both looked up per geo country per publication year,

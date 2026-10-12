@@ -114,10 +114,13 @@ countries in the map; about 5% of single-country studies would be grouped differ
   `docs/data/geo.json`, built by `build_data_v2_2.py`). That field lists the distinct groups of
   the countries a study names, not one per country, so where it is empty or lists several
   groups, the country's current group is used instead (5,243 of 48,002 pairs).
-- **Country profiles, peer comparisons, maps and the Thematic analysis figures:** the current
-  (FY2027) group, one per country. The Methods tab says so.
-- **Open:** moving the income-based figures to publication-year groups (the income bar, the
-  L&MICs share over time, FCAS by context and the burden-by-income figures) is not done yet.
+- **Fragile & conflict-affected settings figures:** publication year too, as in v5: each year's
+  World Bank FCAS list and income group (`fcas` and `income_level_bundled`, read by
+  `build_fcas_outcomes_v2_2.py`).
+- **Country profiles, peer comparisons, maps and the other Thematic analysis figures:** the
+  current (FY2027) group, one per country. The Methods tab says so.
+- **Open:** moving the other income-based figures to publication-year groups (for example the
+  income bar, the L&MICs share over time and the burden-by-income figures) is not done yet.
 
 ## How to rebuild
 
