@@ -398,16 +398,17 @@ hero = [
      "strong": False, "em": False},
 ]
 
+# Tile labels are the keys app.js uses to order the Overview cards and pick their display copy
+# (tileOrder, OVERVIEW_TILE_COPY); keep them, or the cards change order.
 glance_tiles = [
-    {"label": "Studies captured in the map", "value": fmt(n_studies), "theme": "primary", "sub": None},
-    {"label": "Publication years covered", "value": "2010–2026", "theme": "secondary", "sub": None},
-    {"label": "Countries covered by studies", "value": fmt(n_countries_with_studies), "theme": "info",
-     "sub": "Across the global evidence base"},
-    {"label": "Health financing functions covered", "value": fmt(len(function_grps)), "theme": "secondary",
-     "sub": "8 WHO outcome domains mapped"},
-    {"label": "Studies using quantitative analysis", "value": f"{pct_quant:.0f}%", "theme": "success", "sub": None},
-    {"label": "Studies with DOI/URL", "value": f"{pct_link:.0f}%", "theme": "info", "sub": None},
-    {"label": "Studies focused on one country", "value": f"{pct_single:.0f}%", "theme": "secondary", "sub": None},
+    {"label": "Records analysed", "value": fmt(n_studies), "theme": "primary", "sub": None},
+    {"label": "Years covered", "value": "2010–2026", "theme": "secondary", "sub": None},
+    {"label": "Countries studied", "value": fmt(n_countries_with_studies), "theme": "info",
+     "sub": "named in extracted geography"},
+    {"label": "Financing functions coded", "value": fmt(len(function_grps)), "theme": "secondary", "sub": None},
+    {"label": "Quantitative analysis", "value": f"{pct_quant:.0f}%", "theme": "success", "sub": None},
+    {"label": "Has a recovered DOI", "value": f"{pct_link:.0f}%", "theme": "info", "sub": None},
+    {"label": "Single-country studies", "value": f"{pct_single:.0f}%", "theme": "secondary", "sub": None},
 ]
 
 content_json = {
