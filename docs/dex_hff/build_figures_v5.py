@@ -5551,7 +5551,6 @@ gallery = [
             fig_entry("fig_equity_time.png", "L&MICs research share over time"),
             fig_entry("fig_inequality.png", "Evidence concentration among L&MICs"),
             fig_entry("fig_forest.png", "Adjusted odds ratios by income group"),
-            fig_entry("fig_funder_scorecard.png", "Funding priority scorecard"),
         ],
     },
     {
@@ -5587,7 +5586,9 @@ gallery = [
             fig_entry("fig_funder_trend.png", "Which funders are gaining ground"),
         ] + ([
             fig_entry("fig_funder_authorship_alluvial.png",
-                      "Funder to financing function to authorship")] if have_authors else []),
+                      "Funder to financing function to authorship")] if have_authors else []) + [
+            fig_entry("fig_funder_scorecard.png", "Funding priority scorecard"),
+        ],
     } if have_funders else None,
     # "Global financing context" is a group card (SECTION_GROUPS in app.js) holding these
     # five sections, in this order.
