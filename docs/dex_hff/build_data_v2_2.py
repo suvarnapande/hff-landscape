@@ -196,6 +196,16 @@ def match_country(token):
 
 
 geo_s, geo_c, geo_y = [], [], []
+# Income group of each study-country pair in the publication year, from v2.2's
+# income_level_bundled (World Bank classification in the publication year; "MIC" = upper
+# middle). That field lists the distinct groups of the countries a study names, not one per
+# country, so: one group listed -> every country of the study gets it; no value, or several
+# groups -> the country's current (FY2027) group from countries.json. geo.json "i" indexes
+# dict levels.income (-1 = no group). Used by the Explorer's income filter and breakdowns.
+INCOME_LV = ["Low income", "Lower middle income", "Upper middle income", "High income"]
+PUB_INCOME = {"LIC": "Low income", "LMIC": "Lower middle income", "MIC": "Upper middle income", "HIC": "High income"}
+geo_i = []
+n_pub_income = Counter()
 unmatched = Counter()
 country_order = list(ref_by_name.keys())  # preserves existing countries.json row order
 name_to_idx = {n: i for i, n in enumerate(country_order)}
@@ -213,10 +223,19 @@ for i, raw in enumerate(pop["geo_final"]):
             matched.append(name)
         elif name is None and norm(tok) not in ALIASES:
             unmatched[tok] += 1
+    pub = pop["income_level_bundled"].iloc[i]
+    pub_groups = {g.strip() for g in str(pub).split(";") if g.strip()} if pd.notna(pub) else set()
     for name in matched:
         geo_s.append(i)
         geo_c.append(name_to_idx[name])
         geo_y.append(int(year.iloc[i]))
+        if len(pub_groups) == 1:
+            inc = PUB_INCOME[next(iter(pub_groups))]
+            n_pub_income["publication year"] += 1
+        else:
+            inc = ref_by_name[name].get("income")
+            n_pub_income["current (no single publication-year group)"] += 1
+        geo_i.append(INCOME_LV.index(inc) if inc in INCOME_LV else -1)
     if len(matched) >= 2:
         geo_scope_vals.append("Multi-country")
     elif len(matched) == 1:
@@ -324,7 +343,8 @@ studies_json = {
 
 function_json = {"s": func_s, "g": func_g}
 outcome_json = {"s": outcome_s, "g": outcome_g}
-geo_json = {"s": geo_s, "c": geo_c, "y": geo_y}
+geo_json = {"s": geo_s, "c": geo_c, "y": geo_y, "i": geo_i}
+print("Income group of study-country pairs:", dict(n_pub_income))
 
 # ---------------------------------------------------------------------------
 # dict.json
@@ -417,7 +437,7 @@ content_json = {
     "funnel": funnel_content,
     "registries": {
         "trend_vars": [
-            {"label": "Income group", "column": "income"},
+            {"label": "Income group (in publication year)", "column": "income"},
             {"label": "Region", "column": "un_region"},
             {"label": "Financing function", "column": "func_grp"},
             {"label": "Outcome domain", "column": "outcome_grp"},
@@ -484,6 +504,11 @@ write_json("function.json", function_json)
 write_json("outcome.json", outcome_json)
 write_json("geo.json", geo_json)
 write_json("countries.json", new_countries)
+# The gallery is written by build_figures_v2_2.py and later scripts; keep it, so running
+# this script on its own does not empty the Thematic analysis tab.
+_old_content = json.loads((DATA / "content.json").read_text(encoding="utf-8"))
+if "gallery" in _old_content:
+    content_json["gallery"] = _old_content["gallery"]
 write_json("content.json", content_json)
 
 old_disease = DATA / "disease.json"

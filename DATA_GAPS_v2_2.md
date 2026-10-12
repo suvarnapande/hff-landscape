@@ -104,6 +104,21 @@ any study falls outside 2010-2026.
 **For the dataset owners:** please take v2.2.1 (or the same change) into the master dataset, so
 the dataset's headline count and the map agree at 53,779.
 
+## 6. Income groups: publication year in the Explorer, current elsewhere
+
+Income groups are the World Bank's. Some countries changed group during 2010-2026 (56 of the
+countries in the map; about 5% of single-country studies would be grouped differently).
+
+- **Explorer income filter and income breakdowns:** each study-country pair uses the group in
+  the study's publication year, from v2.2's `income_level_bundled` (stored as `i` in
+  `docs/data/geo.json`, built by `build_data_v2_2.py`). That field lists the distinct groups of
+  the countries a study names, not one per country, so where it is empty or lists several
+  groups, the country's current group is used instead (5,243 of 48,002 pairs).
+- **Country profiles, peer comparisons, maps and the Thematic analysis figures:** the current
+  (FY2027) group, one per country. The Methods tab says so.
+- **Open:** moving the income-based figures to publication-year groups (the income bar, the
+  L&MICs share over time, FCAS by context and the burden-by-income figures) is not done yet.
+
 ## How to rebuild
 
 From `docs/`, after changing any input:

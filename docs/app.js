@@ -187,6 +187,10 @@ export function loadData({ dict, studies, geo, func, outcome, countries, content
     incLv: dict.meta.inc_lv.slice(),
     incOrder: dict.meta.inc_lv.slice().reverse(),
     incomeOf: countries.map(r => r.income),
+    // Income group of each geo row (study-country pair) in the publication year (geo.json "i",
+    // an index into levels.income; built by build_data_v2_2.py). Countries themselves keep
+    // their current group (incomeOf), e.g. in country profiles and peer comparisons.
+    geoIncome: geo.i ? geo.i.map(k => (k >= 0 ? levels.income[k] : null)) : null,
     regionOf: countries.map(r => r.un_region),
     function_grps: dict.financing_function_grps,
     outcome_grps: dict.outcome_domain_grps,
@@ -267,7 +271,7 @@ export function applyFilters(db, filt) {
     const s = g.s[i];
     if (!base[s]) continue;
     const c = g.c[i];
-    if (incSet && !incSet.has(db.incomeOf[c])) continue;
+    if (incSet && !incSet.has(db.geoIncome ? db.geoIncome[i] : db.incomeOf[c])) continue;
     if (regSet) {
       const r = db.regionOf[c];
       if (r == null || !regSet.has(r)) continue;
@@ -360,7 +364,7 @@ export function trendSeries(db, flt, varName) {
     const seen = new Set();
     for (const i of flt.geoRows) {
       const s = db.geo.s[i], y = db.geo.y[i], c = db.geo.c[i];
-      const cat = varName === "income" ? db.incomeOf[c] : db.regionOf[c];
+      const cat = varName === "income" ? (db.geoIncome ? db.geoIncome[i] : db.incomeOf[c]) : db.regionOf[c];
       if (cat == null) continue;
       const key = s + "|" + y + "|" + cat;
       if (seen.has(key)) continue;
@@ -797,7 +801,7 @@ export function countryFacts(db, iso3) {
   if (!r) return [];
   const pop = num(r.pop), dalys = num(r.dalys), spend = num(r.total_spend_bn);
   const pairs = [
-    ["Income group", r.income],
+    ["Income group (current)", r.income],
     ["Region (UN M49)", r.un_region == null ? "—" : r.un_region]
   ];
   if (pop != null) pairs.push(["Population", fmtNum(rRound(pop / 1e6)) + " M"]);
