@@ -4,6 +4,10 @@ Static site for the health-financing-functions evidence map: pure HTML/JS (no se
 build step), served from `docs/`. Forked from the `hee-landscape` dashboard scaffold and
 rebuilt against the HFF extraction.
 
+**Current data: HFF dataset v2.2 (October 2026).** Open gaps (metadata for the studies added in
+v2.2, DALYs for Kosovo, and health spending for five added countries) and the v2.2 build order are in
+[DATA_GAPS_v2_2.md](DATA_GAPS_v2_2.md). The pipeline description below is for the earlier builds.
+
 Data pipeline: `docs/dex_hff/build_data.py` reads
 `docs/dex_hff/hff_pipeline_full_single_model.csv` (52,826 LLM-classified records) and
 `docs/dex_hff/hff_pipeline_summary.xlsx` (`Stage Funnel` sheet) and writes the six JSON

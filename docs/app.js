@@ -26,28 +26,29 @@ const OTHER_OUTCOME_EXPLAINER = {
     + 'not fit the definition of any of the eight outcome domains. Several "Other" themes sound close to a named '
     + 'domain. What decides it is what the study actually measured:',
   items: [
-    { theme: "Service use, access and coverage", n: "4,518", near: "Equitable distribution",
+    { theme: "Service use, access and coverage", n: "8,277", near: "Equitable distribution",
       why: "These studies report how many people use services or are covered. They count as equitable distribution "
         + "only when they compare groups (for example richer and poorer, or rural and urban) or use a measure of "
         + "inequality. Without that comparison, they are \"Other\"." },
-    { theme: "Levels, trends and drivers of spending, prices or funding", n: "3,944",
+    { theme: "Levels, trends and drivers of spending, prices or funding", n: "4,495",
       near: "Efficiency or Financial protection",
       why: "Describing how much is spent, or why spending changes, is neither. Efficiency needs spending set against "
         + "what it produces; financial protection needs evidence of financial hardship for households, such as "
         + "catastrophic out-of-pocket payments." },
-    { theme: "Adequacy or sufficiency of financing", n: "1,322", near: "Efficiency",
-      why: "These studies ask whether there is enough money, not how well money is turned into services or health." },
-    { theme: "Insurance markets and enrolment behaviour", n: "1,292", near: "Financial protection",
-      why: "Who enrols in insurance, or how insurance markets behave, does not by itself show whether people were "
-        + "protected from financial hardship." },
-    { theme: "Stakeholder perceptions and implementation experience", n: "884",
+    { theme: "Stakeholder perceptions and implementation experience", n: "2,590",
       near: "Quality of service provision or Responsiveness",
       why: "These studies report what health workers, managers or policymakers think, for example health workers' "
         + "views on how pay-for-performance affects quality of care. Quality itself was not measured, so the "
-        + "outcome is their views. Responsiveness covers the experience of people using services, not providers." }
+        + "outcome is their views. Responsiveness covers the experience of people using services, not providers." },
+    { theme: "Adequacy or sufficiency of financing", n: "1,928", near: "Efficiency",
+      why: "These studies ask whether there is enough money, not how well money is turned into services or health." },
+    { theme: "Insurance markets and enrolment behaviour", n: "1,908", near: "Financial protection",
+      why: "Who enrols in insurance, or how insurance markets behave, does not by itself show whether people were "
+        + "protected from financial hardship." }
   ],
-  outro: 'The themes come from grouping the reasons given for each "Other" code; 6,524 "Other" studies did not '
-    + "fit any theme."
+  outro: 'For the studies in the September set, the themes come from grouping the reasons given for each "Other" '
+    + 'code; for the studies added in October, a language model assigned the same themes. 6,863 "Other" studies '
+    + "did not fit any theme."
 };
 const OUTCOME_CATEGORY_NOTE ='"Other" indicates an identifiable outcome that falls outside the predefined outcome categories; "Unclear" indicates that the available record did not provide sufficient information to classify the study confidently.';
 
@@ -2349,7 +2350,7 @@ if (typeof document !== "undefined") {
     title: "Financing functions and outcomes studied",
     // The outcome-domain figure sits next to the breakdown of its largest bar ("Other"),
     // with a "why Other" button above them that opens the plain-language note.
-    rows: [["fig_function_bar.png"], ["fig_outcome_lollipop.png", "fig_outcome_other_themes_v5.png"],
+    rows: [["fig_function_bar.png", "fig_function_second_opinion_v2_2.png"], ["fig_outcome_lollipop.png", "fig_outcome_other_themes_v5.png"],
       ["fig_function_outcome_heatmap.png"]],
     rowIntros: { 1: () => otherOutcomeExplainer() }
   }];
