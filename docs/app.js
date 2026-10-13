@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-13i";
+const BUILD = "2026-10-13k";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1789,11 +1789,7 @@ if (typeof document !== "undefined") {
       row.append(head, val, note);
       rows.appendChild(row);
     }
-    const more = el("button", "evidence-scope-link");
-    more.type = "button";
-    more.textContent = "Explore financing functions and outcomes →";
-    more.addEventListener("click", () => openOverviewTheme("Financing functions & outcomes"));
-    box.append(title, lead, rows, more);
+    box.append(title, lead, rows);
   }
 
   // Countries card: number of countries, then studies by World Bank income group
@@ -1972,7 +1968,8 @@ if (typeof document !== "undefined") {
           chart.appendChild(row);
         }
         const note = el("div", "funding-overview-note");
-        note.textContent = `Among ${fmtNum(funders.n_funded)} studies reporting a funder. Categories may overlap.`;
+        const fundedPct = (100 * funders.n_funded / Math.max(1, funders.n_studies || db.nStudies)).toFixed(1);
+        note.textContent = `Among ${fmtNum(funders.n_funded)} studies reporting a funder (${fundedPct}% of all studies). Categories may overlap.`;
         box.append(title, chart, note);
         makeOverviewCardInteractive(box, display.label);
         wrap.appendChild(box);
