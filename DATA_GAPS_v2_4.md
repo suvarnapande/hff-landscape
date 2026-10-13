@@ -52,7 +52,6 @@ the three pre-2010 studies, because it was built from v2.2, not v2.2.1.
 | 1 | Per-study coordinates of the v2.4 topic model, to redraw the two topic maps | dataset team |
 | 2 | A DALY estimate for Kosovo comparable with GBD 2023 | anyone; no source yet |
 | 3 | Health spending for Taiwan, Puerto Rico, Kosovo, Bermuda and Greenland | anyone; no source yet |
-| - | Decision not yet taken: show Taiwan as the World Bank's "Taiwan, China"? | project team |
 
 ## 1. Topic map coordinates (the only figures still on v5)
 
@@ -91,12 +90,12 @@ national health accounts are the likely option).
 - **Mauritius and Eritrea have no UN M49 region** in the country list (an older gap). This no
   longer affects the site, which uses WHO regions (both are in the WHO African Region); it only
   matters if the archived `un_region` is used.
-- **Geography left unmatched on purpose:** "Congo" (2 studies; could be either Congo), "Northern
-  Cyprus" (2; in no reference dataset), and region labels such as "Global", "Multiple", "Europe"
+- **Geography left unmatched on purpose** (decided 13 October 2026 to keep as is): "Congo" (2
+  studies; could be either Congo), "Northern Cyprus" (2; in no reference dataset), and region labels such as "Global", "Multiple", "Europe"
   or "Sub-Saharan Africa", which are counted as region/global scope, not as countries.
 - **Taiwan** follows the World Bank ("Taiwan, China"): a separate entry from China, high income in
   every year, East Asia & Pacific wherever World Bank regions are used. The site shows it as
-  "Taiwan".
+  "Taiwan" (decided 13 October 2026 to keep this name, not "Taiwan, China").
 
 ## 5. Decision: three studies excluded as published before 2010
 
