@@ -1924,7 +1924,7 @@ ax2.set_title(f"The {TOP_N_DEFICIT_SC} largest relative evidence gaps", fontsize
 clean_axes(ax2)
 
 lowest_sc = top_deficit_sc.iloc[0]
-sc_headline = "Where research coverage is low relative to disease burden"
+sc_headline = "Gap scorecard: which evidence gaps could funders investigate?"
 sc_desc = ("Country research share divided by disease-burden share. Zero on the log2 scale means proportional "
            "coverage; negative values indicate less research relative to burden.")
 sc_finding = (f"{lowest_sc['country']} has the largest finite relative gap: its research share is "
@@ -5671,7 +5671,6 @@ gallery = [
             fig_entry("fig_burden.png", "Research intensity vs. disease burden"),
             fig_entry("fig_deficit.png", "Studies vs. a burden-proportional share"),
             fig_entry("fig_injustice.png", "Research relative to disease burden"),
-            fig_entry("fig_funder_scorecard.png", "Largest gaps relative to disease burden"),
             fig_entry("fig_equity_time.png", "L&MICs research share over time"),
             fig_entry("fig_inequality.png", "Evidence concentration among L&MICs"),
             fig_entry("fig_forest.png", "Adjusted odds ratios by income group"),
@@ -5711,6 +5710,7 @@ gallery = [
         ] + ([
             fig_entry("fig_funder_authorship_alluvial.png",
                       "Funder to financing function to authorship")] if have_authors else []) + [
+            fig_entry("fig_funder_scorecard.png", "Gap scorecard"),
         ],
     } if have_funders else None,
     # "Global financing context" is a group card (SECTION_GROUPS in app.js) holding these

@@ -4,9 +4,10 @@ Static site for the health-financing-functions evidence map: pure HTML/JS (no se
 build step), served from `docs/`. Forked from the `hee-landscape` dashboard scaffold and
 rebuilt against the HFF extraction.
 
-**Current data: HFF dataset v2.4.1 (October 2026; the dataset team's v2.4 without three pre-2010
-studies, 53,362 included).** What changed, the open gaps (topic-map coordinates, DALYs for Kosovo,
-health spending for five added countries) and the build order are in
+**Current data: HFF dataset v2.5.1 (October 2026; the dataset team's v2.5 without three pre-2010
+studies, 53,411 included).** What v2.5 changed (Decision 17: self-described health technology
+assessments are Benefits decisions) and the build order are in [DATA_GAPS_v2_5.md](DATA_GAPS_v2_5.md);
+the open gaps (DALYs for Kosovo, health spending for five added countries) are in
 [DATA_GAPS_v2_4.md](DATA_GAPS_v2_4.md). The pipeline description below is for the earlier builds.
 
 Data pipeline: `docs/dex_hff/build_data.py` reads

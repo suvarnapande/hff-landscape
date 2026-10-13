@@ -1,9 +1,9 @@
 {
-  "source": "HFF dataset v2.4.1",
-  "n_studies": 53362,
-  "n_funded": 9413,
-  "n_distinct_funder_strings": 6675,
-  "n_private_company_funded": 609,
+  "source": "HFF dataset v2.5.1",
+  "n_studies": 53411,
+  "n_funded": 9418,
+  "n_distinct_funder_strings": 6678,
+  "n_private_company_funded": 612,
   "private_company_share_of_funded_pct": 6.5,
   "overview_funder_groups": {
     "Government and multilateral": {
@@ -11,11 +11,11 @@
       "share_of_funded_pct": 61.0
     },
     "Academic and non-profit": {
-      "n": 3862,
+      "n": 3864,
       "share_of_funded_pct": 41.0
     },
     "Private companies": {
-      "n": 609,
+      "n": 612,
       "share_of_funded_pct": 6.5
     },
     "Unclassified": {
@@ -25,11 +25,11 @@
   },
   "studies_by_type": {
     "National governments": 4945,
-    "Universities, hospitals & institutes": 2105,
-    "Foundations & non-profits": 2038,
+    "Universities, hospitals & institutes": 2106,
+    "Foundations & non-profits": 2039,
     "Multilateral & EU bodies": 655,
     "Sub-national governments": 568,
-    "Pharmaceutical companies": 505,
+    "Pharmaceutical companies": 508,
     "Other private companies": 121,
     "Unclassified": 1425
   },

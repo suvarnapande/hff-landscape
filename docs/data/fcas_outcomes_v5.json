@@ -1,8 +1,8 @@
 {
-  "source": "HFF dataset v2.4.1",
-  "n_studies": 53362,
+  "source": "HFF dataset v2.5.1",
+  "n_studies": 53411,
   "n_fcas": 1449,
-  "n_country_level": 41367,
+  "n_country_level": 41407,
   "last_year_with_wb_lookup": 2025,
   "fcas_top_countries": {
     "Nigeria": 361,
@@ -44,100 +44,100 @@
     "2012": {
       "fcas_that_year": 24,
       "fcas_fixed_set": 83,
-      "country_level": 1956,
+      "country_level": 1958,
       "share_pct": 1.23,
       "share_fixed_pct": 4.24
     },
     "2013": {
       "fcas_that_year": 37,
       "fcas_fixed_set": 99,
-      "country_level": 2015,
-      "share_pct": 1.84,
+      "country_level": 2017,
+      "share_pct": 1.83,
       "share_fixed_pct": 4.91
     },
     "2014": {
       "fcas_that_year": 52,
       "fcas_fixed_set": 121,
-      "country_level": 2151,
+      "country_level": 2153,
       "share_pct": 2.42,
-      "share_fixed_pct": 5.63
+      "share_fixed_pct": 5.62
     },
     "2015": {
       "fcas_that_year": 52,
       "fcas_fixed_set": 127,
-      "country_level": 2302,
+      "country_level": 2304,
       "share_pct": 2.26,
-      "share_fixed_pct": 5.52
+      "share_fixed_pct": 5.51
     },
     "2016": {
       "fcas_that_year": 35,
       "fcas_fixed_set": 131,
-      "country_level": 2572,
+      "country_level": 2574,
       "share_pct": 1.36,
       "share_fixed_pct": 5.09
     },
     "2017": {
       "fcas_that_year": 52,
       "fcas_fixed_set": 145,
-      "country_level": 2678,
+      "country_level": 2680,
       "share_pct": 1.94,
       "share_fixed_pct": 5.41
     },
     "2018": {
       "fcas_that_year": 50,
       "fcas_fixed_set": 163,
-      "country_level": 2820,
+      "country_level": 2826,
       "share_pct": 1.77,
-      "share_fixed_pct": 5.78
+      "share_fixed_pct": 5.77
     },
     "2019": {
       "fcas_that_year": 56,
       "fcas_fixed_set": 165,
-      "country_level": 2944,
+      "country_level": 2950,
       "share_pct": 1.9,
-      "share_fixed_pct": 5.6
+      "share_fixed_pct": 5.59
     },
     "2020": {
       "fcas_that_year": 114,
       "fcas_fixed_set": 215,
-      "country_level": 3124,
+      "country_level": 3127,
       "share_pct": 3.65,
       "share_fixed_pct": 6.88
     },
     "2021": {
       "fcas_that_year": 116,
       "fcas_fixed_set": 200,
-      "country_level": 3126,
+      "country_level": 3129,
       "share_pct": 3.71,
-      "share_fixed_pct": 6.4
+      "share_fixed_pct": 6.39
     },
     "2022": {
       "fcas_that_year": 151,
       "fcas_fixed_set": 209,
-      "country_level": 3111,
+      "country_level": 3114,
       "share_pct": 4.85,
-      "share_fixed_pct": 6.72
+      "share_fixed_pct": 6.71
     },
     "2023": {
       "fcas_that_year": 184,
       "fcas_fixed_set": 221,
-      "country_level": 3017,
+      "country_level": 3018,
       "share_pct": 6.1,
-      "share_fixed_pct": 7.33
+      "share_fixed_pct": 7.32
     },
     "2024": {
       "fcas_that_year": 132,
       "fcas_fixed_set": 177,
-      "country_level": 3111,
+      "country_level": 3114,
       "share_pct": 4.24,
-      "share_fixed_pct": 5.69
+      "share_fixed_pct": 5.68
     },
     "2025": {
       "fcas_that_year": 169,
       "fcas_fixed_set": 197,
-      "country_level": 3085,
-      "share_pct": 5.48,
-      "share_fixed_pct": 6.39
+      "country_level": 3088,
+      "share_pct": 5.47,
+      "share_fixed_pct": 6.38
     }
   },
   "fcas_first_listed_year": {
@@ -198,30 +198,30 @@
   },
   "outcome_domains": {
     "Equitable distribution of health system resources": 6190,
-    "Efficiency in the use of resources": 5886,
-    "Improved level and distribution of health": 5571,
-    "Financial protection": 4424,
-    "Quality of service provision": 3036,
-    "Responsiveness to citizens": 1709,
+    "Efficiency in the use of resources": 5900,
+    "Improved level and distribution of health": 5583,
+    "Financial protection": 4426,
+    "Quality of service provision": 3040,
+    "Responsiveness to citizens": 1710,
     "Transparency and accountability": 999,
     "Economic development": 716,
-    "Other": 28726,
-    "Unclear": 5387
+    "Other": 28738,
+    "Unclear": 5403
   },
   "other_themes": {
-    "Service use, access and coverage": 8189,
+    "Service use, access and coverage": 8192,
     "Levels, trends and drivers of spending, prices or funding": 4418,
-    "Stakeholder perceptions and implementation experience": 2577,
-    "Adequacy or sufficiency of financing": 1913,
+    "Stakeholder perceptions and implementation experience": 2579,
+    "Adequacy or sufficiency of financing": 1915,
     "Insurance markets and enrolment behaviour": 1842,
-    "Priority-setting, HTA and reimbursement decision processes": 960,
+    "Priority-setting, HTA and reimbursement decision processes": 963,
     "Health-workforce outcomes": 919,
-    "Provider or organisation financial performance": 774,
+    "Provider or organisation financial performance": 775,
     "Responses to health taxes": 708,
     "Technical performance of a financing mechanism": 517,
     "Supply-chain and operational management": 507,
-    "Not clustered": 6827,
-    "n_other": 28726
+    "Not clustered": 6830,
+    "n_other": 28738
   },
   "outcome_share_2010_vs_2025_pct": {
     "Equitable distribution of health system resources": [
@@ -254,7 +254,7 @@
     ],
     "Economic development": [
       0.8,
-      1.6
+      1.5
     ]
   },
   "outcome_by_context_pct": {
@@ -276,7 +276,7 @@
       "FCAS": 7.9,
       "Low income": 7.9,
       "Lower-middle": 7.8,
-      "Upper-middle": 9.8,
+      "Upper-middle": 9.9,
       "High income": 11.9
     },
     "Financial protection": {
@@ -318,9 +318,9 @@
   "context_n": {
     "FCAS": 1449,
     "Low income": 1968,
-    "Lower-middle": 5633,
-    "Upper-middle": 9097,
-    "High income": 28369
+    "Lower-middle": 5634,
+    "Upper-middle": 9107,
+    "High income": 28401
   },
   "figures": [
     {
