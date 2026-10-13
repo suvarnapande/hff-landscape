@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-13d";
+const BUILD = "2026-10-13f";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -16,8 +16,11 @@ const OTHER_OUTCOME_NOTE_FIGURES = new Set([
   "fig_outcome_bar.png",
   "fig_outcome_lollipop.png",
   "fig_outcome_combined.png",
-  "fig_function_outcome_heatmap.png"
+  "fig_function_outcome_heatmap.png",
+  "fig_function_outcome_themes.png"
 ]);
+// These figures draw the "Other" themes themselves, so they skip OTHER_OUTCOME_NOTE.
+const FIGURES_WITH_OTHER_THEMES = new Set(["fig_outcome_combined.png", "fig_function_outcome_themes.png"]);
 // Plain-language note on why the main "Other" themes don't belong to a named outcome
 // domain. Shown under the outcome-domain and "Other" themes figures. Counts match
 // fig_outcome_other_themes_v5.png (fcas_outcomes_v5.json "other_themes").
@@ -2418,7 +2421,7 @@ if (typeof document !== "undefined") {
     // One figure shows the outcome domains with "Other" unpacked into its themes, with a
     // "why Other" button above it that opens the plain-language note.
     rows: [["fig_function_bar.png", "fig_function_second_opinion_v2_2.png"], ["fig_outcome_combined.png"],
-      ["fig_function_outcome_heatmap.png"]],
+      ["fig_function_outcome_themes.png"]],
     rowIntros: { 1: () => otherOutcomeExplainer() }
   }];
 
@@ -2473,6 +2476,8 @@ if (typeof document !== "undefined") {
     group.rows.forEach((row, rowIndex) => {
       if (group.rowIntros && group.rowIntros[rowIndex]) card.appendChild(group.rowIntros[rowIndex]());
       const rowEl = el("div", "fig-panels-row");
+      // Technical-only figures collapse into a full-width strip under the row, not a side panel.
+      const technical = [];
       for (const file of row) {
         const f = figsByFile[file];
         if (!f) continue;
@@ -2497,10 +2502,16 @@ if (typeof document !== "undefined") {
           details.appendChild(summary);
           while (panel.firstChild) details.appendChild(panel.firstChild);
           panel.appendChild(details);
+          panel.classList.add("fig-panel-technical");
+          technical.push(panel);
+          continue;
         }
         rowEl.appendChild(panel);
       }
+      // A lone figure is capped and centred instead of stretching across the card.
+      rowEl.classList.toggle("fig-panels-row-single", rowEl.children.length === 1);
       card.appendChild(rowEl);
+      for (const panel of technical) card.appendChild(panel);
     });
     if (UNCLEAR_FOOTNOTE_SECTIONS.has(sec.title)) {
       const body = el("div", "fig-body");
@@ -2577,8 +2588,7 @@ if (typeof document !== "undefined") {
           : UNCLEAR_FOOTNOTE;
         body.appendChild(note);
       }
-      // The combined figure draws the "Other" themes itself, so it skips the text list.
-      if (OTHER_OUTCOME_NOTE_FIGURES.has(f.file) && f.file !== "fig_outcome_combined.png") {
+      if (OTHER_OUTCOME_NOTE_FIGURES.has(f.file) && !FIGURES_WITH_OTHER_THEMES.has(f.file)) {
         const note = el("div", "fig-footnote other-outcome-note");
         note.textContent = OTHER_OUTCOME_NOTE;
         body.appendChild(note);
@@ -3596,7 +3606,11 @@ if (typeof document !== "undefined") {
       "How research priorities differ", "How research responds over time", "USA sensitivity analysis"]);
     // fig_outcome_combined.png replaces the outcome lollipop + "Other" themes pair.
     const HIDDEN_FIGS = new Set(["fig_wellcome_priorities.png", "fig_outcome_lollipop.png",
-      "fig_outcome_other_themes_v5.png"]);
+      "fig_outcome_other_themes_v5.png",
+      // Hidden after review: function shares over time and outcome trends.
+      "fig_function_time_lines.png", "fig_outcome_trend_v5.png", "fig_alluvial.png",
+      // fig_function_outcome_themes.png replaces it, with "Other" split into themes.
+      "fig_function_outcome_heatmap.png"]);
     GALLERY = (db.content.gallery || [])
       .filter(sec => !HIDDEN_SECTIONS.has(sec.title))
       .map(sec => ({ ...sec, figs: sec.figs.filter(f => !HIDDEN_FIGS.has(f.file)) }))

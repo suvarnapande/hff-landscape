@@ -1181,6 +1181,11 @@ main { padding: 1.4rem 1.5rem 2.5rem; max-width: 1500px; margin: 0 auto; }
   background: #fff;
 }
 .fig-panel img { width: 100%; display: block; cursor: zoom-in; border-bottom: 1px solid var(--hff-line); }
+.fig-panels-row-single { max-width: 980px; margin: 0 auto; }
+/* Technical-only figure (e.g. the classification check): a slim collapsible strip under its row. */
+.fig-panel-technical { margin: 0 1.05rem .7rem; padding: 0 .9rem; }
+.fig-panel-technical > .figure-technical-notes { margin: 0; border-top: 0; padding: .55rem 0; }
+.fig-panel-technical .figure-technical-notes[open] img { margin-top: .6rem; }
 .fig-panel-foot {
   display: flex;
   align-items: center;
