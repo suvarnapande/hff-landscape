@@ -5655,7 +5655,7 @@ gallery = [
                        "profile card for each WHO region (disease focus, top financing functions, financial "
                        "protection as an outcome, country coverage over time). The African Region has the most "
                        "studies per dollar spent (11.3 per US$1bn), because its health spending is so small, not "
-                       "because its evidence base is large. Places that are not WHO members (Taiwan, Hong Kong, "
+                       "because its evidence base is large. Places that the WHO's country list does not assign to a region (Taiwan, Hong Kong, "
                        "Kosovo) take the WHO region of their UN M49 sub-region.",
         }] if (FIGS / "fig_glance_regions.html").exists() else []) + ([
             fig_entry("fig_map_bivariate.png", "Where high burden meets low evidence"),

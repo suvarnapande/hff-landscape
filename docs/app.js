@@ -807,7 +807,7 @@ export function countryFacts(db, iso3) {
     ["Income group (current)", r.income],
     ["Region (WHO)", r.who_region == null ? "—"
       : r.who_region_source && r.who_region_source !== "WHO"
-        ? r.who_region + " (not a WHO member; assigned via its UN M49 sub-region, " + r.un_region + ")"
+        ? r.who_region + " (no region in the WHO country list; assigned via its UN M49 sub-region, " + r.un_region + ")"
         : r.who_region]
   ];
   if (pop != null) pairs.push(["Population", fmtNum(rRound(pop / 1e6)) + " M"]);
@@ -1497,7 +1497,7 @@ if (typeof document !== "undefined") {
   // "?" explanations next to Explorer filter labels (shown inline under the label).
   const FILTER_HELP = {
     "x-income": '<p>Countries are grouped by the <a href="https://datahelpdesk.worldbank.org/knowledgebase/articles/906519-world-bank-country-and-lending-groups" target="_blank" rel="noopener">World Bank country and lending groups</a> classification: low, lower-middle, upper-middle and high income. A study counts in every income group of the countries it examines.</p>',
-    "x-region": '<p>Regions are the six <a href="https://www.who.int/about/who-we-are/regional-offices" target="_blank" rel="noopener">WHO regions</a> (for example, the African Region or the Western Pacific Region), as listed by the WHO Global Health Observatory. Places that are not WHO members (Taiwan, Hong Kong, Kosovo) are given the WHO region of the other countries in their <a href="https://unstats.un.org/unsd/methodology/m49/" target="_blank" rel="noopener">UN M49</a> sub-region. A study counts in every region of the countries it examines.</p>',
+    "x-region": '<p>Regions are the six <a href="https://www.who.int/about/who-we-are/regional-offices" target="_blank" rel="noopener">WHO regions</a> (for example, the African Region or the Western Pacific Region), as listed by the WHO Global Health Observatory. Places that the WHO's country list does not assign to a region (Taiwan, Hong Kong, Kosovo) are given the WHO region of the other countries in their <a href="https://unstats.un.org/unsd/methodology/m49/" target="_blank" rel="noopener">UN M49</a> sub-region. A study counts in every region of the countries it examines.</p>',
     "x-datatype": '<p>The kind of data a study analysed, as described in its title and abstract:</p><ul>'
       + '<li><strong>Cross-sectional:</strong> observations at a single point in time.</li>'
       + '<li><strong>Time-series / longitudinal:</strong> observations repeated over time.</li>'

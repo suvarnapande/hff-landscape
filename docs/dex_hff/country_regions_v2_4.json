@@ -1,0 +1,1493 @@
+{
+ "description": "WHO region of each country and area in the HFF evidence map, with the earlier UN M49 sub-region (archived) and the World Bank region.",
+ "fetched": "2026-10-13",
+ "sources": {
+  "who_region": "https://ghoapi.azureedge.net/api/DIMENSION/COUNTRY/DimensionValues",
+  "wb_region": "https://api.worldbank.org/v2/country?format=json&per_page=400",
+  "un_region": "UN M49 sub-regions, from the map's country reference (inherited from the HEE dashboard)"
+ },
+ "rule": "who_region is the region in the WHO Global Health Observatory's country list. Places that list does not assign to a region (Taiwan, Hong Kong, Kosovo) get the WHO region of the other countries in their UN M49 sub-region; who_region_source records this. Membership is a separate question: the United States and Argentina left the WHO in 2026 but the list keeps them in the Region of the Americas.",
+ "n_countries": 185,
+ "countries": [
+  {
+   "iso3": "ZWE",
+   "country": "Zimbabwe",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "ZMB",
+   "country": "Zambia",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "YEM",
+   "country": "Yemen",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "VNM",
+   "country": "Vietnam",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "South-eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "VEN",
+   "country": "Venezuela",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "UZB",
+   "country": "Uzbekistan",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Central Asia",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "URY",
+   "country": "Uruguay",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "USA",
+   "country": "United States of America",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Northern America",
+   "wb_region": "North America"
+  },
+  {
+   "iso3": "GBR",
+   "country": "United Kingdom",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "ARE",
+   "country": "United Arab Emirates",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "UKR",
+   "country": "Ukraine",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Eastern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "UGA",
+   "country": "Uganda",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "TKM",
+   "country": "Turkmenistan",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Central Asia",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "TUR",
+   "country": "Turkey",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "TUN",
+   "country": "Tunisia",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Africa",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "TTO",
+   "country": "Trinidad and Tobago",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "TGO",
+   "country": "Togo",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "TLS",
+   "country": "East Timor",
+   "who_region": "South-East Asia Region",
+   "who_region_source": "WHO",
+   "un_region": "South-eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "THA",
+   "country": "Thailand",
+   "who_region": "South-East Asia Region",
+   "who_region_source": "WHO",
+   "un_region": "South-eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "TZA",
+   "country": "United Republic of Tanzania",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "TJK",
+   "country": "Tajikistan",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Central Asia",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "SYR",
+   "country": "Syria",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "CHE",
+   "country": "Switzerland",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "SWE",
+   "country": "Sweden",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "SWZ",
+   "country": "eSwatini",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "SSD",
+   "country": "South Sudan",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "SDN",
+   "country": "Sudan",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "LKA",
+   "country": "Sri Lanka",
+   "who_region": "South-East Asia Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Asia",
+   "wb_region": "South Asia"
+  },
+  {
+   "iso3": "ESP",
+   "country": "Spain",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "KOR",
+   "country": "South Korea",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "Eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "ZAF",
+   "country": "South Africa",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "SOM",
+   "country": "Somalia",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "SVK",
+   "country": "Slovakia",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Eastern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "SVN",
+   "country": "Slovenia",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "SGP",
+   "country": "Singapore",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "South-eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "SLE",
+   "country": "Sierra Leone",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "SRB",
+   "country": "Republic of Serbia",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "SEN",
+   "country": "Senegal",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "SAU",
+   "country": "Saudi Arabia",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "RWA",
+   "country": "Rwanda",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "RUS",
+   "country": "Russia",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Eastern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "ROU",
+   "country": "Romania",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Eastern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "QAT",
+   "country": "Qatar",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "PRT",
+   "country": "Portugal",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "POL",
+   "country": "Poland",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Eastern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "PHL",
+   "country": "Philippines",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "South-eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "PER",
+   "country": "Peru",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "PRY",
+   "country": "Paraguay",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "PNG",
+   "country": "Papua New Guinea",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "Melanesia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "PAN",
+   "country": "Panama",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "PAK",
+   "country": "Pakistan",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "OMN",
+   "country": "Oman",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "NOR",
+   "country": "Norway",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "PRK",
+   "country": "North Korea",
+   "who_region": "South-East Asia Region",
+   "who_region_source": "WHO",
+   "un_region": "Eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "NGA",
+   "country": "Nigeria",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "NER",
+   "country": "Niger",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "NIC",
+   "country": "Nicaragua",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "NZL",
+   "country": "New Zealand",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "Australia and New Zealand",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "NLD",
+   "country": "Netherlands",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "NPL",
+   "country": "Nepal",
+   "who_region": "South-East Asia Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Asia",
+   "wb_region": "South Asia"
+  },
+  {
+   "iso3": "NAM",
+   "country": "Namibia",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "MOZ",
+   "country": "Mozambique",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "MAR",
+   "country": "Morocco",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Africa",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "MNG",
+   "country": "Mongolia",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "Eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "MDA",
+   "country": "Moldova",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Eastern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "MEX",
+   "country": "Mexico",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "MUS",
+   "country": "Mauritius",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "MRT",
+   "country": "Mauritania",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "MLI",
+   "country": "Mali",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "MYS",
+   "country": "Malaysia",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "South-eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "MWI",
+   "country": "Malawi",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "MDG",
+   "country": "Madagascar",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "MKD",
+   "country": "North Macedonia",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "LTU",
+   "country": "Lithuania",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "LBY",
+   "country": "Libya",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Africa",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "LBR",
+   "country": "Liberia",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "LSO",
+   "country": "Lesotho",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "LBN",
+   "country": "Lebanon",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "LVA",
+   "country": "Latvia",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "LAO",
+   "country": "Laos",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "South-eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "KGZ",
+   "country": "Kyrgyzstan",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Central Asia",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "KWT",
+   "country": "Kuwait",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "KEN",
+   "country": "Kenya",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "JOR",
+   "country": "Jordan",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "JPN",
+   "country": "Japan",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "Eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "JAM",
+   "country": "Jamaica",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "ITA",
+   "country": "Italy",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "IRL",
+   "country": "Ireland",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "IRQ",
+   "country": "Iraq",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "IRN",
+   "country": "Iran",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "IDN",
+   "country": "Indonesia",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "South-eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "IND",
+   "country": "India",
+   "who_region": "South-East Asia Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Asia",
+   "wb_region": "South Asia"
+  },
+  {
+   "iso3": "HUN",
+   "country": "Hungary",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Eastern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "HND",
+   "country": "Honduras",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "HTI",
+   "country": "Haiti",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "GNB",
+   "country": "Guinea-Bissau",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "GIN",
+   "country": "Guinea",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "GTM",
+   "country": "Guatemala",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "GRC",
+   "country": "Greece",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "GHA",
+   "country": "Ghana",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "DEU",
+   "country": "Germany",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "GEO",
+   "country": "Georgia",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "GMB",
+   "country": "Gambia",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "GAB",
+   "country": "Gabon",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "FRA",
+   "country": "France",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "FIN",
+   "country": "Finland",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "ETH",
+   "country": "Ethiopia",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "EST",
+   "country": "Estonia",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "ERI",
+   "country": "Eritrea",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "GNQ",
+   "country": "Equatorial Guinea",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "SLV",
+   "country": "El Salvador",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "EGY",
+   "country": "Egypt",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Africa",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "ECU",
+   "country": "Ecuador",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "DOM",
+   "country": "Dominican Republic",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "DJI",
+   "country": "Djibouti",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "DNK",
+   "country": "Denmark",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "CZE",
+   "country": "Czechia",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Eastern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "CYP",
+   "country": "Cyprus",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "HRV",
+   "country": "Croatia",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "CIV",
+   "country": "Ivory Coast",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "CRI",
+   "country": "Costa Rica",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "COD",
+   "country": "Democratic Republic of the Congo",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "COG",
+   "country": "Republic of the Congo",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "COL",
+   "country": "Colombia",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "CHN",
+   "country": "China",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "Eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "HKG",
+   "country": "Hong Kong S.A.R.",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "no WHO region; WHO region of its UN M49 sub-region (Eastern Asia)",
+   "un_region": "Eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "CHL",
+   "country": "Chile",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "TCD",
+   "country": "Chad",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "CAF",
+   "country": "Central African Republic",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "CAN",
+   "country": "Canada",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Northern America",
+   "wb_region": "North America"
+  },
+  {
+   "iso3": "CMR",
+   "country": "Cameroon",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "KHM",
+   "country": "Cambodia",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "South-eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "MMR",
+   "country": "Myanmar",
+   "who_region": "South-East Asia Region",
+   "who_region_source": "WHO",
+   "un_region": "South-eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "BDI",
+   "country": "Burundi",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "BFA",
+   "country": "Burkina Faso",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "BGR",
+   "country": "Bulgaria",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Eastern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "BRA",
+   "country": "Brazil",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "BWA",
+   "country": "Botswana",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "BIH",
+   "country": "Bosnia and Herzegovina",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "BOL",
+   "country": "Bolivia",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "BEN",
+   "country": "Benin",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "BEL",
+   "country": "Belgium",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "BLR",
+   "country": "Belarus",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Eastern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "BGD",
+   "country": "Bangladesh",
+   "who_region": "South-East Asia Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Asia",
+   "wb_region": "South Asia"
+  },
+  {
+   "iso3": "BHR",
+   "country": "Bahrain",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "AZE",
+   "country": "Azerbaijan",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "AUT",
+   "country": "Austria",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "AUS",
+   "country": "Australia",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "Australia and New Zealand",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "ARM",
+   "country": "Armenia",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "ARG",
+   "country": "Argentina",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "AGO",
+   "country": "Angola",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "DZA",
+   "country": "Algeria",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Africa",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "ALB",
+   "country": "Albania",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "AFG",
+   "country": "Afghanistan",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "TWN",
+   "country": "Taiwan",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "no WHO region; WHO region of its UN M49 sub-region (Eastern Asia)",
+   "un_region": "Eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "ISR",
+   "country": "Israel",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "KAZ",
+   "country": "Kazakhstan",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Central Asia",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "CUB",
+   "country": "Cuba",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "PSE",
+   "country": "Palestine",
+   "who_region": "Eastern Mediterranean Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Asia",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "BTN",
+   "country": "Bhutan",
+   "who_region": "South-East Asia Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Asia",
+   "wb_region": "South Asia"
+  },
+  {
+   "iso3": "LUX",
+   "country": "Luxembourg",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Western Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "ISL",
+   "country": "Iceland",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "FJI",
+   "country": "Fiji",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "Melanesia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "PRI",
+   "country": "Puerto Rico",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "XKX",
+   "country": "Kosovo",
+   "who_region": "European Region",
+   "who_region_source": "no WHO region; WHO region of its UN M49 sub-region (Southern Europe)",
+   "un_region": "Southern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "SLB",
+   "country": "Solomon Islands",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "Melanesia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "MDV",
+   "country": "Maldives",
+   "who_region": "South-East Asia Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Asia",
+   "wb_region": "South Asia"
+  },
+  {
+   "iso3": "GUY",
+   "country": "Guyana",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "BRB",
+   "country": "Barbados",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "TON",
+   "country": "Tonga",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "Polynesia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "BLZ",
+   "country": "Belize",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "VUT",
+   "country": "Vanuatu",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "Melanesia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "PLW",
+   "country": "Palau",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "Micronesia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "MNE",
+   "country": "Montenegro",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Europe",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "MLT",
+   "country": "Malta",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Southern Europe",
+   "wb_region": "Middle East, North Africa, Afghanistan & Pakistan"
+  },
+  {
+   "iso3": "WSM",
+   "country": "Samoa",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "Polynesia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "GRD",
+   "country": "Grenada",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "BRN",
+   "country": "Brunei",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "South-eastern Asia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "FSM",
+   "country": "Micronesia",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "Micronesia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "BMU",
+   "country": "Bermuda",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Northern America",
+   "wb_region": "North America"
+  },
+  {
+   "iso3": "GRL",
+   "country": "Greenland",
+   "who_region": "European Region",
+   "who_region_source": "WHO",
+   "un_region": "Northern America",
+   "wb_region": "Europe & Central Asia"
+  },
+  {
+   "iso3": "VCT",
+   "country": "Saint Vincent and the Grenadines",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  },
+  {
+   "iso3": "KIR",
+   "country": "Kiribati",
+   "who_region": "Western Pacific Region",
+   "who_region_source": "WHO",
+   "un_region": "Micronesia",
+   "wb_region": "East Asia & Pacific"
+  },
+  {
+   "iso3": "COM",
+   "country": "Comoros",
+   "who_region": "African Region",
+   "who_region_source": "WHO",
+   "un_region": "Sub-Saharan Africa",
+   "wb_region": "Sub-Saharan Africa"
+  },
+  {
+   "iso3": "LCA",
+   "country": "Saint Lucia",
+   "who_region": "Region of the Americas",
+   "who_region_source": "WHO",
+   "un_region": "Latin America and the Caribbean",
+   "wb_region": "Latin America & Caribbean"
+  }
+ ]
+}

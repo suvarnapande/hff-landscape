@@ -475,7 +475,7 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
   <div class="foot">
     <div>
       <p>Data: HFF evidence map web build ({SOURCE_NAME}); {YEAR0}–{YEAR1} publication years. Search dates: xx {q("Search dates are not in the web data; they need to come from the review protocol.")}</p>
-      <p>Regions: WHO (AFR African, AMR Americas, SEAR South-East Asia, EUR European, EMR Eastern Mediterranean, WPR Western Pacific), as listed by the WHO Global Health Observatory; places that are not WHO members (Taiwan, Hong Kong, Kosovo) take the WHO region of their UN M49 sub-region. Map and trend lines cover the {len(countries)} countries in the map's country data; trends run to {LAST_FULL_YEAR}.</p>
+      <p>Regions: WHO (AFR African, AMR Americas, SEAR South-East Asia, EUR European, EMR Eastern Mediterranean, WPR Western Pacific), as listed by the WHO Global Health Observatory; places that the WHO's country list does not assign to a region (Taiwan, Hong Kong, Kosovo) take the WHO region of their UN M49 sub-region. Map and trend lines cover the {len(countries)} countries in the map's country data; trends run to {LAST_FULL_YEAR}.</p>
       <p>Health expenditure: total health spending, PPP US$ billions, 2022 (the site's country reference data). Outcome: financial protection outcome domain. Disease groups: 11 groups matched from PubMed MeSH terms, grouped into communicable, non-communicable and injuries. Map: Robinson projection; grey = no study naming the country or no spending data.</p>
     </div>
   </div>

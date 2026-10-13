@@ -162,10 +162,16 @@ M49 sub-regions, inherited from the HEE dashboard) is kept in the data, archived
   (ghoapi.azureedge.net, `DIMENSION/COUNTRY/DimensionValues`), fetched by
   `docs/dex_hff/make_country_regions_v2_4.py` into `docs/dex_hff/country_regions_v2_4.csv`. It
   follows WHO's current membership, for example Indonesia in the Western Pacific since 2025.
-- **Places that are not WHO members** (Taiwan, Hong Kong, Kosovo) get the WHO region of the other
+- **Places the WHO's country list does not assign to a region** (Taiwan, Hong Kong, Kosovo) get the WHO region of the other
   countries in their UN M49 sub-region: Taiwan and Hong Kong (Eastern Asia) the Western Pacific,
   Kosovo (Southern Europe) the European Region. `who_region_source` records this; the country
   profile, the region filter's help text, the Methods tab and the glance page say so.
+- **WHO membership is a separate question.** The United States (withdrawal effective 22 January
+  2026) and Argentina (17 March 2026) have left the WHO, but the WHO's country list still places
+  them, like non-member areas such as Puerto Rico, in the Region of the Americas, and so does the map.
+  The rule is therefore "no region in the WHO's list", not "not a WHO member".
+- **Checked 13 October 2026:** no regional reassignment since Indonesia's (World Health Assembly, May
+  2025); the South-East Asia Region's 10 members match the WHO regional office's own list.
 - **In `docs/data/countries.json`:** `who_region` (used by the site), `who_region_source`,
   `un_region` (UN M49, archived) and `wb_region` (World Bank region, from the World Bank country API;
   Taiwan set to East Asia & Pacific, as "Taiwan, China").
