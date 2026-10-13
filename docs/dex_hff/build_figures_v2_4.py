@@ -787,10 +787,9 @@ ax.annotate(f"average across {len(func_counts)} functions: {mean_func:,.0f}",
             xy=(mean_func, 0.4), xytext=(mean_func + max(fvalues) * 0.02, 0.4),
             fontsize=9, color=SUBHEAD_COLOR, ha="left", va="bottom")
 n_above = sum(1 for v in fvalues if v >= mean_func)
-set_headline(ax, f"{n_above} of {len(func_counts)} financing functions punch above the per-function average",
-             "Studies by financing function — a study can carry more than one.",
-             f"{top_func} leads at {top_func_n:,} studies, {round(top_func_n / second_func_n, 1)}× "
-             f"{second_func}'s {second_func_n:,}; capital-investment financing trails furthest behind.",
+set_headline(ax, f"{n_above} of {len(func_counts)} financing functions have above-average study counts",
+             f"The average is {mean_func:,.0f} studies per function. A study can cover more than one function.",
+             "Benefits decisions, purchasing and pooling receive the most research attention.",
              "fig_function_bar.png")
 ax.set_xlabel("studies")
 ax.tick_params(axis="y", labelsize=10.5)
