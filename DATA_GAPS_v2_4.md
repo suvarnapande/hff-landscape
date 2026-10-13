@@ -76,14 +76,51 @@ funder. Figure footnotes state their bases.
 The 30 other added countries have IHME GBD 2023 all-cause DALY totals (2023, all ages, both sexes),
 imported from `IHME-GBD_2023_DATA-e843da6d-1.zip` on 12 October 2026 (source rows and citation in
 `docs/dex_hff/v2_2/dalys_2023_country_additions_source.csv` and `dalys_2023_citation.txt`).
-Kosovo is not a GBD location, so it stays out of the per-DALY comparisons until a comparable
-estimate is found.
+**Decision (13 October 2026, agreed with the project owner):** retain Kosovo's **8 included
+studies**, leave its DALY value missing, and exclude Kosovo from comparisons that require
+disease-burden data. No comparable Kosovo-specific GBD 2023 estimate has been identified.
+Do not substitute a neighbouring country's estimate or an imputed value in the main analysis.
+Kosovo's studies remain available in the dataset and eligible study-count summaries.
+The relevant figures now explain this limitation in their visible coverage notes and Technical
+notes; the publication-year research-share figure distinguishes its study counts from its
+disease-burden benchmark. The population-rate world map also explains that its existing country
+subset requires burden data, so Kosovo is omitted there despite the population denominator.
+Revisit this decision only if a documented comparable estimate is obtained and reviewed.
 
 ## 3. Health spending for 5 added countries
 
-No World Bank value for Taiwan, Puerto Rico, Kosovo, Bermuda or Greenland, so they are not in the
-per-dollar figures. A source consistent with the other countries is needed (for Taiwan, the
-national health accounts are the likely option).
+The site's `total_spend_bn` remains missing for Taiwan, Puerto Rico, Kosovo, Bermuda and
+Greenland. These study-country counts are retained (454, 9, 8, 2 and 2 respectively), but a
+spending denominator has not been accepted for the per-dollar comparisons.
+
+**Source review (13 October 2026):** there are useful leads, but no replacement values have
+been entered. The target used for country additions is World Bank `SH.XPD.CHEX.PP.CD`,
+**2022 current health expenditure per person in current international dollars**, multiplied
+by **2022 population**, divided by one billion. WHO's
+[Global Health Expenditure Database](https://apps.who.int/nha/database/) supplies the World
+Bank series, so check WHO before constructing an alternative.
+
+| Place | Candidate source | Checks still required |
+|---|---|---|
+| Taiwan | [MOHW 2024 Health and Welfare Report, health expenditure table](https://service.mohw.gov.tw/ebook/dopl/113/02/files/basic-html/page181.html), and [MOHW national health expenditure tables](https://www.mohw.gov.tw/www/lp-130-2.html) | Use current health expenditure (CHE), not the broader NHE total: the report gives 2022 CHE at 7.0% of GDP, whereas NHE is 7.5%. Obtain an unrounded 2022 CHE total and verify the PPP conversion against the GHED basis. Taiwan participates in the World Bank ICP, but a GDP PPP table alone does not validate a health-spending estimate. |
+| Bermuda | [Bermuda Health Council 2019-2023 National Health Accounts](https://healthcouncil.bm/research-and-reports/) | Accounts are available, but years end on 31 March. Check calendar-year alignment, current vs capital expenditure, spending abroad on residents, and a Bermuda-specific compatible PPP basis. |
+| Greenland | [Statistics Greenland government expenditure by function](https://bank.stat.gl/pxweb/en/Greenland/Greenland__OF__OF30/OFXFUNK.px/) | The available 2022 health expenditure is a government total, not verified all-payer SHA current health expenditure. Investigate Nordic health accounts and a Greenland-specific PPP basis; sharing Denmark's currency does not establish the same price level. |
+| Puerto Rico | Local health accounts/Department of Health; CMS as a limited supporting source | No verified all-payer 2022 CHE total or compatible PPP value identified in this review. CMS Medicare spending covers only that programme and cannot substitute for total health expenditure. Sharing the US dollar does not establish US purchasing power. |
+| Kosovo | WHO health-accounts team and Kosovo's national statistical/health authorities | No verified all-payer 2022 CHE total identified in this review. Government health budgets alone omit private spending. Any spending estimate would resolve only the spending gap, not the separate DALY gap above. |
+
+For any candidate, record its spending definition, public/private coverage, residence basis,
+year, currency, PPP source and vintage, population denominator, source table and conversion.
+Prefer a directly published compatible PPP value. Do not convert at market exchange rates or
+borrow a parent/nearby country's PPP and present it as comparable. World Bank
+[PPP guidance](https://datahelpdesk.worldbank.org/knowledgebase/articles/114945-why-are-some-series-shown-in-purchasing-power-pari)
+also cautions against applying general WDI GDP/consumption PPPs to other currency series
+without justification; reproduce the health-series method rather than assume any PPP is suitable.
+
+**Existing comparability limitation:** `make_country_additions_v2_2.py` documents that the
+inherited country spending values use a similar but not identical source, differing by roughly
+5% from the World Bank series. Before claiming full comparability, trace and harmonise that
+inherited source as well as evaluating these five additions. Some later figures instead use
+IHME spending in 2023 US dollars; a 2022 PPP replacement must not be inserted into that series.
 
 ## 4. Smaller items
 
