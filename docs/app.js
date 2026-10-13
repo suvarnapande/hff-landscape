@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-13l";
+const BUILD = "2026-10-13m";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1600,7 +1600,6 @@ if (typeof document !== "undefined") {
       "Studies captured in the map": () => showOverviewTrend("cumulative"),
       "Publication years covered": () => showOverviewTrend("cumulative"),
       "Countries covered by studies": () => openOverviewGroup("Countries and research coverage"),
-      "Studies by WHO region": () => openOverviewGroup("Countries and research coverage"),
       "Health financing functions covered": () => openOverviewTheme("Financing functions & outcomes"),
       "Studies using quantitative analysis": () => openOverviewTheme("Methods & data"),
       "Studies with a publication link": () => openOverviewTheme("Open access & author countries"),
@@ -1792,15 +1791,9 @@ if (typeof document !== "undefined") {
     box.append(title, lead, rows);
   }
 
-  // Countries card: number of countries, then studies by World Bank income group
-  // as circles whose area is proportional to the study count.
-  function fillIncomeBubbleCard(box, nCountries) {
-    box.classList.add("income-bubble-card");
-    const title = el("div", "value-box-title");
-    title.textContent = "Countries covered by studies";
-    const head = el("div", "income-bubble-head");
-    head.innerHTML = `<span class="income-bubble-count">${esc(nCountries)}</span><span>countries named by at least one study</span>`;
-
+  // Studies by World Bank income group (publication year) as circles whose area is
+  // proportional to the study count.
+  function incomeBubbleChart() {
     const counts = geoStudyCounts("income");
     const groups = [["Low income", ["Low"]], ["Lower middle income", ["Lower", "middle"]],
                     ["Upper middle income", ["Upper", "middle"]], ["High income", ["High"]]];
@@ -1827,17 +1820,11 @@ if (typeof document !== "undefined") {
     svg += "</svg>";
     const chart = el("div", "income-bubble-chart");
     chart.innerHTML = svg;
-    const note = el("div", "income-bubble-note");
-    note.textContent = "Studies by World Bank income group of the countries studied, in the publication year " +
-      "(circle area = studies). A multi-country study can count in several groups.";
-    box.append(title, head, chart, note);
+    return chart;
   }
 
-  // WHO region card: studies per region as a lollipop chart.
-  function fillRegionCard(box) {
-    box.classList.add("region-card");
-    const title = el("div", "value-box-title");
-    title.textContent = "Studies by WHO region";
+  // Studies per WHO region as a lollipop chart.
+  function regionLollipopChart() {
     const counts = geoStudyCounts("who_region");
     const short = {
       "Region of the Americas": "Americas", "European Region": "Europe",
@@ -1861,9 +1848,63 @@ if (typeof document !== "undefined") {
       row.append(label, track, value);
       chart.appendChild(row);
     }
-    const note = el("div", "region-lollipop-note");
-    note.textContent = "A study counts once in every region of the countries it examines.";
-    box.append(title, chart, note);
+    return chart;
+  }
+
+  // Share of studies by geographic scope: one stacked bar with a legend.
+  function geoScopeStrip() {
+    const levels = db.levels.geo_scope;
+    const scopes = db.studies.geo_scope;
+    const pct = names => 100 * scopes.filter(code => names.includes(levels[code])).length / Math.max(1, scopes.length);
+    const parts = [
+      ["Single country", pct(["Single country"]), "geo-strip-single"],
+      ["Multi-country or regional/global", pct(["Multi-country", "Region/global"]), "geo-strip-multi"],
+      ["No country stated", pct(["No country stated"]), "geo-strip-none"]
+    ];
+    const wrap = el("div", "geo-strip");
+    const bar = el("div", "geo-strip-bar");
+    const legend = el("div", "geo-strip-legend");
+    for (const [label, share, cls] of parts) {
+      const seg = el("span", "geo-strip-seg " + cls);
+      seg.style.width = share + "%";
+      seg.title = `${label}: ${share.toFixed(1)}%`;
+      bar.appendChild(seg);
+      const item = el("div", "geo-strip-item");
+      item.innerHTML = `<span class="geo-strip-key ${cls}"></span><span>${esc(label)}</span><strong>${share.toFixed(1)}%</strong>`;
+      legend.appendChild(item);
+    }
+    wrap.append(bar, legend);
+    return wrap;
+  }
+
+  // One geography card: countries named and geographic scope, then studies by
+  // income group and by WHO region, side by side.
+  function fillGeographyCard(box, nCountries) {
+    box.classList.add("geography-card");
+    const title = el("div", "value-box-title");
+    title.textContent = "Geographic coverage of studies";
+    const cols = el("div", "geography-cols");
+    const section = (heading, ...content) => {
+      const col = el("div", "geography-col");
+      const h = el("div", "geography-subtitle");
+      h.textContent = heading;
+      col.append(h, ...content);
+      return col;
+    };
+    const countries = el("div", "geography-countries");
+    countries.innerHTML = `<span class="geography-count">${esc(nCountries)}</span>` +
+      "<span>countries named by at least one study</span>";
+    const scopeHead = el("div", "geography-subtitle geography-subtitle-inner");
+    scopeHead.textContent = "Geographic scope";
+    cols.append(
+      section("Countries", countries, scopeHead, geoScopeStrip()),
+      section("By country income group", incomeBubbleChart()),
+      section("By WHO region", regionLollipopChart())
+    );
+    const note = el("div", "geography-note");
+    note.textContent = "A multi-country study counts in every income group and region of the countries it examines. " +
+      "Income groups are World Bank groups in the publication year; circle area = studies.";
+    box.append(title, cols, note);
   }
 
   function renderOverview() {
@@ -1892,16 +1933,13 @@ if (typeof document !== "undefined") {
       "Records analysed",
       "Has a recovered DOI",
       "Countries studied",
-      "Studies by WHO region",
-      "Single-country studies",
       "Quantitative analysis"
     ];
     const tileRank = new Map(tileOrder.map((label, i) => [label, i]));
     tileRank.set("Studies with DOI/URL", tileRank.get("Has a recovered DOI"));
     const tileValue = label => (db.content.glance_tiles.find(t => t.label === label) || {}).value;
     const tiles = db.content.glance_tiles
-      .filter(t => t.label !== "Years covered" && t.label !== "Financing functions coded")
-      .concat([{ label: "Studies by WHO region", value: "", theme: "info", sub: null }])
+      .filter(t => !["Years covered", "Financing functions coded", "Single-country studies"].includes(t.label))
       .sort((a, b) => (tileRank.get(a.label) ?? 99) - (tileRank.get(b.label) ?? 99));
     const oa = db.overviewMetrics.openAccess;
     const funders = db.overviewMetrics.funderTypes;
@@ -2021,13 +2059,7 @@ if (typeof document !== "undefined") {
         continue;
       }
       if (display.label === "Countries covered by studies") {
-        fillIncomeBubbleCard(box, t.value);
-        makeOverviewCardInteractive(box, display.label);
-        wrap.appendChild(box);
-        continue;
-      }
-      if (display.label === "Studies by WHO region") {
-        fillRegionCard(box);
+        fillGeographyCard(box, t.value);
         makeOverviewCardInteractive(box, display.label);
         wrap.appendChild(box);
         continue;
