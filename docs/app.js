@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-13h";
+const BUILD = "2026-10-13i";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1765,9 +1765,7 @@ if (typeof document !== "undefined") {
     const big = el("div", "evidence-scope-number");
     big.textContent = nStudies;
     const sentence = el("p", "evidence-scope-sentence");
-    sentence.innerHTML = `studies published between <strong>${esc(y0)}</strong> and <strong>${esc(y1)}</strong>` +
-      ` (${esc(y1)} is a partial year), covering <strong>${esc(nFunctions)}</strong> health financing functions` +
-      " and <strong>8</strong> outcome domains.";
+    sentence.innerHTML = `studies published <strong>${esc(y0)}–${esc(y1)}</strong>`;
     lead.append(big, sentence);
 
     const rows = el("div", "evidence-scope-rows");
@@ -1921,8 +1919,11 @@ if (typeof document !== "undefined") {
         const title = el("div", "value-box-title");
         title.textContent = "Publication access";
         const metrics = el("div", "publication-access-metrics");
+        const linkN = db.studies.has_publication_link.reduce((a, v) => a + (v === 1 ? 1 : 0), 0);
+        const allN = db.studies.has_publication_link.length;
         for (const [label, valueText, note] of [
-          ["Publication link available", t.value, "Of all studies"],
+          ["Publication link available", (100 * linkN / Math.max(1, allN)).toFixed(1) + "%",
+           `${fmtNum(linkN)} of ${fmtNum(allN)} studies`],
           ["Free to read (open access)", oa.oa_share_pct_of_doi.toFixed(1) + "%",
            `Of ${fmtNum(oa.n_with_doi)} studies with a DOI`]
         ]) {
