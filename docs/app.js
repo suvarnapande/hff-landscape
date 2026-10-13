@@ -3589,7 +3589,9 @@ if (typeof document !== "undefined") {
 
     // Sections listed here stay in content.json (and their figures stay built)
     // but are hidden from the Thematic analysis tab.
-    const HIDDEN_SECTIONS = new Set(["Pipeline"]);
+    // The "Health aid, spending and research" group card is hidden with all five of its sections.
+    const HIDDEN_SECTIONS = new Set(["Pipeline", "The financing backdrop", "Where financing and evidence diverge",
+      "How research priorities differ", "How research responds over time", "USA sensitivity analysis"]);
     const HIDDEN_FIGS = new Set(["fig_wellcome_priorities.png"]);
     GALLERY = (db.content.gallery || [])
       .filter(sec => !HIDDEN_SECTIONS.has(sec.title))

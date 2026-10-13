@@ -1893,10 +1893,14 @@ ax1.axhspan(y_min_sc, 0, color="#c0392b", alpha=0.06, zorder=1)
 ax1.axhline(0, color="#8a8272", linewidth=1.2, linestyle=(0, (4, 3)), zorder=2)
 ax1.text(x_min_sc * 1.15, 0.15, "Research proportional to burden", ha="left", va="bottom",
          fontsize=8.5, color=SUBHEAD_COLOR)
+# North Korea, Yemen, Angola and Venezuela sit close together, so spread their labels apart
+SC_LABEL_OFFSETS = {"North Korea": (-6, -4, "right"), "Yemen": (6, 2, "left"),
+                    "Angola": (6, -9, "left"), "Venezuela": (6, 4, "left")}
 for _, row in top_deficit_sc.head(5).iterrows():
-    ax1.annotate(SHORT_COUNTRY.get(row["country"], row["country"]),
-                 xy=(row["dalys"], row["log2_research_to_burden"]), xytext=(5, -7),
-                 textcoords="offset points", fontsize=7.8, fontweight="bold", color=INK)
+    label = SHORT_COUNTRY.get(row["country"], row["country"])
+    dx, dy, ha = SC_LABEL_OFFSETS.get(label, (5, -7, "left"))
+    ax1.annotate(label, xy=(row["dalys"], row["log2_research_to_burden"]), xytext=(dx, dy),
+                 textcoords="offset points", ha=ha, fontsize=7.8, fontweight="bold", color=INK)
 
 ax1.set_xlabel("Disease burden (DALYs, 2023, log)")
 ax1.set_ylabel("Research relative to burden (log2 ratio)")
@@ -1920,7 +1924,7 @@ ax2.set_title(f"The {TOP_N_DEFICIT_SC} largest relative evidence gaps", fontsize
 clean_axes(ax2)
 
 lowest_sc = top_deficit_sc.iloc[0]
-sc_headline = "Funding priority scorecard: research relative to burden"
+sc_headline = "Where research coverage is low relative to disease burden"
 sc_desc = ("Country research share divided by disease-burden share. Zero on the log2 scale means proportional "
            "coverage; negative values indicate less research relative to burden.")
 sc_finding = (f"{lowest_sc['country']} has the largest finite relative gap: its research share is "
@@ -5667,6 +5671,7 @@ gallery = [
             fig_entry("fig_burden.png", "Research intensity vs. disease burden"),
             fig_entry("fig_deficit.png", "Studies vs. a burden-proportional share"),
             fig_entry("fig_injustice.png", "Research relative to disease burden"),
+            fig_entry("fig_funder_scorecard.png", "Largest gaps relative to disease burden"),
             fig_entry("fig_equity_time.png", "L&MICs research share over time"),
             fig_entry("fig_inequality.png", "Evidence concentration among L&MICs"),
             fig_entry("fig_forest.png", "Adjusted odds ratios by income group"),
@@ -5706,7 +5711,6 @@ gallery = [
         ] + ([
             fig_entry("fig_funder_authorship_alluvial.png",
                       "Funder to financing function to authorship")] if have_authors else []) + [
-            fig_entry("fig_funder_scorecard.png", "Funding priority scorecard"),
         ],
     } if have_funders else None,
     # "Global financing context" is a group card (SECTION_GROUPS in app.js) holding these
