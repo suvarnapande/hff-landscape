@@ -182,7 +182,7 @@ After `build_data_v2_4.py` changes data that many figures use, run the full buil
 On Windows, run `build_open_access_v2_4.py` with `PYTHONIOENCODING=utf-8` (or in a UTF-8
 terminal): it prints captions containing "≥", which the default console encoding cannot show.
 
-The v2.4 files from the dataset team are in `docs/dex_hff/v2_4-2_2metadata update/hff_share_v2_4/`
+The v2.4 files from the dataset team are in `docs/dex_hff/v2_4 from Lucas/hff_share_v2_4/`
 and v2.4.1 in `docs/dex_hff/v2_4_1/`; both are git-ignored: the dataset is internal and must not
 be published. `make_country_additions_v2_2.py` fetches population and spending online and only
 needs rerunning if the country list changes.

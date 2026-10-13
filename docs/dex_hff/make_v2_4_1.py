@@ -12,7 +12,7 @@ all three are articles in Inquiry 46(4), "Winter 2009/2010", published December 
 excluded under the publication-year criterion as `published_before_2010`, the last exclusion
 test (applied after both de-duplications). See CHANGES_v2_4_1.md and DATA_GAPS_v2_4.md, item 5.
 
-The v2.4 files (docs/dex_hff/v2_4-2_2metadata update/hff_share_v2_4/) are left unchanged. Writes,
+The v2.4 files (docs/dex_hff/v2_4 from Lucas/hff_share_v2_4/) are left unchanged. Writes,
 in docs/dex_hff/v2_4_1/:
   hff_analysis_dataset_v2_4_1_included.csv   53,362 included studies
   hff_v2_4_1_all_records.csv                 70,230 records; the three now analysis_include False
@@ -26,7 +26,7 @@ from pathlib import Path
 
 import pandas as pd
 
-V24 = Path(__file__).resolve().parent / "v2_4-2_2metadata update" / "hff_share_v2_4"
+V24 = Path(__file__).resolve().parent / "v2_4 from Lucas" / "hff_share_v2_4"
 OUT = Path(__file__).resolve().parent / "v2_4_1"
 OUT.mkdir(exist_ok=True)
 REASON = "published_before_2010"
