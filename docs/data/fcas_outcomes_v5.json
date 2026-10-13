@@ -1,11 +1,11 @@
 {
-  "source": "HFF dataset v2.2",
-  "n_studies": 53779,
-  "n_fcas": 1452,
-  "n_country_level": 41703,
+  "source": "HFF dataset v2.4.1",
+  "n_studies": 53362,
+  "n_fcas": 1449,
+  "n_country_level": 41367,
   "last_year_with_wb_lookup": 2025,
   "fcas_top_countries": {
-    "Nigeria": 364,
+    "Nigeria": 361,
     "Ethiopia": 191,
     "Democratic Republic of the Congo": 99,
     "Zimbabwe": 87,
@@ -29,115 +29,115 @@
   "fcas_by_year": {
     "2010": {
       "fcas_that_year": 20,
-      "fcas_fixed_set": 56,
-      "country_level": 1618,
+      "fcas_fixed_set": 55,
+      "country_level": 1607,
       "share_pct": 1.24,
-      "share_fixed_pct": 3.46
+      "share_fixed_pct": 3.42
     },
     "2011": {
       "fcas_that_year": 24,
-      "fcas_fixed_set": 67,
-      "country_level": 1766,
-      "share_pct": 1.36,
-      "share_fixed_pct": 3.79
+      "fcas_fixed_set": 66,
+      "country_level": 1748,
+      "share_pct": 1.37,
+      "share_fixed_pct": 3.78
     },
     "2012": {
       "fcas_that_year": 24,
-      "fcas_fixed_set": 84,
-      "country_level": 1973,
-      "share_pct": 1.22,
-      "share_fixed_pct": 4.26
+      "fcas_fixed_set": 83,
+      "country_level": 1956,
+      "share_pct": 1.23,
+      "share_fixed_pct": 4.24
     },
     "2013": {
       "fcas_that_year": 37,
       "fcas_fixed_set": 99,
-      "country_level": 2032,
-      "share_pct": 1.82,
-      "share_fixed_pct": 4.87
+      "country_level": 2015,
+      "share_pct": 1.84,
+      "share_fixed_pct": 4.91
     },
     "2014": {
       "fcas_that_year": 52,
       "fcas_fixed_set": 121,
-      "country_level": 2182,
-      "share_pct": 2.38,
-      "share_fixed_pct": 5.55
+      "country_level": 2151,
+      "share_pct": 2.42,
+      "share_fixed_pct": 5.63
     },
     "2015": {
       "fcas_that_year": 52,
       "fcas_fixed_set": 127,
-      "country_level": 2326,
-      "share_pct": 2.24,
-      "share_fixed_pct": 5.46
+      "country_level": 2302,
+      "share_pct": 2.26,
+      "share_fixed_pct": 5.52
     },
     "2016": {
       "fcas_that_year": 35,
-      "fcas_fixed_set": 133,
-      "country_level": 2602,
-      "share_pct": 1.35,
-      "share_fixed_pct": 5.11
+      "fcas_fixed_set": 131,
+      "country_level": 2572,
+      "share_pct": 1.36,
+      "share_fixed_pct": 5.09
     },
     "2017": {
       "fcas_that_year": 52,
-      "fcas_fixed_set": 146,
-      "country_level": 2709,
-      "share_pct": 1.92,
-      "share_fixed_pct": 5.39
+      "fcas_fixed_set": 145,
+      "country_level": 2678,
+      "share_pct": 1.94,
+      "share_fixed_pct": 5.41
     },
     "2018": {
       "fcas_that_year": 50,
       "fcas_fixed_set": 163,
-      "country_level": 2852,
-      "share_pct": 1.75,
-      "share_fixed_pct": 5.72
+      "country_level": 2820,
+      "share_pct": 1.77,
+      "share_fixed_pct": 5.78
     },
     "2019": {
       "fcas_that_year": 56,
       "fcas_fixed_set": 165,
-      "country_level": 2977,
-      "share_pct": 1.88,
-      "share_fixed_pct": 5.54
+      "country_level": 2944,
+      "share_pct": 1.9,
+      "share_fixed_pct": 5.6
     },
     "2020": {
-      "fcas_that_year": 115,
-      "fcas_fixed_set": 216,
-      "country_level": 3150,
+      "fcas_that_year": 114,
+      "fcas_fixed_set": 215,
+      "country_level": 3124,
       "share_pct": 3.65,
-      "share_fixed_pct": 6.86
+      "share_fixed_pct": 6.88
     },
     "2021": {
       "fcas_that_year": 116,
       "fcas_fixed_set": 200,
-      "country_level": 3146,
-      "share_pct": 3.69,
-      "share_fixed_pct": 6.36
+      "country_level": 3126,
+      "share_pct": 3.71,
+      "share_fixed_pct": 6.4
     },
     "2022": {
-      "fcas_that_year": 153,
-      "fcas_fixed_set": 211,
-      "country_level": 3122,
-      "share_pct": 4.9,
-      "share_fixed_pct": 6.76
+      "fcas_that_year": 151,
+      "fcas_fixed_set": 209,
+      "country_level": 3111,
+      "share_pct": 4.85,
+      "share_fixed_pct": 6.72
     },
     "2023": {
       "fcas_that_year": 184,
-      "fcas_fixed_set": 222,
-      "country_level": 3034,
-      "share_pct": 6.06,
-      "share_fixed_pct": 7.32
+      "fcas_fixed_set": 221,
+      "country_level": 3017,
+      "share_pct": 6.1,
+      "share_fixed_pct": 7.33
     },
     "2024": {
       "fcas_that_year": 132,
       "fcas_fixed_set": 177,
-      "country_level": 3119,
-      "share_pct": 4.23,
-      "share_fixed_pct": 5.67
+      "country_level": 3111,
+      "share_pct": 4.24,
+      "share_fixed_pct": 5.69
     },
     "2025": {
       "fcas_that_year": 169,
       "fcas_fixed_set": 197,
-      "country_level": 3095,
-      "share_pct": 5.46,
-      "share_fixed_pct": 6.37
+      "country_level": 3085,
+      "share_pct": 5.48,
+      "share_fixed_pct": 6.39
     }
   },
   "fcas_first_listed_year": {
@@ -197,55 +197,55 @@
     "Tuvalu": 2026
   },
   "outcome_domains": {
-    "Equitable distribution of health system resources": 6233,
-    "Efficiency in the use of resources": 5936,
-    "Improved level and distribution of health": 5633,
-    "Financial protection": 4457,
-    "Quality of service provision": 3065,
-    "Responsiveness to citizens": 1715,
-    "Transparency and accountability": 1003,
-    "Economic development": 734,
-    "Other": 29018,
-    "Unclear": 5403
+    "Equitable distribution of health system resources": 6190,
+    "Efficiency in the use of resources": 5886,
+    "Improved level and distribution of health": 5571,
+    "Financial protection": 4424,
+    "Quality of service provision": 3036,
+    "Responsiveness to citizens": 1709,
+    "Transparency and accountability": 999,
+    "Economic development": 716,
+    "Other": 28726,
+    "Unclear": 5387
   },
   "other_themes": {
-    "Service use, access and coverage": 8277,
-    "Levels, trends and drivers of spending, prices or funding": 4495,
-    "Stakeholder perceptions and implementation experience": 2590,
-    "Adequacy or sufficiency of financing": 1928,
-    "Insurance markets and enrolment behaviour": 1908,
-    "Priority-setting, HTA and reimbursement decision processes": 965,
-    "Health-workforce outcomes": 944,
-    "Provider or organisation financial performance": 789,
-    "Responses to health taxes": 721,
-    "Technical performance of a financing mechanism": 533,
-    "Supply-chain and operational management": 508,
-    "Not clustered": 6863,
-    "n_other": 29018
+    "Service use, access and coverage": 8189,
+    "Levels, trends and drivers of spending, prices or funding": 4418,
+    "Stakeholder perceptions and implementation experience": 2577,
+    "Adequacy or sufficiency of financing": 1913,
+    "Insurance markets and enrolment behaviour": 1842,
+    "Priority-setting, HTA and reimbursement decision processes": 960,
+    "Health-workforce outcomes": 919,
+    "Provider or organisation financial performance": 774,
+    "Responses to health taxes": 708,
+    "Technical performance of a financing mechanism": 517,
+    "Supply-chain and operational management": 507,
+    "Not clustered": 6827,
+    "n_other": 28726
   },
   "outcome_share_2010_vs_2025_pct": {
     "Equitable distribution of health system resources": [
       11.3,
-      12.5
+      12.6
     ],
     "Efficiency in the use of resources": [
       9.8,
       12.1
     ],
     "Improved level and distribution of health": [
-      7.8,
+      7.7,
       13.2
     ],
     "Financial protection": [
       6.5,
-      8.8
+      8.9
     ],
     "Quality of service provision": [
       5.9,
-      5.5
+      5.4
     ],
     "Responsiveness to citizens": [
-      2.0,
+      2.1,
       4.0
     ],
     "Transparency and accountability": [
@@ -254,20 +254,20 @@
     ],
     "Economic development": [
       0.8,
-      1.5
+      1.6
     ]
   },
   "outcome_by_context_pct": {
     "Equitable distribution of health system resources": {
-      "FCAS": 10.0,
+      "FCAS": 9.9,
       "Low income": 11.5,
-      "Lower-middle": 11.9,
+      "Lower-middle": 11.8,
       "Upper-middle": 12.0,
       "High income": 13.0
     },
     "Efficiency in the use of resources": {
       "FCAS": 8.4,
-      "Low income": 10.3,
+      "Low income": 10.2,
       "Lower-middle": 8.7,
       "Upper-middle": 11.6,
       "High income": 12.5
@@ -275,12 +275,12 @@
     "Improved level and distribution of health": {
       "FCAS": 7.9,
       "Low income": 7.9,
-      "Lower-middle": 7.9,
+      "Lower-middle": 7.8,
       "Upper-middle": 9.8,
-      "High income": 12.0
+      "High income": 11.9
     },
     "Financial protection": {
-      "FCAS": 12.3,
+      "FCAS": 12.4,
       "Low income": 11.3,
       "Lower-middle": 17.4,
       "Upper-middle": 14.6,
@@ -296,7 +296,7 @@
     "Responsiveness to citizens": {
       "FCAS": 4.9,
       "Low income": 4.4,
-      "Lower-middle": 4.7,
+      "Lower-middle": 4.8,
       "Upper-middle": 2.9,
       "High income": 3.4
     },
@@ -309,29 +309,29 @@
     },
     "Economic development": {
       "FCAS": 0.9,
-      "Low income": 1.4,
+      "Low income": 1.3,
       "Lower-middle": 1.3,
       "Upper-middle": 1.7,
       "High income": 1.2
     }
   },
   "context_n": {
-    "FCAS": 1452,
-    "Low income": 1977,
-    "Lower-middle": 5664,
-    "Upper-middle": 9135,
-    "High income": 28639
+    "FCAS": 1449,
+    "Low income": 1968,
+    "Lower-middle": 5633,
+    "Upper-middle": 9097,
+    "High income": 28369
   },
   "figures": [
     {
       "file": "fig_fcas_countries_v5.png",
       "title": "Nigeria and Ethiopia carry the FCAS evidence base",
-      "caption": "Studies about each fragile or conflict-affected country, top 20. 1,452 studies (2.7% of all) cover an FCAS country; Nigeria (364) and Ethiopia (191) appear in 38% of them."
+      "caption": "Studies about each fragile or conflict-affected country, top 20. 1,449 studies (2.7% of all) cover an FCAS country; Nigeria (361) and Ethiopia (191) appear in 38% of them."
     },
     {
       "file": "fig_fcas_trend_v5.png",
       "title": "FCAS research is growing, but list changes exaggerate the jump",
-      "caption": "Studies on fragile or conflict-affected countries per year (top) and as a share of country-level studies (bottom). By each year's list the share tripled, 1.6% (2010-14) to 4.9% (2021-25); on a fixed set of countries it rose only from 4.5% to 6.5%."
+      "caption": "Studies on fragile or conflict-affected countries per year (top) and as a share of country-level studies (bottom). By each year's list the share tripled, 1.7% (2010-14) to 4.9% (2021-25); on a fixed set of countries it rose only from 4.5% to 6.5%."
     },
     {
       "file": "fig_outcome_domains_v5.png",
@@ -346,12 +346,12 @@
     {
       "file": "fig_outcome_trend_v5.png",
       "title": "Health outcomes and financial protection gain ground",
-      "caption": "Share of each year's studies investigating each named health-system goal, 2010-2025. Improved level/distribution of health rose from 8% to 13% and financial protection from 6% to 9%; the rest barely moved."
+      "caption": "Share of each year's studies investigating each named health-system goal, 2010-2025. Improved level/distribution of health rose from 8% to 13% and financial protection from 7% to 9%; the rest barely moved."
     },
     {
       "file": "fig_outcome_by_context_v5.png",
       "title": "FCAS studies look more like low-income than high-income evidence",
-      "caption": "Share of studies in each setting that investigate each health-system goal. Versus high-income settings, FCAS studies focus more on financial protection (12% vs 6%) and less on improved level/distribution of health (8% vs 12%)."
+      "caption": "Share of studies in each setting that investigate each health-system goal. Versus high-income settings, FCAS studies focus more on financial protection (12% vs 6%) and less on efficiency in resource use (8% vs 13%)."
     }
   ]
 }

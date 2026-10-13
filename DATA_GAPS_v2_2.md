@@ -1,5 +1,8 @@
 # HFF evidence map: open data gaps after the v2.2 update
 
+> **Superseded (13 October 2026):** the map is now built from v2.4.1; see
+> [DATA_GAPS_v2_4.md](DATA_GAPS_v2_4.md). This file is kept as the record of the v2.2 build.
+
 The map was rebuilt from the HFF dataset v2.2.1 in October 2026: v2.2 (53,782 included studies)
 with three studies published before 2010 excluded (item 5), so **53,779 included studies**.
 Most figures now use v2.2. The items below are still open, except item 5, which records a decision.

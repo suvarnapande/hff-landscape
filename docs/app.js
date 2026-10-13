@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-12a";
+const BUILD = "2026-10-13a";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -26,28 +26,28 @@ const OTHER_OUTCOME_EXPLAINER = {
     + 'not fit the definition of any of the eight outcome domains. Several "Other" themes sound close to a named '
     + 'domain. What decides it is what the study actually measured:',
   items: [
-    { theme: "Service use, access and coverage", n: "8,277", near: "Equitable distribution",
+    { theme: "Service use, access and coverage", n: "8,189", near: "Equitable distribution",
       why: "These studies report how many people use services or are covered. They count as equitable distribution "
         + "only when they compare groups (for example richer and poorer, or rural and urban) or use a measure of "
         + "inequality. Without that comparison, they are \"Other\"." },
-    { theme: "Levels, trends and drivers of spending, prices or funding", n: "4,495",
+    { theme: "Levels, trends and drivers of spending, prices or funding", n: "4,418",
       near: "Efficiency or Financial protection",
       why: "Describing how much is spent, or why spending changes, is neither. Efficiency needs spending set against "
         + "what it produces; financial protection needs evidence of financial hardship for households, such as "
         + "catastrophic out-of-pocket payments." },
-    { theme: "Stakeholder perceptions and implementation experience", n: "2,590",
+    { theme: "Stakeholder perceptions and implementation experience", n: "2,577",
       near: "Quality of service provision or Responsiveness",
       why: "These studies report what health workers, managers or policymakers think, for example health workers' "
         + "views on how pay-for-performance affects quality of care. Quality itself was not measured, so the "
         + "outcome is their views. Responsiveness covers the experience of people using services, not providers." },
-    { theme: "Adequacy or sufficiency of financing", n: "1,928", near: "Efficiency",
+    { theme: "Adequacy or sufficiency of financing", n: "1,913", near: "Efficiency",
       why: "These studies ask whether there is enough money, not how well money is turned into services or health." },
-    { theme: "Insurance markets and enrolment behaviour", n: "1,908", near: "Financial protection",
+    { theme: "Insurance markets and enrolment behaviour", n: "1,842", near: "Financial protection",
       why: "Who enrols in insurance, or how insurance markets behave, does not by itself show whether people were "
         + "protected from financial hardship." }
   ],
   outro: 'For the studies in the September set, the themes come from grouping the reasons given for each "Other" '
-    + 'code; for the studies added in October, a language model assigned the same themes. 6,863 "Other" studies '
+    + 'code; for the studies added in October, a language model assigned the same themes. 6,827 "Other" studies '
     + "did not fit any theme."
 };
 const OUTCOME_CATEGORY_NOTE ='"Other" indicates an identifiable outcome that falls outside the predefined outcome categories; "Unclear" indicates that the available record did not provide sufficient information to classify the study confidently.';

@@ -4,8 +4,10 @@ Static site for the health-financing-functions evidence map: pure HTML/JS (no se
 build step), served from `docs/`. Forked from the `hee-landscape` dashboard scaffold and
 rebuilt against the HFF extraction.
 
-**Current data: HFF dataset v2.2.1 (October 2026; v2.2 without three pre-2010 studies, 53,779 included).** Open gaps (metadata for the studies added in
-v2.2, DALYs for Kosovo, and health spending for five added countries) and the v2.2 build order are in
+**Current data: HFF dataset v2.4.1 (October 2026; the dataset team's v2.4 without three pre-2010
+studies, 53,362 included).** What changed, the open gaps (topic-map coordinates, DALYs for Kosovo,
+health spending for five added countries) and the build order are in
+[DATA_GAPS_v2_4.md](DATA_GAPS_v2_4.md); the notes for the earlier v2.2 build are in
 [DATA_GAPS_v2_2.md](DATA_GAPS_v2_2.md). The pipeline description below is for the earlier builds.
 
 Data pipeline: `docs/dex_hff/build_data.py` reads
@@ -39,12 +41,12 @@ writes under `docs/data/texts/` are published output and are committed like the 
 
 **Large country files are split (since October 2026).** GitHub Pages rejects any file over
 25 MiB, and with v2.2 the United States file reached about 28 MB. `build_texts_v2_2.py`
-therefore splits any country file over about 20 MB into numbered parts: `USA.json` becomes a
+(and its v2.4 copy, `build_texts_v2_4.py`) therefore splits any country file over about 20 MB into numbered parts: `USA.json` becomes a
 small pointer, `{"parts": 2}`, and the data sits in `USA.1.json` and `USA.2.json` (about 14 MB
 each). The site's `openStudiesModal` in `docs/app.js` sees the pointer, loads the parts and
 joins them; countries under the limit keep a single file and load as before. When working on
 this:
-- always rebuild the files with `build_texts_v2_2.py` (the older `build_texts.py` and
+- always rebuild the files with `build_texts_v2_4.py` or `build_texts_v2_2.py` (the older `build_texts.py` and
   `build_texts_v5.py` do not split, and would write a USA file too large to publish);
 - commit the `<ISO3>.N.json` part files together with the pointer `<ISO3>.json`;
 - if any other code reads `docs/data/texts/`, it must handle the `{"parts": n}` pointer too;
