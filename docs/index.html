@@ -11,7 +11,7 @@
      versions with SHA-384 integrity hashes verified by double fetch. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" integrity="sha384-krui876Mk6M6Lq6uj1SQo+u4MoImxFwCfwzWNU982QBMNci3VMZ3FoYSdUakJD5I" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css" integrity="sha384-PSZaVsyG9jDu8hFaSJev5s/9poIJlX7cuxSGdqCgXRHpo2DzIaZAyCd2rG/DJJmV" crossorigin="anonymous">
-<link rel="stylesheet" href="styles.css?v=2026-10-11d">
+<link rel="stylesheet" href="styles.css?v=2026-10-13c">
 </head>
 <body>
 
@@ -45,9 +45,10 @@
   <!-- ============ OVERVIEW ============ -->
   <section class="tab-pane active" id="pane-overview">
     <div class="overview-intro">
-      <h2 class="hero-title">See where health financing evidence is strong — and where important gaps remain</h2>
+      <h2 class="hero-title">See where health financing evidence is strong and where important gaps remain</h2>
       <div class="overview-update" id="overview-updated"></div>
       <p class="hero-text">Part of the Health Systems Financing (HSF) project, this evidence map brings together more than 53,000 studies published since 2010 that examine health financing functions — how health systems raise, pool and spend money. Explore what has been studied, where evidence is concentrated, how the field is changing, and which countries and health financing priorities remain underexplored.</p>
+      <p class="overview-scope-note">The map shows how much research was identified. It does not assess study quality or establish which policies work.</p>
       <p class="hero-actions-copy">Use <strong>Thematic analysis</strong> to discover key patterns, the <strong>Explorer</strong> to investigate the evidence in detail, or <strong>Countries</strong> to compare settings and examine a specific country.</p>
       <div class="glance-head">
         <h2 class="glance-title">The evidence base at a glance</h2>
@@ -60,7 +61,7 @@
         <span>Publication trends</span>
         <div class="trend-toggle" role="group" aria-label="Chart view">
           <button class="trend-toggle-btn active" type="button" data-trend-mode="annual" aria-pressed="true">Per year</button>
-          <button class="trend-toggle-btn" type="button" data-trend-mode="cumulative" aria-pressed="false">Cumulative</button>
+          <button class="trend-toggle-btn" type="button" data-trend-mode="cumulative" aria-pressed="false">Total so far</button>
         </div>
         <button class="fig-download fig-download-modal trend-download" id="ov-trend-download" type="button"
                 title="Download this chart as a PNG with a citation"><span aria-hidden="true">&#10515;</span> Download</button>
@@ -75,7 +76,7 @@
     <div class="overview-analysis-grid">
       <div class="card overview-analysis-card">
         <div class="card-header overview-card-head">
-          <span>Where the evidence is about</span>
+          <span>Where the research is focused</span>
           <button class="card-header-link" type="button" data-open-group="Geography">More on geography &rarr;</button>
         </div>
         <div class="card-body overview-analysis-body">
@@ -101,7 +102,7 @@
       </div>
       <div class="card overview-analysis-card">
         <div class="card-header overview-card-head">
-          <span>What gets evaluated?</span>
+          <span>Financing functions studied by disease area</span>
           <button class="card-header-link" type="button" data-open-section="Disease focus">More on disease focus &rarr;</button>
         </div>
         <div class="card-body overview-analysis-body">
@@ -190,7 +191,7 @@
           <select id="x-function" multiple placeholder="All functions"></select>
         </div>
         <div class="control-group">
-          <label class="control-label" for="x-outcome">Outcome domain</label>
+          <label class="control-label" for="x-outcome">Outcomes studied</label>
           <select id="x-outcome" multiple placeholder="All domains"></select>
         </div>
         <div class="control-group">
@@ -222,9 +223,9 @@
         <div class="x-download-status text-muted" id="x-download-status" aria-live="polite"></div>
         <hr>
         <p class="text-muted">
-          Every filter combines. A study can carry more than one financing function or outcome
-          domain, so it is counted in every one it's tagged with. Country panels count a
-          multi-country study once per country it is about.
+          Only studies matching all your selections are shown. A study may cover several
+          financing functions or outcomes and counts in each. Studies covering several
+          countries count once in each country.
         </p>
       </aside>
 
@@ -233,7 +234,7 @@
           <div class="value-box x-tile-studies"><div class="value-box-title">Studies in view</div><div class="value-box-value" id="v-studies">—</div></div>
           <div class="value-box x-tile-countries"><div class="value-box-title">Countries in view</div><div class="value-box-value" id="v-countries">—</div></div>
           <div class="value-box x-tile-analysis" id="v-analysis"></div>
-          <div class="value-box x-tile-link"><div class="value-box-title">DOI or URL available</div><div class="value-box-value" id="v-link">—</div></div>
+          <div class="value-box x-tile-link"><div class="value-box-title">Studies with a publication link</div><div class="value-box-value" id="v-link">—</div></div>
         </div>
 
         <div class="grid-2">
@@ -296,10 +297,11 @@
     </div>
     <div class="card">
       <div class="card-body">
-        <p class="fig-caption">Every country by disease burden, health spending per person, and
-          income group — bubble size is the number of HFF studies naming that country. Click a
-          bubble to see that country's financing-function and outcome-domain spread below.
-          Unfiltered — shows the whole dataset, independent of the Explorer tab's filters.</p>
+        <p class="fig-caption">Each bubble is a country. Larger bubbles mean more studies about
+          that country. Click a bubble to see its financing functions and outcomes studied.
+          This view shows all studies and does not use your Explorer filters. Disease burden
+          means healthy years lost through illness or early death; spending is adjusted for
+          differences in purchasing power between countries.</p>
       </div>
     </div>
     <div class="card">
@@ -317,12 +319,11 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-header" id="land-cross-title">Outcomes measured for each financing function</div>
+      <div class="card-header" id="land-cross-title">Financing functions covered for each outcome studied</div>
       <div class="card-body">
-        <p class="fig-caption">Row shares: of this country's studies reporting each outcome
-          domain, the share that also carry each financing-function tag. A study can carry more
-          than one tag of either kind. Click a cell to read the title and abstract of every study
-          behind it.</p>
+        <p class="fig-caption">For each outcome, the cells show the share of this country's
+          studies that also cover each financing function. A study may cover several functions
+          or outcomes, so a row can add to more than 100%. Click a cell to read the studies.</p>
         <div id="land-cross-heatmap" class="plot" style="height:420px"></div>
       </div>
     </div>
@@ -355,6 +356,12 @@
           <div class="value-box"><div class="value-box-title">Per US$1bn spending</div><div class="value-box-value" id="c-spend">—</div></div>
           <div class="value-box"><div class="value-box-title">Per million people</div><div class="value-box-value" id="c-percap">—</div></div>
         </div>
+        <p class="figure-coverage-note">DALYs measure healthy years lost through illness or early death. These measures compare research coverage, rather than study quality.</p>
+        <details class="figure-technical-notes">
+          <summary><span class="technical-notes-icon" aria-hidden="true">i</span>Technical notes on country comparisons</summary>
+          <p>Study counts are divided by disease burden, total health spending or population. DALY and spending data are country reference measures, not results extracted from the studies. Spending uses purchasing-power-adjusted US dollars. The comparison charts use the average or median of countries in the same income group; the median is the middle value.</p>
+          <p>On logarithmic axes, equal spacing represents multiples rather than equal increases. These country-level associations do not establish cause and effect.</p>
+        </details>
         <div class="grid-2">
           <div class="card">
             <div class="card-header">Studies per year: this country vs. similar-income countries</div>
@@ -401,7 +408,7 @@
         <button class="methods-tab" type="button" data-methods-tab="methodology">Methodology</button>
         -->
         <button class="methods-tab active" type="button" data-methods-tab="topics">Financing topics</button>
-        <button class="methods-tab" type="button" data-methods-tab="outcomes">Outcome domains</button>
+        <button class="methods-tab" type="button" data-methods-tab="outcomes">Outcomes studied</button>
       </div>
 
       <div class="methods-panel" data-methods-panel="methodology">
@@ -599,11 +606,11 @@
 
       <div class="methods-panel" data-methods-panel="outcomes">
         <div class="card">
-          <div class="card-header">Outcome-domain definitions</div>
+          <div class="card-header">Definitions of the outcomes studied</div>
           <div class="card-body">
             <p>Seven definitions draw directly from, or use language from, the WHO Health System Performance Assessment framework. <strong>Economic development</strong> is defined specifically for this evidence map.</p>
             <table class="methods-table outcome-definitions-table">
-              <thead><tr><th>Outcome domain</th><th>Definition and coding guidance</th></tr></thead>
+              <thead><tr><th>Outcome studied</th><th>Definition and coding guidance</th></tr></thead>
               <tbody>
                 <tr><td><strong>Equitable distribution of health-system resources</strong></td><td>The extent to which the distribution of health care and its benefits among a population is fair. Health-service equity refers to the distribution of care quality and ensuring that it does not vary because of personal characteristics such as gender, ethnicity, geographic location or socioeconomic status. Code this outcome when a study assesses an outcome for an equity-relevant group relative to another demographic or socioeconomic group, or uses an explicit comparative measure of inequality or equity. Do not code it solely because the study covers an equity-relevant or disadvantaged group.</td></tr>
                 <tr><td><strong>Efficiency in the use of resources</strong></td><td>The relationship between a specific product (output) of the health system and the resources (inputs) used to create the product, distinguishing technical and allocative efficiency.</td></tr>
@@ -710,7 +717,7 @@
        aria-labelledby="outcomes-help-title">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="outcomes-help-title">Outcome domains mapped</h3>
+        <h3 class="modal-title" id="outcomes-help-title">Outcomes studied</h3>
         <button class="modal-close" id="outcomes-help-close" type="button">Close</button>
       </div>
       <div class="modal-body info-modal-body">
@@ -734,7 +741,7 @@
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.js" integrity="sha384-EcVTHT5RdDTvzbTIbNOtaNxNALeJYDgmv5Crp3NBmcdrCPrDnqp6I1+ETJ/FCFHI" crossorigin="anonymous"></script>
-<script type="module" src="app.js?v=2026-10-11d"></script>
+<script type="module" src="app.js?v=2026-10-13c"></script>
 
 </body>
 </html>

@@ -65,7 +65,7 @@ h1 { font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; f
 <body>
 <div class="wrap">
   <div class="eyebrow"><span>HFF evidence map</span><span class="badge">Draft · data: HFF dataset v2.4.1</span></div>
-  <h1>(Un)equal weight: Health financing research output compared to health expenditure</h1>
+  <h1>Research coverage relative to health spending</h1>
   <p class="lede">Measured against what health systems spend, the pattern reverses: African Region has the most health financing research per dollar (11.3 studies per US$1bn), 5× Western Pacific Region (2.2). That reflects how little is spent there, not a large evidence base: in absolute terms Region of the Americas is named by 19,440 studies and African Region by 4,133.</p>
 
   <div class="sec"><b>A</b><h2>Research intensity by country</h2><span>Studies per US$1bn total health expenditure · median 4.3</span><button class="q" type="button" aria-label="What does this mean?" data-note="Studies naming the country, divided by its total health expenditure (PPP US$ billions, 2022), per US$1bn. Colour is on a log scale centred on the median country. Grey = no study naming the country, or no spending data (Venezuela, Hong Kong).">?</button></div>
@@ -185,13 +185,14 @@ h1 { font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; f
       </div>
   </div>
 
-  <div class="foot">
+  <details class="foot">
+    <summary>Technical notes and data sources</summary>
     <div>
-      <p>Data: HFF evidence map web build (HFF dataset v2.4.1); 2010–2026 publication years. Search dates: xx <button class="q" type="button" aria-label="What does this mean?" data-note="Search dates are not in the web data; they need to come from the review protocol.">?</button></p>
+      <p>Data: HFF evidence map web build (HFF dataset v2.4.1); 2010–2026 publication years. Search dates are not recorded in this page's data. 2026 is an incomplete publication year.</p>
       <p>Regions: WHO (AFR African, AMR Americas, SEAR South-East Asia, EUR European, EMR Eastern Mediterranean, WPR Western Pacific), as listed by the WHO Global Health Observatory; places that the WHO's country list does not assign to a region (Taiwan, Hong Kong, Kosovo) take the WHO region of their UN M49 sub-region. Map and trend lines cover the 185 countries in the map's country data; trends run to 2025.</p>
       <p>Health expenditure: total health spending, PPP US$ billions, 2022 (the site's country reference data). Outcome: financial protection outcome domain. Disease groups: 11 groups matched from PubMed MeSH terms, grouped into communicable, non-communicable and injuries. Map: Robinson projection; grey = no study naming the country or no spending data.</p>
     </div>
-  </div>
+  </details>
 </div>
 <div id="pop" role="dialog"></div>
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>

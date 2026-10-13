@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-13b";
+const BUILD = "2026-10-13c";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -11,7 +11,7 @@ const UNCLEAR_FOOTNOTE_SECTIONS = new Set([
   "Financing functions & outcomes",
   "Methods & data"
 ]);
-const OTHER_OUTCOME_NOTE = 'Top five themes within "Other": Service use, access and coverage (4,518); Levels, trends and drivers of spending, prices or funding (3,944); Adequacy or sufficiency of financing (1,322); Insurance markets and enrolment behaviour (1,292); and Stakeholder perceptions and implementation experience (884).';
+const OTHER_OUTCOME_NOTE = 'The largest themes within "Other" are service use, access and coverage (8,189); spending, prices and funding (4,418); stakeholder views and implementation experience (2,577); adequacy of financing (1,913); and insurance markets and enrolment (1,842).';
 const OTHER_OUTCOME_NOTE_FIGURES = new Set([
   "fig_outcome_bar.png",
   "fig_outcome_lollipop.png",
@@ -46,9 +46,7 @@ const OTHER_OUTCOME_EXPLAINER = {
       why: "Who enrols in insurance, or how insurance markets behave, does not by itself show whether people were "
         + "protected from financial hardship." }
   ],
-  outro: 'For the studies in the September set, the themes come from grouping the reasons given for each "Other" '
-    + 'code; for the studies added in October, a language model assigned the same themes. 6,827 "Other" studies '
-    + "did not fit any theme."
+  outro: '6,827 studies classified as "Other" could not be assigned a theme. Technical notes explain how the themes were identified.'
 };
 const OUTCOME_CATEGORY_NOTE ='"Other" indicates an identifiable outcome that falls outside the predefined outcome categories; "Unclear" indicates that the available record did not provide sufficient information to classify the study confidently.';
 
@@ -1037,6 +1035,39 @@ if (typeof document !== "undefined") {
     return btn;
   }
 
+  // Keep interpretation and coverage limits visible; put calculation detail
+  // in native disclosure controls that work by keyboard, click and touch.
+  function figureNotes(f, includeCaption = false) {
+    const wrap = el("div", "figure-explanation");
+    if (includeCaption) {
+      const caption = el("p", "fig-caption");
+      caption.textContent = f.caption;
+      wrap.appendChild(caption);
+    }
+    if (f.warning) {
+      const warning = el("p", "figure-coverage-note");
+      warning.textContent = f.warning;
+      wrap.appendChild(warning);
+    }
+    if (f.technical_notes?.length) {
+      const details = el("details", "figure-technical-notes");
+      const summary = el("summary");
+      summary.setAttribute("aria-label", "Technical notes for " + f.title);
+      const icon = el("span", "technical-notes-icon");
+      icon.textContent = "i";
+      icon.setAttribute("aria-hidden", "true");
+      summary.append(icon, document.createTextNode("Technical notes"));
+      details.appendChild(summary);
+      for (const note of f.technical_notes) {
+        const p = el("p");
+        p.textContent = note;
+        details.appendChild(p);
+      }
+      wrap.appendChild(details);
+    }
+    return wrap;
+  }
+
   let modalFigure = null;
 
   function openModal(file) {
@@ -1054,9 +1085,7 @@ if (typeof document !== "undefined") {
     const modalCaption = $("fig-modal-caption");
     modalCaption.hidden = !footnote;
     modalCaption.textContent = footnote;
-    $("fig-modal-specific-note").textContent = OTHER_OUTCOME_NOTE_FIGURES.has(f.file)
-      ? OTHER_OUTCOME_NOTE
-      : "";
+    $("fig-modal-specific-note").replaceChildren(figureNotes(f, true));
     setFigureZoom(1);
     $("fig-zoom-viewport").scrollTo(0, 0);
     $("fig-modal").classList.add("open");
@@ -1209,8 +1238,8 @@ if (typeof document !== "undefined") {
     if (!mix) return;
     $("land-func-title").textContent = "Which financing functions are studied — " + mix.country +
       " (" + fmtNum(mix.n_studies) + (mix.n_studies === 1 ? " study" : " studies") + ")";
-    $("land-outcome-title").textContent = "Which outcomes are measured — " + mix.country;
-    $("land-cross-title").textContent = "Outcomes measured for each financing function — " + mix.country;
+    $("land-outcome-title").textContent = "Which outcomes are studied: " + mix.country;
+    $("land-cross-title").textContent = "Financing functions covered for each outcome studied: " + mix.country;
     window.Plotly.react("land-func-mix", mixBarTrace(mix.function_mix.rows,
       ["#c9ddef", "#a8c8e3", "#7faed3", "#568fc0", "#356fa8", "#1f5fa8"]), mixLayout(), PLOTLY_CFG);
     window.Plotly.react("land-outcome-mix", mixBarTrace(mix.outcome_mix.rows,
@@ -1410,7 +1439,7 @@ if (typeof document !== "undefined") {
         "<strong>Topic clusters</strong> were found from the studies themselves, not from a list of "
           + "categories decided in advance. A language model turned each study's abstract into a numerical "
           + "summary of its meaning, and studies with similar summaries were grouped together automatically "
-          + "into 49 clusters. Each cluster is named by the words that best set it apart (for example "
+          + "into 56 topic groups. Each group is named by the words that best set it apart (for example "
           + "\"insurance / medicaid / medicare\"), so the names describe content rather than official categories.",
         "<strong>Research fields</strong> come from a separate source: the OpenAlex topic taxonomy, which "
           + "assigns each publication to a broad field and subfield. These are external bibliographic "
@@ -1460,24 +1489,24 @@ if (typeof document !== "undefined") {
 
   // Sections shown together under one card on the Thematic analysis index.
   const SECTION_GROUPS = [{
-    title: "Global financing context",
+    title: "Health aid, spending and research",
     blurb: "How the research landscape compares with global health financing: aid, national spending, "
       + "where money and evidence diverge, and how research responds over time.",
     members: ["The financing backdrop", "Where financing and evidence diverge", "How research priorities differ",
       "How research responds over time", "USA sensitivity analysis"]
   }, {
-    title: "Authorship & access",
+    title: "Authors and free access",
     blurb: "Who writes health financing research about different settings, how authors collaborate "
       + "across income groups, and how much of their work is freely available.",
     members: ["Research ownership & collaboration", "Open access & author countries"]
   }, {
-    title: "Topic clustering & disease focus",
+    title: "Research topics and disease areas",
     blurb: "The subjects studies deal with: topics found in the wording of their abstracts, and the "
       + "diseases they address. These are different from financing functions and outcomes, which classify "
       + "the part of health financing a study examines and the results it measures.",
     members: ["Topic clusters", "Disease focus"]
   }, {
-    title: "Geography",
+    title: "Countries and research coverage",
     blurb: "Where health financing research is concentrated, whether it is distributed in "
       + "proportion to health needs, and how it covers fragile and conflict-affected settings.",
     members: ["Geographic coverage", "Geographic inequalities", "Fragile & conflict-affected settings"]
@@ -1486,6 +1515,15 @@ if (typeof document !== "undefined") {
   function groupOf(sectionTitle) {
     return SECTION_GROUPS.find(g => g.members.includes(sectionTitle)) || null;
   }
+
+  const SECTION_DISPLAY_TITLES = {
+    "Financing functions & outcomes": "Financing functions and outcomes studied",
+    "Research ownership & collaboration": "Author locations and collaboration",
+    "How research responds over time": "Research and health aid over time",
+    "USA sensitivity analysis": "Checking the influence of US studies",
+    "Open access & author countries": "Free access and author locations"
+  };
+  const sectionDisplayTitle = sec => SECTION_DISPLAY_TITLES[sec.title] || sec.title;
 
   function openOverviewGroup(title) {
     const group = SECTION_GROUPS.find(g => g.title === title);
@@ -1496,8 +1534,10 @@ if (typeof document !== "undefined") {
 
   // "?" explanations next to Explorer filter labels (shown inline under the label).
   const FILTER_HELP = {
+    "x-function": '<p>A financing function is a part of how a health system raises, pools or spends money. A study may cover several functions and is counted in each one.</p>',
+    "x-outcome": '<p>Choose what the studies examine, such as quality of care or protection from financial hardship. “Other” means an identifiable outcome outside the eight named groups. “Unclear” means the title and abstract did not provide enough information. A study may examine several outcomes.</p>',
     "x-income": '<p>Countries are grouped by the <a href="https://datahelpdesk.worldbank.org/knowledgebase/articles/906519-world-bank-country-and-lending-groups" target="_blank" rel="noopener">World Bank country and lending groups</a> classification: low, lower-middle, upper-middle and high income. A study counts in every income group of the countries it examines.</p>',
-    "x-region": '<p>Regions are the six <a href="https://www.who.int/about/who-we-are/regional-offices" target="_blank" rel="noopener">WHO regions</a> (for example, the African Region or the Western Pacific Region), as listed by the WHO Global Health Observatory. Places that the WHO's country list does not assign to a region (Taiwan, Hong Kong, Kosovo) are given the WHO region of the other countries in their <a href="https://unstats.un.org/unsd/methodology/m49/" target="_blank" rel="noopener">UN M49</a> sub-region. A study counts in every region of the countries it examines.</p>',
+    "x-region": '<p>Regions are the six <a href="https://www.who.int/about/who-we-are/regional-offices" target="_blank" rel="noopener">WHO regions</a> (for example, the African Region or the Western Pacific Region), as listed by the WHO Global Health Observatory. Places that the WHO country list does not assign to a region (Taiwan, Hong Kong, Kosovo) are given the WHO region of the other countries in their <a href="https://unstats.un.org/unsd/methodology/m49/" target="_blank" rel="noopener">UN M49</a> sub-region. A study counts in every region of the countries it examines.</p>',
     "x-datatype": '<p>The kind of data a study analysed, as described in its title and abstract:</p><ul>'
       + '<li><strong>Cross-sectional:</strong> observations at a single point in time.</li>'
       + '<li><strong>Time-series / longitudinal:</strong> observations repeated over time.</li>'
@@ -1555,7 +1595,7 @@ if (typeof document !== "undefined") {
     const actions = {
       "Studies captured in the map": () => showOverviewTrend("cumulative"),
       "Publication years covered": () => showOverviewTrend("cumulative"),
-      "Countries covered by studies": () => openOverviewGroup("Geography"),
+      "Countries covered by studies": () => openOverviewGroup("Countries and research coverage"),
       "Health financing functions covered": () => openOverviewTheme("Financing functions & outcomes"),
       "Studies using quantitative analysis": () => openOverviewTheme("Methods & data"),
       "Studies with a publication link": () => openOverviewTheme("Open access & author countries"),
@@ -1727,14 +1767,14 @@ if (typeof document !== "undefined") {
         title.textContent = "Publication access";
         const metrics = el("div", "publication-access-metrics");
         for (const [label, valueText, note] of [
-          ["DOI or URL available", t.value, "Of all studies"],
-          ["Available open access", oa.oa_share_pct_of_doi.toFixed(1) + "%",
+          ["Publication link available", t.value, "Of all studies"],
+          ["Free to read (open access)", oa.oa_share_pct_of_doi.toFixed(1) + "%",
            `Of ${fmtNum(oa.n_with_doi)} studies with a DOI`]
         ]) {
           const metric = el("div", "publication-access-metric");
           const metricLabel = el("span", "publication-access-label");
           metricLabel.textContent = label;
-          if (label === "Available open access") {
+           if (label === "Free to read (open access)") {
             const help = el("button", "metric-help-button");
             help.type = "button";
             help.textContent = "?";
@@ -1787,7 +1827,7 @@ if (typeof document !== "undefined") {
         const metrics = el("div", "coverage-metrics");
         for (const [label, valueText, modalId] of [
           ["Health financing functions covered", t.value, "functions-help-modal"],
-          ["Outcome domains mapped", "8", "outcomes-help-modal"]
+          ["Outcomes studied", "8", "outcomes-help-modal"]
         ]) {
           const metric = el("div", "coverage-metric");
           const titleRow = el("div", "coverage-metric-title");
@@ -2104,7 +2144,7 @@ if (typeof document !== "undefined") {
       const i = GALLERY.findIndex(x => x.title === title);
       if (i < 0) continue;
       const sec = GALLERY[i];
-      grid.appendChild(thematicCard(sec.title, sec.blurb, thumbnailOf(sec), sec.figs.length + " figures",
+      grid.appendChild(thematicCard(sectionDisplayTitle(sec), sec.blurb, thumbnailOf(sec), sec.figs.length + " figures",
         () => showSection(i, { group })));
     }
     window.scrollTo(0, 0);
@@ -2145,7 +2185,7 @@ if (typeof document !== "undefined") {
       img.loading = "lazy";
       const body = el("div", "thematic-card-body");
       const title = el("h2", "thematic-card-title");
-      title.textContent = sec.title;
+      title.textContent = sectionDisplayTitle(sec);
       const count = el("div", "thematic-card-count");
       count.textContent = sec.figs.length + " figures";
       const description = el("p", "thematic-card-description");
@@ -2166,7 +2206,7 @@ if (typeof document !== "undefined") {
       const item = el("button", "nav-theme-link");
       item.type = "button";
       item.setAttribute("role", "menuitem");
-      item.textContent = sec.title;
+      item.textContent = sectionDisplayTitle(sec);
       item.addEventListener("click", () => {
         closeThematicMenu();
         switchTab("gallery");
@@ -2189,7 +2229,7 @@ if (typeof document !== "undefined") {
     $("gal-sec-grid").classList.remove("group-grid");
     $("gal-index").style.display = "none";
     $("gal-section").style.display = "block";
-    $("gal-sec-title").textContent = sec.title;
+    $("gal-sec-title").textContent = sectionDisplayTitle(sec);
     $("gal-sec-blurb").textContent = sec.blurb.replace(/\s+/g, " ").trim();
     const extra = $("gal-sec-extra");
     extra.textContent = "";
@@ -2227,7 +2267,7 @@ if (typeof document !== "undefined") {
       links.appendChild(label);
       for (const [text, panel] of [
         ["Financing function definitions", "topics"],
-        ["Outcome domain definitions", "outcomes"]
+        ["Definitions of outcomes studied", "outcomes"]
       ]) {
         const link = el("button", "scope-link");
         link.type = "button";
@@ -2273,7 +2313,7 @@ if (typeof document !== "undefined") {
     open.target = "_blank";
     open.rel = "noopener";
     open.innerHTML = '<span aria-hidden="true">&#8599;</span> Open full page';
-    body.append(ft, fc, open);
+    body.append(ft, fc, figureNotes(f), open);
     card.append(frame, body);
     grid.appendChild(card);
   }
@@ -2281,7 +2321,7 @@ if (typeof document !== "undefined") {
   // Figures shown together as one card with mini-tabs (in this order).
   const FIGURE_TAB_GROUPS = [{
     files: ["fig_worldmap.png", "fig_map_growth.png", "fig_map_method.png"],
-    tabs: ["Where the evidence is about", "Where the evidence is youngest", "Dominant type of analysis"]
+    tabs: ["Where research is focused", "How recent the research is", "Most common analysis approach"]
   }, {
     files: ["fig_function_time_lines.png", "fig_method_stream.png"],
     tabs: ["Share of studies", "Number of studies"]
@@ -2289,20 +2329,20 @@ if (typeof document !== "undefined") {
 
   }, {
     files: ["fig_topicmap.png", "fig_topicmap_income.png"],
-    tabs: ["All themes", "By income skew"]
+    tabs: ["All topics", "Country income groups studied"]
   }, {
     files: ["fig_topic_landscape.png", "fig_topic_landscape_treemap.png"],
     tabs: ["Circular view", "Treemap view"]
   }, {
     files: ["fig_disease_method.png", "fig_funder_opportunity.png"],
-    tabs: ["How each disease area is evaluated", "Opportunity matrix"]
+    tabs: ["Financing functions studied", "More or less research attention"]
   }, {
     files: ["fig_transition.png", "fig_funder_trajectory.png", "fig_map_disease.png"],
-    tabs: ["Shift to NCDs", "Share by era", "Disease atlas (map)"]
+    tabs: ["Changes in disease areas", "Compare publication periods", "Countries studied"]
   }, {
     // Same top funders and the same heatmap layout, so switching changes content only.
     files: ["fig_funder_function_heatmap.png", "fig_funder_outcome_heatmap.png"],
-    tabs: ["Financing functions", "Outcomes measured"]
+    tabs: ["Financing functions", "Outcomes studied"]
   }];
 
   function renderTabbedFigureCard(group, figs, grid) {
@@ -2314,6 +2354,7 @@ if (typeof document !== "undefined") {
     const body = el("div", "fig-body");
     const ft = el("div", "fig-title");
     const fc = el("div", "fig-caption");
+    const notes = el("div");
     let current = figs[0];
     const dl = el("button", "fig-download");
     dl.type = "button";
@@ -2330,6 +2371,7 @@ if (typeof document !== "undefined") {
       img.alt = f.title;
       ft.textContent = f.title;
       fc.textContent = f.caption.replace(/\s+/g, " ").trim();
+      notes.replaceChildren(figureNotes(f));
       for (const b of tabs.querySelectorAll(".fig-tab")) {
         const on = b.dataset.file === f.file;
         b.classList.toggle("active", on);
@@ -2362,7 +2404,7 @@ if (typeof document !== "undefined") {
     img.addEventListener("load", () => {
       card.classList.toggle("fig-card-wide", img.naturalWidth >= WIDE_FIGURE_MIN_PX);
     });
-    body.append(ft, fc, dl);
+    body.append(ft, fc, notes, dl);
     card.append(tabs, img, body);
     grid.appendChild(card);
     show(figs[0]);
@@ -2412,7 +2454,7 @@ if (typeof document !== "undefined") {
     outro.textContent = x.outro + " ";
     const link = el("button", "other-explainer-link");
     link.type = "button";
-    link.textContent = "Read the full outcome domain definitions";
+    link.textContent = "Read the full definitions of outcomes studied";
     link.addEventListener("click", () => openScopePanel("outcomes", "Financing functions & outcomes"));
     outro.appendChild(link);
     box.append(intro, list, outro);
@@ -2446,7 +2488,15 @@ if (typeof document !== "undefined") {
         const dl = downloadButton(f.file, f.title);
         dl.classList.add("fig-download-small");
         foot.append(name, dl);
-        panel.append(img, foot);
+        panel.append(img, foot, figureNotes(f, true));
+        if (f.technical_only) {
+          const details = el("details", "figure-technical-notes");
+          const summary = el("summary");
+          summary.textContent = "Classification check (technical notes)";
+          details.appendChild(summary);
+          while (panel.firstChild) details.appendChild(panel.firstChild);
+          panel.appendChild(details);
+        }
         rowEl.appendChild(panel);
       }
       card.appendChild(rowEl);
@@ -2517,6 +2567,7 @@ if (typeof document !== "undefined") {
       fc.textContent = f.caption.replace(/\s+/g, " ").trim();
       body.appendChild(ft);
       body.appendChild(fc);
+      body.appendChild(figureNotes(f));
       if (UNCLEAR_FOOTNOTE_SECTIONS.has(f.sourceSectionTitle || sec.title)
           && !FIGURES_WITH_OWN_UNCLEAR_NOTE.has(f.file)) {
         const note = el("div", "fig-footnote");

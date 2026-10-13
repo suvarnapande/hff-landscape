@@ -1802,3 +1802,13 @@ table.dataTable thead th.num { text-align: right; }
 .x-download { display: block; width: 100%; margin-top: .5rem; }
 .x-download:disabled { opacity: .6; cursor: progress; }
 .x-download-status { font-size: .78rem; margin-top: .35rem; min-height: 1.1em; }
+/* Plain-language chart help and accessible technical-note disclosures. */
+.overview-scope-note { color: #5a6472; font-size: .94rem; max-width: 78ch; }
+.figure-explanation { line-height: 1.55; }
+.figure-coverage-note { margin: .55rem 0; color: #5a6472; font-size: .9rem; }
+.figure-technical-notes { margin: .7rem 0; border-top: 1px solid #e7e3da; padding-top: .5rem; }
+.figure-technical-notes summary { cursor: pointer; color: #1f659f; font-size: .9rem; font-weight: 600; }
+.figure-technical-notes summary:focus-visible { outline: 2px solid #1f659f; outline-offset: 4px; border-radius: 3px; }
+.figure-technical-notes p { margin: .65rem 0; color: #5a6472; font-size: .9rem; }
+.technical-notes-icon { display: inline-flex; align-items: center; justify-content: center; width: 1.1em; height: 1.1em; margin-right: .4em; border: 1px solid currentColor; border-radius: 50%; font-size: .85em; font-family: serif; }
+.fig-panel > .figure-explanation { padding: 0 1rem 1rem; }
