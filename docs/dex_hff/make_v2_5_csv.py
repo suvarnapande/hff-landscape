@@ -52,19 +52,27 @@ assert not outside_window.any(), (
 
 df["financing_function_final"] = df["financing_function_v52"]
 
-# Publication links for the 28 Decision 17 HTA studies with no DOI and no URL, from the EPPI-Reviewer
-# RIS export (matched on U1 = record_id; supplied 13 October 2026). Only empty URLs are filled.
-# Link: the RIS DOI as a doi.org link (the dataset's url style), else the public PubMed page for
-# the RIS PubMed ID (U2; the RIS Ovid link needs a subscription), else the RIS Scopus record.
-eppi = pd.read_csv(DEX / "v2_5_1" / "eppi_urls" / "eppi_ris_hta_28.csv", dtype=str, keep_default_na=False)
+# Publication links from EPPI-Reviewer RIS exports, for studies with no DOI and no URL (matched on
+# U1 = record_id). Only empty URLs are filled. Lookup files in v2_5_1/eppi_urls/:
+#   eppi_ris_v2_4_1_matches.csv  9,329 studies matched in v2.4.1 (v2_4_1/url_search/eppi_ris/,
+#                                record_id match, exact normalized title, year within one)
+#   eppi_ris_hta_28.csv          the 28 Decision 17 HTA studies (export supplied 13 October 2026)
+# Link: the RIS DOI as a doi.org link (the dataset's url style), else the public PubMed page for the
+# RIS PubMed ID (Ovid MEDLINE accession numbers are PubMed IDs; the Ovid link needs a subscription),
+# else the RIS link as exported (Scopus, Cochrane CENTRAL, PDF or publisher pages).
+eppi = pd.concat([pd.read_csv(f, dtype=str, keep_default_na=False)
+                  for f in sorted((DEX / "v2_5_1" / "eppi_urls").glob("eppi_ris_*.csv"))])
+assert eppi["record_id"].is_unique, "a study appears in more than one EPPI lookup file"
 eppi["link"] = [f"https://doi.org/{doi}" if doi else f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else url
                 for doi, pmid, url in zip(eppi["ris_doi"], eppi["ris_pmid"], eppi["ris_url"])]
 link_of = dict(zip(eppi["record_id"], eppi["link"]))
-no_url = df["url"].isna() | df["url"].str.strip().str.lower().isin({"na", "could not find", "none", "nan"})
-fill = no_url & df["record_id"].isin(link_of)
-assert fill.sum() == len(link_of), f"expected {len(link_of)} studies without a URL, found {int(fill.sum())}"
+empty = {"na", "could not find", "none", "nan"}
+no_link = ((df["url"].isna() | df["url"].str.strip().str.lower().isin(empty)) &
+           (df["doi"].isna() | df["doi"].str.strip().str.lower().isin(empty)))
+fill = no_link & df["record_id"].isin(link_of)
+assert fill.sum() == len(link_of), f"expected {len(link_of)} studies without a link, found {int(fill.sum())}"
 df.loc[fill, "url"] = df.loc[fill, "record_id"].map(link_of)
-print(f"URLs filled from the EPPI RIS export: {int(fill.sum())}")
+print(f"URLs filled from EPPI RIS exports: {int(fill.sum())}")
 
 
 def recode_income(v):

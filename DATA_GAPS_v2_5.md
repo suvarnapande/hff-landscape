@@ -43,18 +43,30 @@ cover the 53,362 studies with a topic embedding; the topic map's technical note 
 second-opinion labels. The 49 HTA studies are labelled by the Decision 17 rule, not the main panel,
 but the figure counts them on the panel side. The effect is under 0.1% of studies.
 
-## 3. Publication links for the 28 HTA studies without a DOI
+## 3. Publication links from EPPI-Reviewer for studies without a DOI
 
-21 of the 49 HTA studies have a DOI; the other 28 had no DOI and no URL. Their links come from an
-EPPI-Reviewer RIS export (matched on U1 = record_id, 13 October 2026), stored in
-`docs/dex_hff/v2_5_1/eppi_urls/eppi_ris_hta_28.csv`. `make_v2_5_csv.py` fills only empty URLs.
-For each study it uses the RIS DOI as a doi.org link (5 studies), else the public PubMed page for
-the RIS PubMed ID (18; the Ovid link needs a subscription), else the RIS Scopus record (5). Studies
-with a publication link: 42,144 → 42,172 (79%). The DOI count and the open-access figures are
-unchanged.
+The dataset's `url` column holds only doi.org links, so 11,239 studies had no DOI and no link.
+Links now come from EPPI-Reviewer RIS exports, matched on U1 = record_id. They are stored as
+lookup files in `docs/dex_hff/v2_5_1/eppi_urls/`, and `make_v2_5_csv.py` fills only studies with no
+DOI and no URL:
 
-The dataset's `url` column holds only doi.org links. The 9,329 EPPI URLs recovered for v2.4.1
-(`v2_4_1/url_search/eppi_ris/`) have not been merged into the site.
+- `eppi_ris_v2_4_1_matches.csv`: 9,329 studies matched for v2.4.1 (`v2_4_1/url_search/eppi_ris/`,
+  `retrieve_eppi_urls.py`; record_id match, exact normalized title, year within one).
+- `eppi_ris_hta_28.csv`: the 28 Decision 17 HTA studies without a DOI (export of 13 October 2026).
+
+For each study the link is chosen in this order:
+
+1. the RIS DOI as a doi.org link (4,643 studies);
+2. else, for Ovid MEDLINE records, the public PubMed page for the accession number, which is the
+   PubMed ID (767; the Ovid link needs a subscription);
+3. else the RIS link as exported: Scopus record (2,720), other publisher or agency pages (709),
+   PDFs (432), Cochrane CENTRAL (86).
+
+The Scopus and Cochrane CENTRAL records may need a subscription to open. The links were not checked
+online.
+
+Studies with a publication link: 42,144 → **51,501 (96.4%)**; 1,910 still have none. The `doi` column,
+the DOI count and the open-access figures are unchanged, because the RIS DOIs were only used as links.
 
 ## 5. Decision: three studies excluded as published before 2010
 
