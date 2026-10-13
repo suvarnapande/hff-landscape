@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-13c";
+const BUILD = "2026-10-13d";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -15,6 +15,7 @@ const OTHER_OUTCOME_NOTE = 'The largest themes within "Other" are service use, a
 const OTHER_OUTCOME_NOTE_FIGURES = new Set([
   "fig_outcome_bar.png",
   "fig_outcome_lollipop.png",
+  "fig_outcome_combined.png",
   "fig_function_outcome_heatmap.png"
 ]);
 // Plain-language note on why the main "Other" themes don't belong to a named outcome
@@ -2414,9 +2415,9 @@ if (typeof document !== "undefined") {
   // figures that sit next to each other.
   const FIGURE_PANEL_GROUPS = [{
     title: "Financing functions and outcomes studied",
-    // The outcome-domain figure sits next to the breakdown of its largest bar ("Other"),
-    // with a "why Other" button above them that opens the plain-language note.
-    rows: [["fig_function_bar.png", "fig_function_second_opinion_v2_2.png"], ["fig_outcome_lollipop.png", "fig_outcome_other_themes_v5.png"],
+    // One figure shows the outcome domains with "Other" unpacked into its themes, with a
+    // "why Other" button above it that opens the plain-language note.
+    rows: [["fig_function_bar.png", "fig_function_second_opinion_v2_2.png"], ["fig_outcome_combined.png"],
       ["fig_function_outcome_heatmap.png"]],
     rowIntros: { 1: () => otherOutcomeExplainer() }
   }];
@@ -2576,7 +2577,8 @@ if (typeof document !== "undefined") {
           : UNCLEAR_FOOTNOTE;
         body.appendChild(note);
       }
-      if (OTHER_OUTCOME_NOTE_FIGURES.has(f.file)) {
+      // The combined figure draws the "Other" themes itself, so it skips the text list.
+      if (OTHER_OUTCOME_NOTE_FIGURES.has(f.file) && f.file !== "fig_outcome_combined.png") {
         const note = el("div", "fig-footnote other-outcome-note");
         note.textContent = OTHER_OUTCOME_NOTE;
         body.appendChild(note);
@@ -3592,7 +3594,9 @@ if (typeof document !== "undefined") {
     // The "Health aid, spending and research" group card is hidden with all five of its sections.
     const HIDDEN_SECTIONS = new Set(["Pipeline", "The financing backdrop", "Where financing and evidence diverge",
       "How research priorities differ", "How research responds over time", "USA sensitivity analysis"]);
-    const HIDDEN_FIGS = new Set(["fig_wellcome_priorities.png"]);
+    // fig_outcome_combined.png replaces the outcome lollipop + "Other" themes pair.
+    const HIDDEN_FIGS = new Set(["fig_wellcome_priorities.png", "fig_outcome_lollipop.png",
+      "fig_outcome_other_themes_v5.png"]);
     GALLERY = (db.content.gallery || [])
       .filter(sec => !HIDDEN_SECTIONS.has(sec.title))
       .map(sec => ({ ...sec, figs: sec.figs.filter(f => !HIDDEN_FIGS.has(f.file)) }))
