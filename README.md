@@ -7,8 +7,7 @@ rebuilt against the HFF extraction.
 **Current data: HFF dataset v2.4.1 (October 2026; the dataset team's v2.4 without three pre-2010
 studies, 53,362 included).** What changed, the open gaps (topic-map coordinates, DALYs for Kosovo,
 health spending for five added countries) and the build order are in
-[DATA_GAPS_v2_4.md](DATA_GAPS_v2_4.md); the notes for the earlier v2.2 build are in
-[DATA_GAPS_v2_2.md](DATA_GAPS_v2_2.md). The pipeline description below is for the earlier builds.
+[DATA_GAPS_v2_4.md](DATA_GAPS_v2_4.md). The pipeline description below is for the earlier builds.
 
 Data pipeline: `docs/dex_hff/build_data.py` reads
 `docs/dex_hff/hff_pipeline_full_single_model.csv` (52,826 LLM-classified records) and

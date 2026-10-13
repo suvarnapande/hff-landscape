@@ -5,7 +5,7 @@ so the 2010-onwards criterion could not be applied; they were screened, labelled
 An online check (CrossRef and OpenAlex, 2026-10-12) found no version published in 2010 or later:
 all three are articles in Inquiry 46(4), "Winter 2009/2010", published December 2009. They are
 excluded under the publication-year criterion as `published_before_2010`, the last exclusion
-test (applied after de-duplication). See CHANGES_v2_2_1.md and DATA_GAPS_v2_2.md, item 5.
+test (applied after de-duplication). See CHANGES_v2_2_1.md and DATA_GAPS_v2_4.md, item 5.
 
 The v2.2 files are left unchanged. Writes, in docs/dex_hff/v2_2/:
   hff_analysis_dataset_v2_2_1_included.csv   53,779 included studies

@@ -118,7 +118,7 @@ era = year.map(era_of)
 existing_countries = json.loads((DATA / "countries.json").read_text(encoding="utf-8"))
 # v2.2: 31 countries the v2.2 studies name that the inherited list lacked, from
 # make_country_additions_v2_2.py (UN population, World Bank spending; no DALYs yet, see
-# DATA_GAPS_v2_2.md). Appended once: after the first run they are already in countries.json.
+# DATA_GAPS_v2_4.md). Appended once: after the first run they are already in countries.json.
 # Values filled in the CSV later (e.g. GBD DALYs) also reach rows added on an earlier run.
 _by_iso3 = {c["iso3"]: c for c in existing_countries}
 for _r in pd.read_csv(DEX / "country_additions_v2_2.csv", dtype={"iso3": str}).to_dict("records"):

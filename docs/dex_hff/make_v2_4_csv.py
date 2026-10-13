@@ -15,7 +15,7 @@ What changes from the v2.2 file:
     extracted)
   - nothing is left out: the build stops if any study falls outside 2010-2026. The three
     pre-2010 studies (no year at EPPI import, December 2009 articles) are excluded upstream,
-    in v2.2.1; see DATA_GAPS_v2_2.md, item 5
+    in v2.2.1; see DATA_GAPS_v2_4.md, item 5
   - function_label_source is kept, for the with/without second-opinion sensitivity figure
 
 The bibliographic, topic and MeSH columns are copied as they are; in v2.4 they are filled for

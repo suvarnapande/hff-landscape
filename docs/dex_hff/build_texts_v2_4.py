@@ -69,7 +69,7 @@ for c, row in enumerate(countries):
         old_part.unlink()
     # GitHub Pages rejects files over 25 MiB, so a shard over ~20 MB is split into numbered
     # parts (<ISO3>.1.json, ...) and <ISO3>.json becomes {"parts": n}; app.js
-    # (openStudiesModal) loads the parts and joins them. See DATA_GAPS_v2_2.md.
+    # (openStudiesModal) loads the parts and joins them. See README.md ("Large country files are split").
     text = json.dumps(payload, ensure_ascii=False)
     n_parts = -(-len(text.encode("utf-8")) // 20_000_000)  # stay well under Pages' 25 MiB cap
     if n_parts == 1:
