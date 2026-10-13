@@ -1,6 +1,6 @@
 """Builds docs/figures/fig_glance_regions.html — the HFF version of HEE's
 "(Un)equal weight at a glance" page: a research-intensity map plus one profile
-card per World Bank region.
+card per WHO region (v2.4: WHO regions replace the World Bank regions of the earlier build).
 
 HEE divides research output by disease burden (DALYs) and profiles QALY use.
 HFF studies are about health financing, so here:
@@ -50,42 +50,26 @@ ID_TO_IDX = {sid: i for i, sid in enumerate(studies["id"])}
 YEAR0, YEAR1 = min(studies["year"]), max(studies["year"])
 
 # ---------------------------------------------------------------------------
-# World Bank regions (same lists as HEE's glance page; HKG added to EAS).
-# The lists also drive the black silhouettes above each card.
+# WHO regions, from countries.json `who_region` (build_data_v2_4.py, from
+# make_country_regions_v2_4.py: WHO Global Health Observatory; places that are not WHO
+# members get the WHO region of their UN M49 sub-region). The isos lists also drive the
+# black silhouettes above each card; lon/lat are each silhouette's crop box.
 # ---------------------------------------------------------------------------
-WB_REGIONS = {
-    "EAS": ("East Asia & Pacific", ["AUS", "CHN", "HKG", "IDN", "JPN", "KHM", "KOR", "LAO", "MMR", "MNG", "MYS",
-             "NZL", "PHL", "PNG", "PRK", "SGP", "THA", "TLS", "TWN", "VNM", "FJI", "BRN", "SLB", "VUT"],
-            [70, 180], [-48, 55]),
-    "ECS": ("Europe & Central Asia", ["ALB", "ARM", "AUT", "AZE", "BEL", "BGR", "BIH", "BLR", "CHE", "CYP", "CZE",
-             "DEU", "DNK", "ESP", "EST", "FIN", "FRA", "GBR", "GEO", "GRC", "HRV", "HUN", "IRL", "ITA", "KGZ",
-             "LTU", "LVA", "MDA", "MKD", "NLD", "NOR", "POL", "PRT", "ROU", "RUS", "SRB", "SVK", "SVN", "SWE",
-             "TJK", "TKM", "TUR", "UKR", "UZB", "KAZ", "ISL", "LUX", "MNE"],
-            [-25, 180], [34, 78]),
-    "LCN": ("Latin America & Caribbean", ["ARG", "BOL", "BRA", "CHL", "COL", "CRI", "DOM", "ECU", "GTM", "HND",
-             "HTI", "JAM", "MEX", "NIC", "PAN", "PER", "PRY", "SLV", "TTO", "URY", "VEN", "CUB", "GUY", "SUR",
-             "BLZ", "BHS"],
-            [-118, -34], [-56, 33]),
-    "MEA": ("Middle East & North Africa", ["ARE", "BHR", "DJI", "DZA", "EGY", "IRN", "IRQ", "JOR", "KWT", "LBN",
-             "LBY", "MAR", "OMN", "QAT", "SAU", "SYR", "TUN", "YEM", "ISR", "PSE", "MLT"],
-            [-18, 63], [11, 40]),
-    "NAC": ("North America", ["CAN", "USA"], [-170, -52], [18, 72]),
-    "SAS": ("South Asia", ["AFG", "BGD", "IND", "LKA", "NPL", "PAK", "BTN"], [60, 93], [5, 39]),
-    "SSF": ("Sub-Saharan Africa", ["AGO", "BDI", "BEN", "BFA", "BWA", "CAF", "CIV", "CMR", "COD", "COG", "ERI",
-             "ETH", "GAB", "GHA", "GIN", "GMB", "GNB", "GNQ", "KEN", "LBR", "LSO", "MDG", "MLI", "MOZ", "MRT",
-             "MUS", "MWI", "NAM", "NER", "NGA", "RWA", "SDN", "SEN", "SLE", "SOM", "SSD", "SWZ", "TCD", "TGO",
-             "TZA", "UGA", "ZAF", "ZMB", "ZWE", "CPV", "COM"],
-            [-26, 58], [-35, 26]),
+_WHO_LAYOUT = {  # code: (name in countries.json, silhouette lon box, lat box)
+    "AFR": ("African Region", [-26, 58], [-35, 38]),
+    "AMR": ("Region of the Americas", [-170, -34], [-56, 72]),
+    "SEAR": ("South-East Asia Region", [65, 132], [-10, 43]),
+    "EUR": ("European Region", [-25, 180], [29, 78]),
+    "EMR": ("Eastern Mediterranean Region", [-18, 76], [-2, 42]),
+    "WPR": ("Western Pacific Region", [70, 180], [-48, 55]),
 }
-TAGS = {"EAS": (110, 32), "ECS": (62, 56), "LCN": (-62, -12), "MEA": (30, 24),
-        "NAC": (-100, 45), "SAS": (78, 22), "SSF": (20, -6)}
-# v2.2: countries added to countries.json by make_country_additions_v2_2.py (World Bank regions)
-for _code, _isos in {"EAS": ["TON", "PLW", "WSM", "FSM", "KIR"], "ECS": ["XKX", "GRL"],
-                     "LCN": ["PRI", "BRB", "GRD", "VCT", "LCA"], "NAC": ["BMU"], "SAS": ["MDV"]}.items():
-    WB_REGIONS[_code][1].extend(_isos)
+WB_REGIONS = {code: (name, [c["iso3"] for c in countries if c.get("who_region") == name], lon, lat)
+              for code, (name, lon, lat) in _WHO_LAYOUT.items()}  # name kept from the World Bank version
+TAGS = {"AFR": (20, -6), "AMR": (-90, 12), "SEAR": (82, 18), "EUR": (45, 57), "EMR": (42, 24),
+        "WPR": (125, 22)}
 REGION_OF = {iso: code for code, (_, isos, _, _) in WB_REGIONS.items() for iso in isos}
 missing = [c["iso3"] for c in countries if c["iso3"] not in REGION_OF]
-assert not missing, f"countries without a World Bank region: {missing}"
+assert not missing, f"countries without a WHO region: {missing}"
 
 # ---------------------------------------------------------------------------
 # Disease categories: MeSH keyword rules copied from build_figures_v5.py
@@ -491,7 +475,7 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
   <div class="foot">
     <div>
       <p>Data: HFF evidence map web build ({SOURCE_NAME}); {YEAR0}–{YEAR1} publication years. Search dates: xx {q("Search dates are not in the web data; they need to come from the review protocol.")}</p>
-      <p>Regions: World Bank (EAS East Asia &amp; Pacific, ECS Europe &amp; Central Asia, LCN Latin America &amp; Caribbean, MEA Middle East &amp; North Africa, NAC North America, SAS South Asia, SSF Sub-Saharan Africa). Map and trend lines cover the {len(countries)} countries in the map's country data; trends run to {LAST_FULL_YEAR}.</p>
+      <p>Regions: WHO (AFR African, AMR Americas, SEAR South-East Asia, EUR European, EMR Eastern Mediterranean, WPR Western Pacific), as listed by the WHO Global Health Observatory; places that are not WHO members (Taiwan, Hong Kong, Kosovo) take the WHO region of their UN M49 sub-region. Map and trend lines cover the {len(countries)} countries in the map's country data; trends run to {LAST_FULL_YEAR}.</p>
       <p>Health expenditure: total health spending, PPP US$ billions, 2022 (the site's country reference data). Outcome: financial protection outcome domain. Disease groups: 11 groups matched from PubMed MeSH terms, grouped into communicable, non-communicable and injuries. Map: Robinson projection; grey = no study naming the country or no spending data.</p>
     </div>
   </div>

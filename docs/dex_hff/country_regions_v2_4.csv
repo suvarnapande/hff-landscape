@@ -1,0 +1,186 @@
+iso3,country,who_region,who_region_source,un_region,wb_region
+ZWE,Zimbabwe,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+ZMB,Zambia,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+YEM,Yemen,Eastern Mediterranean Region,WHO,Western Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+VNM,Vietnam,Western Pacific Region,WHO,South-eastern Asia,East Asia & Pacific
+VEN,Venezuela,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+UZB,Uzbekistan,European Region,WHO,Central Asia,Europe & Central Asia
+URY,Uruguay,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+USA,United States of America,Region of the Americas,WHO,Northern America,North America
+GBR,United Kingdom,European Region,WHO,Northern Europe,Europe & Central Asia
+ARE,United Arab Emirates,Eastern Mediterranean Region,WHO,Western Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+UKR,Ukraine,European Region,WHO,Eastern Europe,Europe & Central Asia
+UGA,Uganda,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+TKM,Turkmenistan,European Region,WHO,Central Asia,Europe & Central Asia
+TUR,Turkey,European Region,WHO,Western Asia,Europe & Central Asia
+TUN,Tunisia,Eastern Mediterranean Region,WHO,Northern Africa,"Middle East, North Africa, Afghanistan & Pakistan"
+TTO,Trinidad and Tobago,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+TGO,Togo,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+TLS,East Timor,South-East Asia Region,WHO,South-eastern Asia,East Asia & Pacific
+THA,Thailand,South-East Asia Region,WHO,South-eastern Asia,East Asia & Pacific
+TZA,United Republic of Tanzania,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+TJK,Tajikistan,European Region,WHO,Central Asia,Europe & Central Asia
+SYR,Syria,Eastern Mediterranean Region,WHO,Western Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+CHE,Switzerland,European Region,WHO,Western Europe,Europe & Central Asia
+SWE,Sweden,European Region,WHO,Northern Europe,Europe & Central Asia
+SWZ,eSwatini,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+SSD,South Sudan,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+SDN,Sudan,Eastern Mediterranean Region,WHO,Northern Africa,Sub-Saharan Africa
+LKA,Sri Lanka,South-East Asia Region,WHO,Southern Asia,South Asia
+ESP,Spain,European Region,WHO,Southern Europe,Europe & Central Asia
+KOR,South Korea,Western Pacific Region,WHO,Eastern Asia,East Asia & Pacific
+ZAF,South Africa,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+SOM,Somalia,Eastern Mediterranean Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+SVK,Slovakia,European Region,WHO,Eastern Europe,Europe & Central Asia
+SVN,Slovenia,European Region,WHO,Southern Europe,Europe & Central Asia
+SGP,Singapore,Western Pacific Region,WHO,South-eastern Asia,East Asia & Pacific
+SLE,Sierra Leone,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+SRB,Republic of Serbia,European Region,WHO,Southern Europe,Europe & Central Asia
+SEN,Senegal,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+SAU,Saudi Arabia,Eastern Mediterranean Region,WHO,Western Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+RWA,Rwanda,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+RUS,Russia,European Region,WHO,Eastern Europe,Europe & Central Asia
+ROU,Romania,European Region,WHO,Eastern Europe,Europe & Central Asia
+QAT,Qatar,Eastern Mediterranean Region,WHO,Western Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+PRT,Portugal,European Region,WHO,Southern Europe,Europe & Central Asia
+POL,Poland,European Region,WHO,Eastern Europe,Europe & Central Asia
+PHL,Philippines,Western Pacific Region,WHO,South-eastern Asia,East Asia & Pacific
+PER,Peru,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+PRY,Paraguay,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+PNG,Papua New Guinea,Western Pacific Region,WHO,Melanesia,East Asia & Pacific
+PAN,Panama,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+PAK,Pakistan,Eastern Mediterranean Region,WHO,Southern Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+OMN,Oman,Eastern Mediterranean Region,WHO,Western Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+NOR,Norway,European Region,WHO,Northern Europe,Europe & Central Asia
+PRK,North Korea,South-East Asia Region,WHO,Eastern Asia,East Asia & Pacific
+NGA,Nigeria,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+NER,Niger,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+NIC,Nicaragua,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+NZL,New Zealand,Western Pacific Region,WHO,Australia and New Zealand,East Asia & Pacific
+NLD,Netherlands,European Region,WHO,Western Europe,Europe & Central Asia
+NPL,Nepal,South-East Asia Region,WHO,Southern Asia,South Asia
+NAM,Namibia,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+MOZ,Mozambique,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+MAR,Morocco,Eastern Mediterranean Region,WHO,Northern Africa,"Middle East, North Africa, Afghanistan & Pakistan"
+MNG,Mongolia,Western Pacific Region,WHO,Eastern Asia,East Asia & Pacific
+MDA,Moldova,European Region,WHO,Eastern Europe,Europe & Central Asia
+MEX,Mexico,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+MUS,Mauritius,African Region,WHO,,Sub-Saharan Africa
+MRT,Mauritania,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+MLI,Mali,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+MYS,Malaysia,Western Pacific Region,WHO,South-eastern Asia,East Asia & Pacific
+MWI,Malawi,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+MDG,Madagascar,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+MKD,North Macedonia,European Region,WHO,Southern Europe,Europe & Central Asia
+LTU,Lithuania,European Region,WHO,Northern Europe,Europe & Central Asia
+LBY,Libya,Eastern Mediterranean Region,WHO,Northern Africa,"Middle East, North Africa, Afghanistan & Pakistan"
+LBR,Liberia,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+LSO,Lesotho,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+LBN,Lebanon,Eastern Mediterranean Region,WHO,Western Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+LVA,Latvia,European Region,WHO,Northern Europe,Europe & Central Asia
+LAO,Laos,Western Pacific Region,WHO,South-eastern Asia,East Asia & Pacific
+KGZ,Kyrgyzstan,European Region,WHO,Central Asia,Europe & Central Asia
+KWT,Kuwait,Eastern Mediterranean Region,WHO,Western Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+KEN,Kenya,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+JOR,Jordan,Eastern Mediterranean Region,WHO,Western Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+JPN,Japan,Western Pacific Region,WHO,Eastern Asia,East Asia & Pacific
+JAM,Jamaica,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+ITA,Italy,European Region,WHO,Southern Europe,Europe & Central Asia
+IRL,Ireland,European Region,WHO,Northern Europe,Europe & Central Asia
+IRQ,Iraq,Eastern Mediterranean Region,WHO,Western Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+IRN,Iran,Eastern Mediterranean Region,WHO,Southern Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+IDN,Indonesia,Western Pacific Region,WHO,South-eastern Asia,East Asia & Pacific
+IND,India,South-East Asia Region,WHO,Southern Asia,South Asia
+HUN,Hungary,European Region,WHO,Eastern Europe,Europe & Central Asia
+HND,Honduras,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+HTI,Haiti,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+GNB,Guinea-Bissau,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+GIN,Guinea,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+GTM,Guatemala,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+GRC,Greece,European Region,WHO,Southern Europe,Europe & Central Asia
+GHA,Ghana,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+DEU,Germany,European Region,WHO,Western Europe,Europe & Central Asia
+GEO,Georgia,European Region,WHO,Western Asia,Europe & Central Asia
+GMB,Gambia,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+GAB,Gabon,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+FRA,France,European Region,WHO,Western Europe,Europe & Central Asia
+FIN,Finland,European Region,WHO,Northern Europe,Europe & Central Asia
+ETH,Ethiopia,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+EST,Estonia,European Region,WHO,Northern Europe,Europe & Central Asia
+ERI,Eritrea,African Region,WHO,,Sub-Saharan Africa
+GNQ,Equatorial Guinea,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+SLV,El Salvador,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+EGY,Egypt,Eastern Mediterranean Region,WHO,Northern Africa,"Middle East, North Africa, Afghanistan & Pakistan"
+ECU,Ecuador,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+DOM,Dominican Republic,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+DJI,Djibouti,Eastern Mediterranean Region,WHO,Sub-Saharan Africa,"Middle East, North Africa, Afghanistan & Pakistan"
+DNK,Denmark,European Region,WHO,Northern Europe,Europe & Central Asia
+CZE,Czechia,European Region,WHO,Eastern Europe,Europe & Central Asia
+CYP,Cyprus,European Region,WHO,Western Asia,Europe & Central Asia
+HRV,Croatia,European Region,WHO,Southern Europe,Europe & Central Asia
+CIV,Ivory Coast,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+CRI,Costa Rica,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+COD,Democratic Republic of the Congo,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+COG,Republic of the Congo,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+COL,Colombia,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+CHN,China,Western Pacific Region,WHO,Eastern Asia,East Asia & Pacific
+HKG,Hong Kong S.A.R.,Western Pacific Region,no WHO region; WHO region of its UN M49 sub-region (Eastern Asia),Eastern Asia,East Asia & Pacific
+CHL,Chile,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+TCD,Chad,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+CAF,Central African Republic,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+CAN,Canada,Region of the Americas,WHO,Northern America,North America
+CMR,Cameroon,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+KHM,Cambodia,Western Pacific Region,WHO,South-eastern Asia,East Asia & Pacific
+MMR,Myanmar,South-East Asia Region,WHO,South-eastern Asia,East Asia & Pacific
+BDI,Burundi,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+BFA,Burkina Faso,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+BGR,Bulgaria,European Region,WHO,Eastern Europe,Europe & Central Asia
+BRA,Brazil,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+BWA,Botswana,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+BIH,Bosnia and Herzegovina,European Region,WHO,Southern Europe,Europe & Central Asia
+BOL,Bolivia,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+BEN,Benin,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+BEL,Belgium,European Region,WHO,Western Europe,Europe & Central Asia
+BLR,Belarus,European Region,WHO,Eastern Europe,Europe & Central Asia
+BGD,Bangladesh,South-East Asia Region,WHO,Southern Asia,South Asia
+BHR,Bahrain,Eastern Mediterranean Region,WHO,Western Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+AZE,Azerbaijan,European Region,WHO,Western Asia,Europe & Central Asia
+AUT,Austria,European Region,WHO,Western Europe,Europe & Central Asia
+AUS,Australia,Western Pacific Region,WHO,Australia and New Zealand,East Asia & Pacific
+ARM,Armenia,European Region,WHO,Western Asia,Europe & Central Asia
+ARG,Argentina,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+AGO,Angola,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+DZA,Algeria,African Region,WHO,Northern Africa,"Middle East, North Africa, Afghanistan & Pakistan"
+ALB,Albania,European Region,WHO,Southern Europe,Europe & Central Asia
+AFG,Afghanistan,Eastern Mediterranean Region,WHO,Southern Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+TWN,Taiwan,Western Pacific Region,no WHO region; WHO region of its UN M49 sub-region (Eastern Asia),Eastern Asia,East Asia & Pacific
+ISR,Israel,European Region,WHO,Western Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+KAZ,Kazakhstan,European Region,WHO,Central Asia,Europe & Central Asia
+CUB,Cuba,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+PSE,Palestine,Eastern Mediterranean Region,WHO,Western Asia,"Middle East, North Africa, Afghanistan & Pakistan"
+BTN,Bhutan,South-East Asia Region,WHO,Southern Asia,South Asia
+LUX,Luxembourg,European Region,WHO,Western Europe,Europe & Central Asia
+ISL,Iceland,European Region,WHO,Northern Europe,Europe & Central Asia
+FJI,Fiji,Western Pacific Region,WHO,Melanesia,East Asia & Pacific
+PRI,Puerto Rico,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+XKX,Kosovo,European Region,no WHO region; WHO region of its UN M49 sub-region (Southern Europe),Southern Europe,Europe & Central Asia
+SLB,Solomon Islands,Western Pacific Region,WHO,Melanesia,East Asia & Pacific
+MDV,Maldives,South-East Asia Region,WHO,Southern Asia,South Asia
+GUY,Guyana,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+BRB,Barbados,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+TON,Tonga,Western Pacific Region,WHO,Polynesia,East Asia & Pacific
+BLZ,Belize,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+VUT,Vanuatu,Western Pacific Region,WHO,Melanesia,East Asia & Pacific
+PLW,Palau,Western Pacific Region,WHO,Micronesia,East Asia & Pacific
+MNE,Montenegro,European Region,WHO,Southern Europe,Europe & Central Asia
+MLT,Malta,European Region,WHO,Southern Europe,"Middle East, North Africa, Afghanistan & Pakistan"
+WSM,Samoa,Western Pacific Region,WHO,Polynesia,East Asia & Pacific
+GRD,Grenada,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+BRN,Brunei,Western Pacific Region,WHO,South-eastern Asia,East Asia & Pacific
+FSM,Micronesia,Western Pacific Region,WHO,Micronesia,East Asia & Pacific
+BMU,Bermuda,Region of the Americas,WHO,Northern America,North America
+GRL,Greenland,European Region,WHO,Northern America,Europe & Central Asia
+VCT,Saint Vincent and the Grenadines,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean
+KIR,Kiribati,Western Pacific Region,WHO,Micronesia,East Asia & Pacific
+COM,Comoros,African Region,WHO,Sub-Saharan Africa,Sub-Saharan Africa
+LCA,Saint Lucia,Region of the Americas,WHO,Latin America and the Caribbean,Latin America & Caribbean

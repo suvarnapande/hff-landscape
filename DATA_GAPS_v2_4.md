@@ -38,6 +38,8 @@ the three pre-2010 studies, because it was built from v2.2, not v2.2.1.
 - **Income groups:** publication-year groups for analyses that count studies, current groups for
   comparisons between countries; gaps in the dataset's field filled from the World Bank's history
   (item 6).
+- **Regions:** the site uses the six WHO regions (item 7); the earlier UN M49 regions are kept in the
+  data, archived.
 - **Financing functions:** a figure comparing function shares with and without the second-opinion
   labels sits next to the function chart, as the dataset README asks.
 - **Build:** large country text files are split for GitHub Pages (README), and the figure script
@@ -50,8 +52,7 @@ the three pre-2010 studies, because it was built from v2.2, not v2.2.1.
 | 1 | Per-study coordinates of the v2.4 topic model, to redraw the two topic maps | dataset team |
 | 2 | A DALY estimate for Kosovo comparable with GBD 2023 | anyone; no source yet |
 | 3 | Health spending for Taiwan, Puerto Rico, Kosovo, Bermuda and Greenland | anyone; no source yet |
-| 4 | Region for Mauritius and Eritrea (both UN M49 Sub-Saharan Africa) | site team; small fix |
-| - | Decisions not yet taken: show Taiwan as the World Bank's "Taiwan, China"? Switch the site's region field from UN M49 to World Bank regions? | project team |
+| - | Decision not yet taken: show Taiwan as the World Bank's "Taiwan, China"? | project team |
 
 ## 1. Topic map coordinates (the only figures still on v5)
 
@@ -87,8 +88,9 @@ national health accounts are the likely option).
 
 ## 4. Smaller items
 
-- **Mauritius and Eritrea have no region** in the country list (an older gap). Both are UN M49
-  Sub-Saharan Africa; they are missing from region filters and region figures until set.
+- **Mauritius and Eritrea have no UN M49 region** in the country list (an older gap). This no
+  longer affects the site, which uses WHO regions (both are in the WHO African Region); it only
+  matters if the archived `un_region` is used.
 - **Geography left unmatched on purpose:** "Congo" (2 studies; could be either Congo), "Northern
   Cyprus" (2; in no reference dataset), and region labels such as "Global", "Multiple", "Europe"
   or "Sub-Saharan Africa", which are counted as region/global scope, not as countries.
@@ -151,6 +153,31 @@ differently).
 - **FCAS figures:** the FCAS share keeps the dataset's own lookup as its base (FCAS status comes
   from it); the comparison by income setting fills studies without a dataset group from `geo.json`.
 
+## 7. Regions: WHO regions on the site, UN M49 archived
+
+Decided 13 October 2026: the map follows the six **WHO regions**. The earlier classification (UN
+M49 sub-regions, inherited from the HEE dashboard) is kept in the data, archived.
+
+- **Source:** the WHO Global Health Observatory's country list
+  (ghoapi.azureedge.net, `DIMENSION/COUNTRY/DimensionValues`), fetched by
+  `docs/dex_hff/make_country_regions_v2_4.py` into `docs/dex_hff/country_regions_v2_4.csv`. It
+  follows WHO's current membership, for example Indonesia in the Western Pacific since 2025.
+- **Places that are not WHO members** (Taiwan, Hong Kong, Kosovo) get the WHO region of the other
+  countries in their UN M49 sub-region: Taiwan and Hong Kong (Eastern Asia) the Western Pacific,
+  Kosovo (Southern Europe) the European Region. `who_region_source` records this; the country
+  profile, the region filter's help text, the Methods tab and the glance page say so.
+- **In `docs/data/countries.json`:** `who_region` (used by the site), `who_region_source`,
+  `un_region` (UN M49, archived) and `wb_region` (World Bank region, from the World Bank country API;
+  Taiwan set to East Asia & Pacific, as "Taiwan, China").
+- **Where WHO regions are used:** the Explorer's region filter and breakdowns, country profiles,
+  the country table, and the "(Un)equal weight at a glance" page (one card per WHO region; it used
+  World Bank regions before).
+- **Exception:** "Aid vs. evidence, by region" groups countries like IHME's GBD super-regions
+  (income group, then UN M49 sub-region), to match IHME's aid data. Its description and footnote
+  say it does not use WHO regions.
+- **Effect to be aware of:** WHO's Region of the Americas joins the US and Canada with Latin
+  America and the Caribbean (19,440 studies), so regional comparisons are dominated by it.
+
 ## How to rebuild
 
 From `docs/`, after changing any input:
@@ -158,7 +185,7 @@ From `docs/`, after changing any input:
 ```bash
 python dex_hff/make_v2_4_1.py                    # v2.4 -> v2.4.1 (excludes the three pre-2010 studies)
 python dex_hff/make_v2_4_csv.py                  # v2.4.1 analysis file -> site layout
-python dex_hff/build_data_v2_4.py                # data/*.json, Overview tiles, Methods funnel
+python dex_hff/build_data_v2_4.py                # data/*.json, Overview tiles, Methods funnel (reads country_regions_v2_4.csv)
 python dex_hff/build_study_meta_v2_4.py          # Explorer CSV download
 python dex_hff/build_texts_v2_4.py               # Country profile titles and abstracts (splits files over ~20 MB; see README)
 python dex_hff/build_glance_regions_v2_4.py      # "(Un)equal weight at a glance" page
@@ -185,7 +212,8 @@ terminal): it prints captions containing "≥", which the default console encodi
 The v2.4 files from the dataset team are in `docs/dex_hff/v2_4 from Lucas/hff_share_v2_4/`
 and v2.4.1 in `docs/dex_hff/v2_4_1/`; both are git-ignored: the dataset is internal and must not
 be published. `make_country_additions_v2_2.py` fetches population and spending online and only
-needs rerunning if the country list changes.
+needs rerunning if the country list changes; so does `make_country_regions_v2_4.py` (WHO and World
+Bank regions, fetched online), run before `build_data_v2_4.py`.
 
 ## History: the v2.2 build
 

@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-13a";
+const BUILD = "2026-10-13b";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -191,7 +191,8 @@ export function loadData({ dict, studies, geo, func, outcome, countries, content
     // an index into levels.income; built by build_data_v2_2.py). Countries themselves keep
     // their current group (incomeOf), e.g. in country profiles and peer comparisons.
     geoIncome: geo.i ? geo.i.map(k => (k >= 0 ? levels.income[k] : null)) : null,
-    regionOf: countries.map(r => r.un_region),
+    // WHO region (who_region); un_region (UN M49) is kept in countries.json, archived.
+    regionOf: countries.map(r => r.who_region),
     function_grps: dict.financing_function_grps,
     outcome_grps: dict.outcome_domain_grps,
     functionSets,
@@ -309,6 +310,7 @@ export function applyFilters(db, filt) {
       country: r.country,
       income: r.income,
       un_region: r.un_region,
+      who_region: r.who_region,
       pop: pop,
       dalys: dalys,
       total_spend_bn: spend,
@@ -352,7 +354,7 @@ export function trendSeries(db, flt, varName) {
     }
     return sortedYearObj(counts);
   }
-  const isGeo = varName === "income" || varName === "un_region";
+  const isGeo = varName === "income" || varName === "who_region" || varName === "un_region";
   const grp = grpDim(db, varName);
   const counts = new Map();
   const bump = (y, cat) => {
@@ -500,7 +502,7 @@ export function tableRows(db, flt, k = 25) {
   return rows.slice(0, k).map(r => ({
     Country: r.country,
     Income: r.income,
-    Region: r.un_region == null ? "" : r.un_region,
+    "Region (WHO)": r.who_region == null ? "" : r.who_region,
     Studies: r.studies,
     "Per 100k DALYs": r.per100k == null ? null : rRound(r.per100k, 2),
     "Per US$1bn": r.per_bn == null ? null : rRound(r.per_bn, 2),
@@ -663,6 +665,7 @@ export function countryProfile(db, iso3) {
     iso3: r.iso3,
     income: r.income,
     un_region: r.un_region,
+    who_region: r.who_region,
     c_n: r.studies,
     c_daly: num(r.per100k_dalys),
     c_spend: num(r.per_bn_usd),
@@ -802,7 +805,10 @@ export function countryFacts(db, iso3) {
   const pop = num(r.pop), dalys = num(r.dalys), spend = num(r.total_spend_bn);
   const pairs = [
     ["Income group (current)", r.income],
-    ["Region (UN M49)", r.un_region == null ? "—" : r.un_region]
+    ["Region (WHO)", r.who_region == null ? "—"
+      : r.who_region_source && r.who_region_source !== "WHO"
+        ? r.who_region + " (not a WHO member; assigned via its UN M49 sub-region, " + r.un_region + ")"
+        : r.who_region]
   ];
   if (pop != null) pairs.push(["Population", fmtNum(rRound(pop / 1e6)) + " M"]);
   if (dalys != null) pairs.push(["Disease burden", fmtNum(rRound(dalys / 1e6)) + " M DALYs (2023)"]);
@@ -1491,7 +1497,7 @@ if (typeof document !== "undefined") {
   // "?" explanations next to Explorer filter labels (shown inline under the label).
   const FILTER_HELP = {
     "x-income": '<p>Countries are grouped by the <a href="https://datahelpdesk.worldbank.org/knowledgebase/articles/906519-world-bank-country-and-lending-groups" target="_blank" rel="noopener">World Bank country and lending groups</a> classification: low, lower-middle, upper-middle and high income. A study counts in every income group of the countries it examines.</p>',
-    "x-region": '<p>Regions follow the United Nations <a href="https://unstats.un.org/unsd/methodology/m49/" target="_blank" rel="noopener">M49 standard</a> geographic sub-regions (for example, Sub-Saharan Africa or Southern Asia). A study counts in every region of the countries it examines.</p>',
+    "x-region": '<p>Regions are the six <a href="https://www.who.int/about/who-we-are/regional-offices" target="_blank" rel="noopener">WHO regions</a> (for example, the African Region or the Western Pacific Region), as listed by the WHO Global Health Observatory. Places that are not WHO members (Taiwan, Hong Kong, Kosovo) are given the WHO region of the other countries in their <a href="https://unstats.un.org/unsd/methodology/m49/" target="_blank" rel="noopener">UN M49</a> sub-region. A study counts in every region of the countries it examines.</p>',
     "x-datatype": '<p>The kind of data a study analysed, as described in its title and abstract:</p><ul>'
       + '<li><strong>Cross-sectional:</strong> observations at a single point in time.</li>'
       + '<li><strong>Time-series / longitudinal:</strong> observations repeated over time.</li>'
@@ -3059,7 +3065,7 @@ if (typeof document !== "undefined") {
 
   function renderTable() {
     const rows = tableRows(db, state.result, 25);
-    const cols = ["Country", "Income", "Region", "Studies", "Per 100k DALYs", "Per US$1bn", "Per million"];
+    const cols = ["Country", "Income", "Region (WHO)", "Studies", "Per 100k DALYs", "Per US$1bn", "Per million"];
     const numCols = new Set(["Studies", "Per 100k DALYs", "Per US$1bn", "Per million"]);
     // Country/Income/Region cells are data-derived strings: build the table
     // with createElement + textContent — never innerHTML string concat.

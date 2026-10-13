@@ -182,7 +182,7 @@
           <select id="x-income" multiple placeholder="All groups"></select>
         </div>
         <div class="control-group">
-          <label class="control-label" for="x-region">Region</label>
+          <label class="control-label" for="x-region">Region (WHO)</label>
           <select id="x-region" multiple placeholder="All regions"></select>
         </div>
         <div class="control-group">
@@ -454,8 +454,14 @@
                       <a href="https://www.nlm.nih.gov/mesh/meshhome.html" target="_blank" rel="noopener">PubMed Medical Subject Headings (MeSH)</a> supply disease and health-topic descriptors where available; OpenAlex topic metadata is used as fallback. These are external bibliographic classifications, not outputs of the LLM consensus process.</td></tr>
               <tr><td>Country income groups, regions and population</td>
                   <td><a href="https://datahelpdesk.worldbank.org/knowledgebase/articles/906519-world-bank-country-and-lending-groups" target="_blank" rel="noopener">World Bank country and lending groups</a>,
-                      <a href="https://unstats.un.org/unsd/methodology/m49/" target="_blank" rel="noopener">UN M49 regions</a> and
+                      <a href="https://www.who.int/about/who-we-are/regional-offices" target="_blank" rel="noopener">WHO regions</a> and
                       <a href="https://data.worldbank.org/indicator/SP.POP.TOTL" target="_blank" rel="noopener">World Bank population data</a>.
+                      Regions are the six WHO regions, as listed by the WHO Global Health Observatory (for example,
+                      Indonesia in the Western Pacific since 2025). Places that are not WHO members (Taiwan, Hong Kong,
+                      Kosovo) are given the WHO region of the other countries in their
+                      <a href="https://unstats.un.org/unsd/methodology/m49/" target="_blank" rel="noopener">UN M49</a>
+                      sub-region. The "Aid vs. evidence, by region" figure is the exception: it groups countries like
+                      IHME's GBD super-regions, to match IHME's aid data.
                       Income groups follow the World Bank classification. Analyses that count studies use each study
                       country's group in the study's publication year (or the current group where that is not
                       recorded); comparisons between countries use the current (FY2027) classification.</td></tr>

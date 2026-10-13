@@ -132,6 +132,16 @@ for _r in pd.read_csv(DEX / "country_additions_v2_2.csv", dtype={"iso3": str}).t
         _by_iso3[_r["iso3"]].update({k: v for k, v in _row.items() if v is not None})
     else:
         existing_countries.append(_row)
+# Regions (country_regions_v2_4.csv, from make_country_regions_v2_4.py): the site uses WHO regions
+# (who_region); un_region (UN M49, the earlier classification) and wb_region are kept, archived.
+_regions = {r["iso3"]: r for r in pd.read_csv(DEX / "country_regions_v2_4.csv", dtype=str,
+                                                  keep_default_na=False).to_dict("records")}
+for _c in existing_countries:
+    _reg = _regions.get(_c["iso3"])
+    assert _reg, f"{_c['iso3']} is missing from country_regions_v2_4.csv; rerun make_country_regions_v2_4.py"
+    _c["who_region"] = _reg["who_region"] or None
+    _c["who_region_source"] = _reg["who_region_source"]
+    _c["wb_region"] = _reg["wb_region"] or None
 ref_by_name = {c["country"]: c for c in existing_countries}
 ref_by_iso3 = {c["iso3"]: c for c in existing_countries}
 
@@ -387,7 +397,8 @@ dict_json = {
         "geo_scope": LV_GEO_SCOPE,
         "era": LV_ERA,
         "income": existing_dict["levels"]["income"],
-        "un_region": sorted({c["un_region"] for c in new_countries if c["un_region"]}),
+        "un_region": sorted({c["un_region"] for c in new_countries if c["un_region"]}),  # archived
+        "who_region": sorted({c["who_region"] for c in new_countries if c["who_region"]}),
         "iso3": [c["iso3"] for c in new_countries],
         "country": [c["country"] for c in new_countries],
     },
@@ -405,7 +416,7 @@ dict_json = {
         "inc_lv": existing_dict["meta"]["inc_lv"],
         "pal_inc": existing_dict["meta"]["pal_inc"],
     },
-    "REGIONS": sorted({c["un_region"] for c in new_countries if c["un_region"]}),
+    "REGIONS": sorted({c["who_region"] for c in new_countries if c["who_region"]}),  # WHO regions
     "financing_function_grps": function_grps,
     "outcome_domain_grps": outcome_grps,
     "years": [2010, 2026],
@@ -459,7 +470,7 @@ content_json = {
     "registries": {
         "trend_vars": [
             {"label": "Income group (in publication year)", "column": "income"},
-            {"label": "Region", "column": "un_region"},
+            {"label": "Region (WHO)", "column": "who_region"},
             {"label": "Financing function", "column": "func_grp"},
             {"label": "Outcome domain", "column": "outcome_grp"},
             {"label": "Study design", "column": "study_design"},

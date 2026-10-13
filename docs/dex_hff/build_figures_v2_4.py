@@ -4678,11 +4678,14 @@ if have_ihme:
             "Eastern Asia": "Southeast Asia, East Asia, and Oceania",
             "South-eastern Asia": "Southeast Asia, East Asia, and Oceania",
             "Melanesia": "Southeast Asia, East Asia, and Oceania",
+            "Micronesia": "Southeast Asia, East Asia, and Oceania",
+            "Polynesia": "Southeast Asia, East Asia, and Oceania",
             "Northern Africa": "North Africa and Middle East",
             "Western Asia": "North Africa and Middle East",
             "Latin America and the Caribbean": "Latin America and Caribbean",
             "Eastern Europe": "Central Europe, Eastern Europe, and Central Asia",
             "Central Asia": "Central Europe, Eastern Europe, and Central Asia",
+            "Southern Europe": "Central Europe, Eastern Europe, and Central Asia",
         }.get(un_region, "High-income")
 
     country_bucket = {i: gbd_bucket(c["income"], c["un_region"]) for i, c in enumerate(countries)}
@@ -4715,7 +4718,7 @@ if have_ihme:
 
     av_headline = f"{most_under} gets a far larger share of aid than of research attention"
     av_desc = ("Share of global DAH (2022–24 average) vs. share of HFF study-country pairs, "
-               "by region (income-first approximation of GBD super-regions).")
+               "by region (IHME GBD super-regions, approximated by income group then UN sub-region; not WHO regions).")
     av_finding = (f"{most_under} receives {aid_by_bucket.get(most_under, 0) / aid_total * 100:.0f}% of DAH but only "
                   f"{research_by_bucket.get(most_under, 0) / research_total * 100:.0f}% of study-country pairs — "
                   f"the largest aid-to-evidence gap of any region.")
@@ -4724,8 +4727,10 @@ if have_ihme:
     ax.set_xlabel("share (%)")
     clean_axes(ax)
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.11), ncol=2, frameon=False, fontsize=9.5)
-    set_footnote(fig, "Base: IHME DAH by GBD super-region. Countries are grouped by World Bank income group, then "
-                       "UN region, which approximates (but does not exactly match) IHME's super-regions.")
+    set_footnote(fig, "Regions here are IHME's GBD super-regions, not the WHO regions used elsewhere on this site, "
+                       "so that study counts can be set against IHME's aid data. Base: IHME DAH by GBD super-region. "
+                       "Countries are grouped by World Bank income group, then UN M49 sub-region, which approximates "
+                       "(but does not exactly match) IHME's super-regions.")
     fig.tight_layout()
 
     # Headline/desc/finding are long enough to look better wrapped across a
@@ -5647,10 +5652,11 @@ gallery = [
         "figs": ([{
             "file": "fig_glance_regions.html", "title": "(Un)equal weight at a glance",
             "caption": "Interactive page: HFF studies per US$1bn of total health expenditure by country, and a "
-                       "profile card for each World Bank region (disease focus, top financing functions, financial "
-                       "protection as an outcome, country coverage over time). Sub-Saharan Africa has the most "
-                       "studies per dollar spent (11.9 per US$1bn), because its health spending is so small, not "
-                       "because its evidence base is large.",
+                       "profile card for each WHO region (disease focus, top financing functions, financial "
+                       "protection as an outcome, country coverage over time). The African Region has the most "
+                       "studies per dollar spent (11.3 per US$1bn), because its health spending is so small, not "
+                       "because its evidence base is large. Places that are not WHO members (Taiwan, Hong Kong, "
+                       "Kosovo) take the WHO region of their UN M49 sub-region.",
         }] if (FIGS / "fig_glance_regions.html").exists() else []) + ([
             fig_entry("fig_map_bivariate.png", "Where high burden meets low evidence"),
             fig_entry("fig_map_burden.png", "Research intensity against disease burden (map)"),
