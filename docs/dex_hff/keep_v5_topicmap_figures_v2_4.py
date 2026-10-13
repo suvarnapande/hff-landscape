@@ -13,6 +13,10 @@ Run LAST, after build_figures_v2_4.py, build_funder_types_v2_4.py, build_fcas_ou
 and build_open_access_v2_4.py:
     python docs/dex_hff/keep_v5_topicmap_figures_v2_4.py
 """
+import sys
+sys.exit("Retired: build_figures_v2_4.py now draws both topic maps from "
+         "v2_4 from Lucas/hff_topic_coordinates_v2_4.csv. Do not run this script.")
+
 import json
 import subprocess
 from pathlib import Path

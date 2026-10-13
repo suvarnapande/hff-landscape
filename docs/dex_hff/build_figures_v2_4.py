@@ -80,6 +80,8 @@ if "--only" in sys.argv:
 # with/without second-opinion check the v2.2 README asks for on function results.
 RAW_CSV = DEX / "v2_4_1" / "hff_v2_4_1_site.csv"
 SOURCE_NAME = "HFF dataset v2.4.1"
+# v2.4 model map positions (record_id, x, y, topic_cluster_id), from the dataset team
+TOPIC_MAP_CSV = DEX / "v2_4 from Lucas" / "hff_topic_coordinates_v2_4.csv"
 
 REQUIRED_INPUTS = [
     DATA / "dict.json",
@@ -90,7 +92,7 @@ REQUIRED_INPUTS = [
     DATA / "countries.json",
     DATA / "content.json",
     RAW_CSV,
-    DEX / "topic_map.csv",
+    TOPIC_MAP_CSV,
     DEX / "F03_Total_DAH_forecast_1990-2030.xlsx",
     DEX / "F07_DAH_by_source_change_2024-2025.xlsx",
     DEX / "F11_Total_health_spending_per_person_by_WB_income_group_2000-2030.xlsx",
@@ -3551,9 +3553,10 @@ content = load("content.json")
 # actually kept in sync with the pipeline, dropping one fragile external
 # dependency.
 # ---------------------------------------------------------------------------
-have_topics = RAW_CSV.exists() and (DEX / "topic_map.csv").exists()
+have_topics = RAW_CSV.exists() and TOPIC_MAP_CSV.exists()
 if have_topics:
-    topic_map = pd.read_csv(DEX / "topic_map.csv")
+    topic_map = (pd.read_csv(TOPIC_MAP_CSV, usecols=["record_id", "x", "y", "topic_cluster_id"])
+                 .rename(columns={"topic_cluster_id": "cluster"}))
     topic_map = topic_map[topic_map["record_id"].isin(ID_TO_IDX)].copy()
 
     tc_raw = pd.read_csv(RAW_CSV, low_memory=False, usecols=["record_id", "topic_cluster_id", "topic_cluster_label",
