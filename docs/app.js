@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-13g";
+const BUILD = "2026-10-13h";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1600,6 +1600,7 @@ if (typeof document !== "undefined") {
       "Studies captured in the map": () => showOverviewTrend("cumulative"),
       "Publication years covered": () => showOverviewTrend("cumulative"),
       "Countries covered by studies": () => openOverviewGroup("Countries and research coverage"),
+      "Studies by WHO region": () => openOverviewGroup("Countries and research coverage"),
       "Health financing functions covered": () => openOverviewTheme("Financing functions & outcomes"),
       "Studies using quantitative analysis": () => openOverviewTheme("Methods & data"),
       "Studies with a publication link": () => openOverviewTheme("Open access & author countries"),
@@ -1721,9 +1722,154 @@ if (typeof document !== "undefined") {
     const singleLabel = el("div");
     singleLabel.innerHTML = "<strong>Single-country</strong><span>One country examined</span>";
     const otherLabel = el("div");
-    otherLabel.innerHTML = "<strong>Other geographic scope</strong><span>14.2% multi-country or regional/global; 4.5% no country stated</span>";
+    const pctOf = names => (100 * scopes.filter(code => names.includes(levels[code])).length /
+      Math.max(1, scopes.length)).toFixed(1) + "%";
+    otherLabel.innerHTML = "<strong>Other geographic scope</strong><span>" +
+      pctOf(["Multi-country", "Region/global"]) + " multi-country or regional/global; " +
+      pctOf(["No country stated"]) + " no country stated</span>";
     labels.append(singleLabel, otherLabel);
     box.append(bar, labels);
+  }
+
+  // Unique studies per category of a geographic dimension ("income" in the
+  // publication year, or "who_region"), over all studies. A multi-country study
+  // counts once in every category its countries fall in.
+  function geoStudyCounts(varName) {
+    const counts = {};
+    for (const byCat of Object.values(trendSeries(db, applyFilters(db, {}), varName))) {
+      for (const [cat, n] of Object.entries(byCat)) counts[cat] = (counts[cat] || 0) + n;
+    }
+    return counts;
+  }
+
+  // "?" button that opens one of the explanation modals.
+  function helpButton(modalId, label) {
+    const help = el("button", "metric-help-button");
+    help.type = "button";
+    help.textContent = "?";
+    help.title = `Learn about ${label}`;
+    help.setAttribute("aria-label", `Explain ${label}`);
+    help.dataset.modal = modalId;
+    help.addEventListener("click", () => $(modalId).classList.add("open"));
+    return help;
+  }
+
+  // Summary card: number of studies, publication years, financing functions and
+  // outcome domains (replaces four separate tiles).
+  function fillEvidenceScopeCard(box, nStudies, years, nFunctions) {
+    box.classList.add("evidence-scope-card");
+    const title = el("div", "value-box-title");
+    title.textContent = "Studies captured in the map";
+    const [y0, y1] = String(years).split(/[–-]/);
+    const lead = el("div", "evidence-scope-lead");
+    const big = el("div", "evidence-scope-number");
+    big.textContent = nStudies;
+    const sentence = el("p", "evidence-scope-sentence");
+    sentence.innerHTML = `studies published between <strong>${esc(y0)}</strong> and <strong>${esc(y1)}</strong>` +
+      ` (${esc(y1)} is a partial year), covering <strong>${esc(nFunctions)}</strong> health financing functions` +
+      " and <strong>8</strong> outcome domains.";
+    lead.append(big, sentence);
+
+    const rows = el("div", "evidence-scope-rows");
+    const nonCat = new Set(["Other", "Unclear"]);
+    for (const [label, value, modalId, insight] of [
+      ["Health financing functions", nFunctions, "functions-help-modal",
+       "Most studied: " + mostCommonCategory(db.function, db.function_grps, nonCat) +
+       " · Least studied: " + leastCommonCategory(db.function, db.function_grps, nonCat)],
+      ["Outcome domains", "8", "outcomes-help-modal",
+       "Most common named: " + mostCommonCategory(db.outcome, db.outcome_grps, nonCat)]
+    ]) {
+      const row = el("div", "evidence-scope-row");
+      const head = el("div", "evidence-scope-row-head");
+      const name = el("span");
+      name.textContent = label;
+      head.append(name, helpButton(modalId, label.toLowerCase()));
+      const val = el("strong", "evidence-scope-row-value");
+      val.textContent = value;
+      const note = el("span", "evidence-scope-row-note");
+      note.textContent = insight;
+      row.append(head, val, note);
+      rows.appendChild(row);
+    }
+    const more = el("button", "evidence-scope-link");
+    more.type = "button";
+    more.textContent = "Explore financing functions and outcomes →";
+    more.addEventListener("click", () => openOverviewTheme("Financing functions & outcomes"));
+    box.append(title, lead, rows, more);
+  }
+
+  // Countries card: number of countries, then studies by World Bank income group
+  // as circles whose area is proportional to the study count.
+  function fillIncomeBubbleCard(box, nCountries) {
+    box.classList.add("income-bubble-card");
+    const title = el("div", "value-box-title");
+    title.textContent = "Countries covered by studies";
+    const head = el("div", "income-bubble-head");
+    head.innerHTML = `<span class="income-bubble-count">${esc(nCountries)}</span><span>countries named by at least one study</span>`;
+
+    const counts = geoStudyCounts("income");
+    const groups = [["Low income", ["Low"]], ["Lower middle income", ["Lower", "middle"]],
+                    ["Upper middle income", ["Upper", "middle"]], ["High income", ["High"]]];
+    const max = Math.max(...groups.map(([k]) => counts[k] || 0), 1);
+    // Each circle sits in its own slot (at least 68 units wide) so labels never overlap.
+    const rMax = 48, slotMin = 68, gap = 10, labelH = 40, topPad = 22;
+    const radii = groups.map(([k]) => Math.max(6, rMax * Math.sqrt((counts[k] || 0) / max)));
+    const slots = radii.map(r => Math.max(2 * r, slotMin));
+    const width = slots.reduce((a, w) => a + w, 0) + gap * (groups.length - 1);
+    const height = topPad + 2 * rMax + labelH;
+    const fills = ["#cfe9df", "#93cdb8", "#4fa98b", "#23795f"];
+    const base = topPad + 2 * rMax;
+    let x = 0;
+    let svg = `<svg class="income-bubble-svg" viewBox="0 0 ${width.toFixed(1)} ${height}" role="img" ` +
+      `aria-label="Studies by country income group">`;
+    groups.forEach(([k, lines], i) => {
+      const r = radii[i], cx = x + slots[i] / 2, cy = base - r;
+      svg += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r.toFixed(1)}" fill="${fills[i]}"></circle>` +
+        `<text class="ib-value" x="${cx.toFixed(1)}" y="${(cy - r - 6).toFixed(1)}">${fmtNum(counts[k] || 0)}</text>` +
+        `<text class="ib-label" x="${cx.toFixed(1)}" y="${base + 15}">` +
+        lines.map((line, j) => `<tspan x="${cx.toFixed(1)}" dy="${j ? 13 : 0}">${esc(line)}</tspan>`).join("") + "</text>";
+      x += slots[i] + gap;
+    });
+    svg += "</svg>";
+    const chart = el("div", "income-bubble-chart");
+    chart.innerHTML = svg;
+    const note = el("div", "income-bubble-note");
+    note.textContent = "Studies by World Bank income group of the countries studied, in the publication year " +
+      "(circle area = studies). A multi-country study can count in several groups.";
+    box.append(title, head, chart, note);
+  }
+
+  // WHO region card: studies per region as a lollipop chart.
+  function fillRegionCard(box) {
+    box.classList.add("region-card");
+    const title = el("div", "value-box-title");
+    title.textContent = "Studies by WHO region";
+    const counts = geoStudyCounts("who_region");
+    const short = {
+      "Region of the Americas": "Americas", "European Region": "Europe",
+      "Western Pacific Region": "Western Pacific", "African Region": "Africa",
+      "South-East Asia Region": "South-East Asia", "Eastern Mediterranean Region": "Eastern Mediterranean"
+    };
+    const rows = Object.entries(counts).filter(([k]) => short[k]).sort((a, b) => b[1] - a[1]);
+    const max = Math.max(...rows.map(r => r[1]), 1);
+    const chart = el("div", "region-lollipop");
+    for (const [region, n] of rows) {
+      const row = el("div", "region-lollipop-row");
+      row.title = `${region}: ${fmtNum(n)} studies`;
+      const label = el("span", "region-lollipop-label");
+      label.textContent = short[region];
+      const track = el("div", "region-lollipop-track");
+      const stem = el("span", "region-lollipop-stem");
+      stem.style.width = (100 * n / max) + "%";
+      track.appendChild(stem);
+      const value = el("strong");
+      value.textContent = fmtNum(n);
+      row.append(label, track, value);
+      chart.appendChild(row);
+    }
+    const note = el("div", "region-lollipop-note");
+    note.textContent = "A study counts once in every region of the countries it examines.";
+    box.append(title, chart, note);
   }
 
   function renderOverview() {
@@ -1745,18 +1891,23 @@ if (typeof document !== "undefined") {
     // sub === null means no footer line.
     const wrap = $("ov-tiles");
     wrap.textContent = "";
+    // "Years covered" and "Financing functions coded" are shown inside the
+    // "Records analysed" card (one summary card); the WHO region card is added
+    // after the countries card.
     const tileOrder = [
       "Records analysed",
-      "Years covered",
       "Has a recovered DOI",
-      "Financing functions coded",
       "Countries studied",
+      "Studies by WHO region",
       "Single-country studies",
       "Quantitative analysis"
     ];
     const tileRank = new Map(tileOrder.map((label, i) => [label, i]));
     tileRank.set("Studies with DOI/URL", tileRank.get("Has a recovered DOI"));
-    const tiles = db.content.glance_tiles.slice()
+    const tileValue = label => (db.content.glance_tiles.find(t => t.label === label) || {}).value;
+    const tiles = db.content.glance_tiles
+      .filter(t => t.label !== "Years covered" && t.label !== "Financing functions coded")
+      .concat([{ label: "Studies by WHO region", value: "", theme: "info", sub: null }])
       .sort((a, b) => (tileRank.get(a.label) ?? 99) - (tileRank.get(b.label) ?? 99));
     const oa = db.overviewMetrics.openAccess;
     const funders = db.overviewMetrics.funderTypes;
@@ -1861,6 +2012,24 @@ if (typeof document !== "undefined") {
           metrics.appendChild(metric);
         }
         box.appendChild(metrics);
+        makeOverviewCardInteractive(box, display.label);
+        wrap.appendChild(box);
+        continue;
+      }
+      if (display.label === "Studies captured in the map") {
+        fillEvidenceScopeCard(box, t.value, tileValue("Years covered"), tileValue("Financing functions coded"));
+        makeOverviewCardInteractive(box, display.label);
+        wrap.appendChild(box);
+        continue;
+      }
+      if (display.label === "Countries covered by studies") {
+        fillIncomeBubbleCard(box, t.value);
+        makeOverviewCardInteractive(box, display.label);
+        wrap.appendChild(box);
+        continue;
+      }
+      if (display.label === "Studies by WHO region") {
+        fillRegionCard(box);
         makeOverviewCardInteractive(box, display.label);
         wrap.appendChild(box);
         continue;

@@ -1817,3 +1817,93 @@ table.dataTable thead th.num { text-align: right; }
 .figure-technical-notes p { margin: .65rem 0; color: #5a6472; font-size: .9rem; }
 .technical-notes-icon { display: inline-flex; align-items: center; justify-content: center; width: 1.1em; height: 1.1em; margin-right: .4em; border: 1px solid currentColor; border-radius: 50%; font-size: .85em; font-family: serif; }
 .fig-panel > .figure-explanation { padding: 0 1rem 1rem; }
+
+/* ---- Overview glance cards (v2.5 layout) ----
+   Row 1: evidence summary (2/3) + publication access (1/3).
+   Row 2: countries & income groups, WHO regions, geographic scope (1/3 each).
+   Row 3: type of analysis + funders (1/2 each). Accents are set per card, not by position. */
+#ov-tiles .value-box.evidence-scope-card { grid-column: span 32; --tile-accent: #2769a8; --tile-bg: #f0f6fc; }
+#ov-tiles .value-box.publication-access-card { grid-column: span 16; --tile-accent: #b05b47; --tile-bg: #fbf2ef; }
+#ov-tiles .value-box.income-bubble-card { grid-column: span 16; --tile-accent: #25835f; --tile-bg: #eff8f3; }
+#ov-tiles .value-box.region-card { grid-column: span 16; --tile-accent: #6f5aa8; --tile-bg: #f5f3fb; }
+#ov-tiles .value-box.geo-scope-card { grid-column: span 16; --tile-accent: #53687d; --tile-bg: #f2f5f7; }
+#ov-tiles .value-box.analysis-approach-card { grid-column: span 24; --tile-accent: #16869a; --tile-bg: #eef8f8; }
+#ov-tiles .value-box.funding-overview-card { grid-column: span 24; --tile-accent: #7b668c; --tile-bg: #f7f3f8; }
+#ov-tiles .value-box.income-bubble-card,
+#ov-tiles .value-box.region-card { display: flex; flex-direction: column; }
+
+.evidence-scope-lead { display: flex; align-items: baseline; flex-wrap: wrap; gap: .3rem .8rem; }
+.evidence-scope-number { color: var(--hff-ink); font-size: 2.3rem; font-weight: 600; line-height: 1.1; }
+.evidence-scope-sentence { flex: 1 1 18rem; margin: 0; color: var(--hff-ink-soft); font-size: .95rem; line-height: 1.45; }
+.evidence-scope-sentence strong { color: var(--hff-ink); }
+.evidence-scope-rows {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .8rem;
+  margin-top: .85rem;
+  padding-top: .8rem;
+  border-top: 1px solid color-mix(in srgb, var(--tile-accent) 22%, white);
+}
+.evidence-scope-row { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: .15rem .7rem; min-width: 0; }
+.evidence-scope-row + .evidence-scope-row { padding-left: .8rem; border-left: 1px solid color-mix(in srgb, var(--tile-accent) 22%, white); }
+.evidence-scope-row-head {
+  display: flex; grid-column: 1 / -1; align-items: center; gap: .4rem;
+  color: var(--tile-accent); font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+.evidence-scope-row-value { color: var(--hff-ink); font-size: 1.6rem; font-weight: 600; line-height: 1.1; }
+.evidence-scope-row-note { color: var(--hff-muted); font-size: .74rem; line-height: 1.35; }
+.evidence-scope-link {
+  margin-top: .75rem; padding: 0; border: 0; background: none;
+  color: var(--tile-accent); font: 600 .76rem/1.3 'Inter', system-ui, sans-serif; cursor: pointer;
+}
+.evidence-scope-link:hover { text-decoration: underline; }
+
+.income-bubble-head { display: flex; align-items: baseline; gap: .5rem; color: var(--hff-muted); font-size: .76rem; }
+.income-bubble-count { color: var(--hff-ink); font-size: 1.75rem; font-weight: 600; }
+.income-bubble-chart { display: flex; justify-content: center; margin: .6rem 0 .2rem; }
+.income-bubble-svg { width: 100%; max-width: 360px; height: auto; overflow: visible; }
+.income-bubble-svg .ib-value { fill: var(--hff-ink-soft); font: 600 11px 'Inter', system-ui, sans-serif; text-anchor: middle; }
+.income-bubble-svg .ib-label { fill: var(--hff-ink); font: 500 11.5px 'Inter', system-ui, sans-serif; text-anchor: middle; }
+.income-bubble-note, .region-lollipop-note { margin-top: auto; padding-top: .55rem; color: var(--hff-muted); font-size: .7rem; line-height: 1.35; }
+
+.region-lollipop { display: grid; gap: .85rem; margin-top: .6rem; }
+.region-lollipop-row {
+  display: grid; grid-template-columns: minmax(6.5rem, auto) minmax(4rem, 1fr) 3.4rem;
+  align-items: center; gap: .55rem; font-size: .76rem;
+}
+.region-lollipop-label { color: var(--hff-ink-soft); text-align: right; white-space: nowrap; }
+.region-lollipop-track { position: relative; height: 12px; }
+.region-lollipop-track::before {
+  content: ""; position: absolute; inset: 5px 0 auto; height: 2px; border-radius: 2px;
+  background: color-mix(in srgb, var(--tile-accent) 12%, white);
+}
+.region-lollipop-stem {
+  position: absolute; top: 4px; left: 0; height: 4px; border-radius: 2px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tile-accent) 25%, white), var(--tile-accent));
+}
+.region-lollipop-stem::after {
+  content: ""; position: absolute; top: 50%; right: -6px; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--tile-accent); box-shadow: 0 0 0 2px #fff; transform: translateY(-50%);
+}
+.region-lollipop-row strong { color: var(--hff-ink); font-variant-numeric: tabular-nums; text-align: right; }
+
+@media (max-width: 980px) {
+  #ov-tiles .value-box.evidence-scope-card { grid-column: 1 / -1; }
+  #ov-tiles .value-box.publication-access-card,
+  #ov-tiles .value-box.income-bubble-card,
+  #ov-tiles .value-box.region-card,
+  #ov-tiles .value-box.geo-scope-card,
+  #ov-tiles .value-box.analysis-approach-card,
+  #ov-tiles .value-box.funding-overview-card { grid-column: span 6; }
+}
+@media (max-width: 620px) {
+  #ov-tiles .value-box.evidence-scope-card,
+  #ov-tiles .value-box.publication-access-card,
+  #ov-tiles .value-box.income-bubble-card,
+  #ov-tiles .value-box.region-card,
+  #ov-tiles .value-box.geo-scope-card,
+  #ov-tiles .value-box.analysis-approach-card,
+  #ov-tiles .value-box.funding-overview-card { grid-column: 1 / -1; }
+  .evidence-scope-rows { grid-template-columns: 1fr; }
+  .evidence-scope-row + .evidence-scope-row { padding-left: 0; border-left: 0; }
+}
