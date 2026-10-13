@@ -43,6 +43,19 @@ cover the 53,362 studies with a topic embedding; the topic map's technical note 
 second-opinion labels. The 49 HTA studies are labelled by the Decision 17 rule, not the main panel,
 but the figure counts them on the panel side. The effect is under 0.1% of studies.
 
+## 3. Publication links for the 28 HTA studies without a DOI
+
+21 of the 49 HTA studies have a DOI; the other 28 had no DOI and no URL. Their links come from an
+EPPI-Reviewer RIS export (matched on U1 = record_id, 13 October 2026), stored in
+`docs/dex_hff/v2_5_1/eppi_urls/eppi_ris_hta_28.csv`. `make_v2_5_csv.py` fills only empty URLs.
+For each study it uses the RIS DOI as a doi.org link (5 studies), else the public PubMed page for
+the RIS PubMed ID (18; the Ovid link needs a subscription), else the RIS Scopus record (5). Studies
+with a publication link: 42,144 → 42,172 (79%). The DOI count and the open-access figures are
+unchanged.
+
+The dataset's `url` column holds only doi.org links. The 9,329 EPPI URLs recovered for v2.4.1
+(`v2_4_1/url_search/eppi_ris/`) have not been merged into the site.
+
 ## 5. Decision: three studies excluded as published before 2010
 
 v2.5, like v2.4, includes the three December 2009 *Inquiry* articles again (records 132855712-14,
