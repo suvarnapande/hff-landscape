@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-13m";
+const BUILD = "2026-10-14a";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -2524,7 +2524,7 @@ if (typeof document !== "undefined") {
   // Figures shown together as one card with mini-tabs (in this order).
   const FIGURE_TAB_GROUPS = [{
     files: ["fig_worldmap.png", "fig_map_growth.png", "fig_map_method.png"],
-    tabs: ["Where research is focused", "How recent the research is", "Most common analysis approach"]
+    tabs: ["Countries studied", "How recent the research is", "Most common analysis approach"]
   }, {
     files: ["fig_function_time_lines.png", "fig_method_stream.png"],
     tabs: ["Share of studies", "Number of studies"]
