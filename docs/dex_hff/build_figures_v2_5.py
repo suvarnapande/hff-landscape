@@ -3517,7 +3517,7 @@ if HAVE_PLOTLY:
     fig.text(0.02, 0.925, D(mm_desc), fontsize=9.5, color=SUBHEAD_COLOR, ha="left", va="top", wrap=True)
     fig.text(0.02, 0.885, D(mm_finding), fontsize=10, fontweight="bold", color=INK, ha="left", va="top",
              wrap=True)
-    fig.text(0.01, 0.10, f"Base: {len(mm_modal):,} countries with ≥5 HFF studies naming them.",
+    fig.text(0.01, 0.10, f"Base: {len(mm_modal):,} countries with ≥5 studies examining them.",
              fontsize=7.6, color=SUBHEAD_COLOR, ha="left", va="bottom")
     fig.patch.set_facecolor(PAPER)
     fig.savefig(FIGS / "fig_map_method.png", dpi=150)

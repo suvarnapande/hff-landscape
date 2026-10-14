@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-14f";
+const BUILD = "2026-10-14g";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -3808,6 +3808,8 @@ if (typeof document !== "undefined") {
       "fig_outcome_other_themes_v5.png",
       // Hidden after review: function shares over time and outcome trends.
       "fig_function_time_lines.png", "fig_outcome_trend_v5.png", "fig_alluvial.png",
+      // Hidden after review: country recency and analysis-approach maps (Geographic coverage).
+      "fig_map_growth.png", "fig_map_method.png",
       // fig_function_outcome_themes.png replaces it, with "Other" split into themes.
       "fig_function_outcome_heatmap.png"]);
     GALLERY = (db.content.gallery || [])
