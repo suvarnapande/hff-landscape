@@ -1508,7 +1508,7 @@ bars = ax.bar(inc_labels, inc_values, color=[inc_cmap(inc_norm(v)) for v in inc_
               zorder=3, width=0.6)
 for bar, v in zip(bars, inc_values):
     ax.text(bar.get_x() + bar.get_width() / 2, v + max(inc_values) * 0.015,
-            f"{v:,}\n({100 * v / inc_total:.0f}%)", ha="center", va="bottom", fontsize=9.5,
+            f"{v:,}\n({100 * v / inc_total:.1f}%)", ha="center", va="bottom", fontsize=9.5,
             color=INK, linespacing=1.15)
 ax.margins(x=0.04)
 ax.set_ylim(0, max(inc_values) * 1.18)
@@ -2320,14 +2320,15 @@ for ax, (panel_title, rows_fp) in zip(axes, fp_results.items()):
         col = inc_colors_fp.get(inc, GREY)
         ax.plot([lo, hi], [y, y], color=col, linewidth=2, zorder=3)
         ax.scatter([orv], [y], color=col, s=70, zorder=4)
-        ax.text(hi, y, f"  {orv:.2f}", va="center", fontsize=9, color=INK)
+        # OR and 95% CI above the point, so the label never crosses the reference line at 1
+        ax.text(orv, y + 0.16, f"{orv:.2f} ({lo:.2f}–{hi:.2f})", ha="center", va="bottom", fontsize=9, color=INK)
     ax.axvline(1, color="#8a8272", linewidth=1, linestyle=(0, (4, 3)), zorder=2)
     ax.set_yticks(ys, [inc for inc, *_ in rows_fp], fontsize=9.5)
     ax.set_xscale("log")
     ax.xaxis.set_major_locator(mticker.FixedLocator([0.05, 0.1, 0.2, 0.3, 0.5, 1.0]))
     ax.xaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:g}"))
     ax.xaxis.set_minor_formatter(mticker.NullFormatter())
-    ax.set_xlabel("adjusted odds ratio vs. high income (log)")
+    ax.set_xlabel("adjusted odds ratio vs. high income (log); lines = 95% CI")
     ax.set_title(panel_title, fontsize=11, fontweight="bold", color=INK, loc="left")
     ax.set_ylim(-0.6, len(rows_fp) - 0.4)
     for spine in ("top", "right"):
@@ -2346,8 +2347,8 @@ fp_desc = ("Adjusted odds ratios from two logistic models on single-country stud
            "group. Reference group is high-income studies (OR=1). Adjusted for era; observational, so "
            "associations not causes.")
 fp_finding = (f"{lowest_quant[0]} studies have {lowest_quant[1]:.2f}× the odds of a high-income study of "
-              f"using a quantitative analysis, and {lowest_local[1]:.2f}× the odds of {lowest_local[0]} "
-              f"studies having a local author.")
+              f"using a quantitative analysis, and {lowest_local[0]} studies have {lowest_local[1]:.2f}× the "
+              f"odds of having a local author.")
 FIG_META["fig_forest.png"] = (fp_headline, fp_desc, fp_finding)
 fig.suptitle("")
 fig.text(0.02, 0.99, D(fp_headline), fontsize=15.5, fontweight="bold", color=INK, ha="left", va="top")
