@@ -4007,8 +4007,13 @@ if have_taxonomy:
             if n < CELL_MIN:
                 ax.text(j, i, f"n={int(n)}", ha="center", va="center", fontsize=7.5, color="#8a8272")
             else:
+                cell_rgb = np.asarray(opp_cmap(opp_norm(log_grid[i, j]))[:3])
+                cell_linear = np.where(cell_rgb <= 0.04045, cell_rgb / 12.92,
+                                       ((cell_rgb + 0.055) / 1.055) ** 2.4)
+                cell_luminance = float(cell_linear @ [0.2126, 0.7152, 0.0722])
+                label_color = "white" if cell_luminance < 0.25 else INK
                 ax.text(j, i, f"{2 ** log_grid[i, j]:.2g}×", ha="center", va="center",
-                        fontsize=8.5, fontweight="bold", color=INK)
+                        fontsize=8.5, fontweight="bold", color=label_color)
     ax.set_xticks(np.arange(-0.5, len(opp_funcs), 1), minor=True)
     ax.set_yticks(np.arange(-0.5, len(disease_order), 1), minor=True)
     ax.grid(which="minor", color=PAPER, linewidth=2)
