@@ -3370,14 +3370,14 @@ if HAVE_PLOTLY:
     build_continuous_map_figure(
         "fig_map_burden.png",
         "Research intensity against disease burden",
-        "HFF studies naming each country, per 100,000 DALYs of disease burden. Blue: more research per "
-        "unit of burden than the typical studied country; red: less.",
+        "HFF studies naming each country, per 100,000 DALYs of disease burden. Red: more research per "
+        "unit of burden than the typical studied country; blue: less.",
         f"The median studied country has {studied_b['per100k'].median():.2f} studies per 100,000 DALYs "
         f"— rich, small countries cluster far above that line, populous L&MICs far below it.",
         f"Base: {len(studied_b):,} countries with GBD 2023 burden data and ≥1 study; global median "
         f"{studied_b['per100k'].median():.2f}. Grey = no study naming the country, or no GBD burden row.",
         studied_b["iso3"].tolist(), studied_b["log_per100k"].tolist(),
-        ["#8c2d20", "#c0392b", "#f2ead9", "#5b78ab", "#2e4a72"],
+        ["#2e4a72", "#5b78ab", "#f2ead9", "#c0392b", "#8c2d20"],
         med_log - half_span, med_log + half_span,
         [med_log - half_span, med_log - half_span / 2, med_log, med_log + half_span / 2, med_log + half_span],
         ["low", "", "median", "", "high"], "studies per\n100k DALYs")
@@ -3468,7 +3468,7 @@ if HAVE_PLOTLY:
         f"Base: {len(wdf):,} countries with ≥1 study and population data. Grey = no study naming the "
         f"country. Population: World Bank.",
         wdf["iso3"].tolist(), wdf["log_per10m"].tolist(),
-        ["#cc2f27", "#efe9da", "#2a5ea8"], wmin, wmax,
+        ["#2a5ea8", "#efe9da", "#cc2f27"], wmin, wmax,
         [wmin, (wmin + wmax) / 2, wmax], ["low", "", "high"], "studies per\n10M people")
 
     # --- fig_map_method: modal type of analysis per country ---
@@ -3534,13 +3534,13 @@ if HAVE_PLOTLY:
             "fig_map_authorship.png",
             "Who studies whom",
             "Share of a country's single-country HFF studies that have at least one author based there. "
-            "Blue = mostly domestic; red = mostly produced from outside.",
+            "Red = mostly domestic; blue = mostly produced from outside.",
             f"{countries[most_external[0]]['country']} has the lowest local-authorship share "
             f"({most_external[1]:.0f}%) among countries with ≥5 studies with a known affiliation.",
             f"Base: {sum(r[2] for r in ma_rows):,} single-country studies with a known author-affiliation "
             f"country, across {len(ma_rows)} countries with ≥5 such studies.",
             ma_isos, ma_vals,
-            ["#c0392b", "#f2ead9", "#2a5ea8"], 0, 100,
+            ["#2a5ea8", "#f2ead9", "#c0392b"], 0, 100,
             [0, 25, 50, 75, 100], ["0%", "25%", "50%", "75%", "100%"], "% with a\nlocal author")
 
 # ---------------------------------------------------------------------------
@@ -3978,8 +3978,8 @@ if have_taxonomy:
 
     opp_headline = "Financing-function attention diverges sharply by disease area"
     opp_desc = ("For each MeSH-derived disease category, its share of tags for a given financing function, "
-                "divided by that function's overall share across all disease-tagged studies. Blue = "
-                "disproportionately more attention; red = disproportionately less.")
+                "divided by that function's overall share across all disease-tagged studies. Red = "
+                "disproportionately more attention; blue = disproportionately less.")
     opp_finding = (
         f"{most_over[0]} studies are tagged {SHORT_FN.get(most_over[1], most_over[1])} "
         f"{2 ** most_over[3]:.2g}× as often as the disease-tagged average, while {most_under[0]} studies "
@@ -3989,7 +3989,7 @@ if have_taxonomy:
 
     masked = np.ma.masked_invalid(log_grid)
     opp_cmap = mcolors.LinearSegmentedColormap.from_list(
-        "opp", ["#8c2d20", "#c0392b", "#f2ead9", "#5b78ab", "#2e4a72"])
+        "opp", ["#2e4a72", "#5b78ab", "#f2ead9", "#c0392b", "#8c2d20"])
     opp_cmap.set_bad("#e5e1d6")
     opp_norm = mcolors.Normalize(vmin=-2, vmax=2)
 
