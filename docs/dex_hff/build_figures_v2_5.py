@@ -5662,16 +5662,11 @@ gallery = [
         "blurb": "Whether research is distributed in proportion to health needs: where evidence falls short "
                  "of disease burden, how concentrated the L&MICs evidence base is, and where evidence "
                  "deserts remain.",
-        # Interactive HTML page written by build_glance_regions_v5.py (run that first).
+        # Interactive HTML page written by build_glance_regions_functions_v2_5.py (run that first).
         "figs": ([{
-            "file": "fig_glance_regions.html", "title": "(Un)equal weight at a glance",
-            "caption": "Interactive page: HFF studies per US$1bn of total health expenditure by country, and a "
-                       "profile card for each WHO region (disease focus, top financing functions, financial "
-                       "protection as an outcome, country coverage over time). The African Region has the most "
-                       "studies per dollar spent (11.3 per US$1bn), because its health spending is so small, not "
-                       "because its evidence base is large. Places that the WHO's country list does not assign to a region (Taiwan, Hong Kong, "
-                       "Kosovo) take the WHO region of their UN M49 sub-region.",
-        }] if (FIGS / "fig_glance_regions.html").exists() else []) + ([
+            "file": "fig_glance_functions.html", "title": 'Which financing functions research focuses on',
+            "caption": "Interactive page: each country is coloured by the financing function tagged most often among the studies naming it (Other and Unclear left out; a study can carry more than one function; grey = fewer than 5 function-tagged studies, or a tie). Benefits decisions leads in 49 of the 150 countries with a clear lead and revenue raising in 44. A profile card for each WHO region shows its function mix (the top function is 16-24% of the region's function tags), disease focus, top financing functions, financial protection as an outcome and country coverage over time. Places that the WHO's country list does not assign to a region (Taiwan, Hong Kong, Kosovo) take the WHO region of their UN M49 sub-region.",
+        }] if (FIGS / "fig_glance_functions.html").exists() else []) + ([
             fig_entry("fig_map_bivariate.png", "Where high burden meets low evidence"),
             fig_entry("fig_map_burden.png", "Research intensity against disease burden (map)"),
             fig_entry("fig_map_deserts.png", "Evidence deserts"),
