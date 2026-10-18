@@ -2,7 +2,9 @@
   - map: each country coloured by the financing function its studies are tagged with most
     (countries with fewer than MIN_FN_STUDIES function-tagged studies, or a tie, in grey);
   - card marker row: a stacked bar of the region's full function mix, accent = its top function;
-  - writes docs/figures/fig_glance_functions.html, so fig_glance_regions.html is left as is.]
+  - writes docs/figures/fig_glance_functions.html, so fig_glance_regions.html is left as is;
+  - no disease-focus row (disease groups are still computed for the console summary);
+  - a "Download PNG" button saves the whole page as one image (html-to-image).]
 
 Builds docs/figures/fig_glance_regions.html — the HFF version of HEE's
 "(Un)equal weight at a glance" page: a research-intensity map plus one profile
@@ -296,9 +298,6 @@ for code, (name, isos, lon, lat) in WB_REGIONS.items():
                   for f in FN_ORDER if fn_counts[f])
 
     dz = Counter(disease_of[s] for s in ss if s in disease_of)
-    dots = largest_remainder({k: dz.get(k, 0) for k in WAFFLE})
-    waffle = "".join(f'<i style="background:{WAFFLE[k]}"></i>' * dots[k] for k in WAFFLE)
-    waffle_labels = "".join(f'<span style="color:{WAFFLE[k]}">{dots[k]}%</span>' for k in WAFFLE)
 
     top3 = ""
     for f, k in fn_counts.most_common(3):
@@ -319,7 +318,6 @@ for code, (name, isos, lon, lat) in WB_REGIONS.items():
           <div class="mix">{mix}</div>
           <div class="scale-v">Most tagged: <strong>{html.escape(SHORT_FN.get(top_fn, top_fn))}</strong></div>
         </div>
-        <div class="row row-waffle"><div class="waffle">{waffle}</div><div class="waffle-labels">{waffle_labels}</div><div class="waffle-n">n = {sum(dz.values()):,} disease-coded</div></div>
         <div class="row row-top3">{top3}</div>
         <div class="row row-utility">
           <div class="big">{fp:.0f}%</div>
@@ -363,13 +361,6 @@ MAP_NOTE = (f"Each country is coloured by the financing function tagged most oft
             f"(Other and Unclear left out; a study can carry more than one function). Light grey = fewer than "
             f"{MIN_FN_STUDIES} function-tagged studies; darker grey = two or more functions tied for the lead; "
             f"pale = no study naming the country.")
-DISEASE_NOTE = (f"Share of the region's disease-coded studies, split into communicable (infectious, maternal and "
-                f"neonatal), non-communicable and injuries. Each study is placed in one of 11 disease groups, "
-                f"matched from its PubMed MeSH terms. Caveats: only {n_disease:,} of {N:,} studies "
-                f"({100 * n_disease / N:.0f}%) have a disease group, because most health financing studies have no "
-                f"PubMed MeSH terms or are not about a single disease; 'metabolic & nutritional' (diabetes and "
-                f"malnutrition together) is counted as non-communicable because the keyword rules cannot "
-                f"separate them.")
 TOP3_NOTE = ("The three financing functions tagged most often among the region's studies. Bar = share of the "
              "region's studies with at least one named function (Other and Unclear left out). A study can carry "
              "more than one function, so shares can add up to more than 100%.")
@@ -399,7 +390,8 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
 .sec b {{ background:var(--ink); color:#fff; font-size:11px; width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; border-radius:3px; }}
 .sec h2 {{ font:800 20px/1 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; font-stretch:condensed; text-transform:uppercase; margin:0; }}
 .sec span {{ color:var(--muted); font-size:12px; }}
-.dl {{ margin-left:auto; padding:5px 11px; border:1px solid var(--ink); border-radius:5px; background:#fff; color:var(--ink); font:600 12px/1 Inter, "Segoe UI", Arial, sans-serif; cursor:pointer; }}
+.eyebrow-r {{ display:flex; align-items:center; gap:10px; }}
+.dl {{ padding:5px 11px; border:1px solid var(--ink); border-radius:5px; background:#fff; color:var(--ink); font:600 12px/1 Inter, "Segoe UI", Arial, sans-serif; cursor:pointer; }}
 .dl:hover {{ background:var(--ink); color:#fff; }}
 .dl:disabled {{ opacity:.5; cursor:wait; }}
 #map {{ height:520px; }}
@@ -408,13 +400,13 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
 .kpi:first-child {{ border-left:0; padding-left:0; }}
 .kpi-v {{ font:800 36px/1 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; font-stretch:condensed; display:flex; align-items:flex-start; gap:4px; }}
 .kpi-l {{ color:var(--muted); font-size:12px; margin-top:8px; }}
-.regions {{ display:grid; grid-template-columns:150px repeat(7, minmax(118px, 1fr)); gap:10px; overflow-x:auto; padding-bottom:6px; }}
+.regions {{ display:grid; grid-template-columns:150px repeat(6, minmax(118px, 1fr)); gap:10px; overflow-x:auto; padding-bottom:6px; }}
 .labels {{ display:grid; grid-template-rows:var(--rows); padding-top:17px; }}
 .lab {{ font-size:11px; color:var(--muted); padding-right:6px; }}
 .lab strong {{ display:block; color:var(--ink); font:800 15px/1.1 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; text-transform:uppercase; margin-bottom:4px; }}
 .lab .key {{ display:flex; align-items:center; gap:5px; }}
 .lab .key i {{ width:9px; height:9px; border-radius:2px; display:inline-block; }}
-.wrap {{ --rows: 62px 40px 24px 58px 166px 140px 112px 104px; }}
+.wrap {{ --rows: 62px 52px 24px 58px 140px 112px 104px; }}
 .sil {{ height:58px; }}
 .card {{ display:grid; grid-template-rows:var(--rows); background:var(--card); border-radius:10px; border-top:5px solid var(--accent); padding:12px 10px; min-width:0; }}
 .card h3 {{ font:800 14px/1.15 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; text-transform:uppercase; text-align:center; margin:0; align-self:center; }}
@@ -453,11 +445,11 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
 </head>
 <body>
 <div class="wrap">
-  <div class="eyebrow"><span>HFF evidence map</span><span class="badge">Draft · data: {SOURCE_NAME}</span></div>
+  <div class="eyebrow"><span>HFF evidence map</span><span class="eyebrow-r"><button class="dl" id="page-dl" type="button" title="Download the whole page (map and region profiles) as a PNG with a citation"><span aria-hidden="true">&#10515;</span> Download PNG</button><span class="badge">Draft · data: {SOURCE_NAME}</span></span></div>
   <h1>(Un)equal weight: Which health financing functions research focuses on</h1>
   <p class="lede">{html.escape(LEDE)}</p>
 
-  <div class="sec"><b>A</b><h2>Leading financing function by country</h2><span>Function tagged most often among the studies naming each country</span>{q(MAP_NOTE)}<button class="dl" id="map-dl" type="button" title="Download the map as a PNG with its legend and a citation"><span aria-hidden="true">&#10515;</span> Download PNG</button></div>
+  <div class="sec"><b>A</b><h2>Leading financing function by country</h2><span>Function tagged most often among the studies naming each country</span>{q(MAP_NOTE)}</div>
   <div class="fn-key">{"".join(f'<span><i style="background:{FUNCTION_COLORS[f]}"></i>{html.escape(SHORT_FN.get(f, f))} ({dom_counts[f]})</span>' for f in FN_ORDER if dom_counts[f])}<span><i style="background:#c9c3b8"></i>Tie</span><span><i style="background:#e6e1d8;border:1px solid #cfc8bc"></i>Fewer than {MIN_FN_STUDIES} studies</span></div>
   <div id="map"></div>
 
@@ -468,10 +460,6 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
     <div class="labels">
       <div></div><div></div><div></div>
       <div class="lab"><strong>Function mix {q(MIX_NOTE)}</strong>Share of function tags; colours as on the map</div>
-      <div class="lab"><strong>Disease focus {q(DISEASE_NOTE)}</strong>Share of disease-coded studies. 1 dot = 1%
-        <span class="key"><i style="background:#3f8f80"></i>Communicable</span>
-        <span class="key"><i style="background:#8a63a8"></i>Non-communicable</span>
-        <span class="key"><i style="background:#d8a03c"></i>Injuries</span></div>
       <div class="lab"><strong>Top three financing functions {q(TOP3_NOTE)}</strong>Bar = share of function-tagged studies</div>
       <div class="lab"><strong>Financial protection as an outcome {q(FP_NOTE)}</strong>Black = financial protection studied; red line = all-study average</div>
       <div class="lab"><strong>Trend over time {q(TREND_NOTE)}</strong>% of the region's countries with a study: solid = at least 1, dashed = 2 or more, grey = all regions (at least 1)</div>
@@ -483,12 +471,13 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
     <div>
       <p>Data: HFF evidence map web build ({SOURCE_NAME}); {YEAR0}–{YEAR1} publication years. Search dates: xx {q("Search dates are not in the web data; they need to come from the review protocol.")}</p>
       <p>Regions: WHO (AFR African, AMR Americas, SEAR South-East Asia, EUR European, EMR Eastern Mediterranean, WPR Western Pacific), as listed by the WHO Global Health Observatory; places that the WHO's country list does not assign to a region (Taiwan, Hong Kong, Kosovo) take the WHO region of their UN M49 sub-region. Map and trend lines cover the {len(countries)} countries in the map's country data; trends run to {LAST_FULL_YEAR}.</p>
-      <p>Financing functions: the HFF financing function groups (Other and Unclear left out); a study can carry more than one. Outcome: financial protection outcome domain. Disease groups: 11 groups matched from PubMed MeSH terms, grouped into communicable, non-communicable and injuries. Map: Robinson projection; countries with fewer than {MIN_FN_STUDIES} function-tagged studies are shown in grey.</p>
+      <p>Financing functions: the HFF financing function groups (Other and Unclear left out); a study can carry more than one. Outcome: financial protection outcome domain. Map: Robinson projection; countries with fewer than {MIN_FN_STUDIES} function-tagged studies are shown in grey.</p>
     </div>
   </div>
 </div>
 <div id="pop" role="dialog"></div>
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js" integrity="sha384-UbfRVKN3/elS1r7JcK2FhmPP+KlJ4CvYwbyYD7tH+uTkbT9bNJr9eJeQ0FoFbAgz" crossorigin="anonymous"></script>
 <script>
 const MAP = {json.dumps(MAP, separators=(",", ":"))};
 (function () {{
@@ -523,74 +512,39 @@ const MAP = {json.dumps(MAP, separators=(",", ":"))};
            lataxis: {{ range: [-58, 85] }} }}
   }}, {{ responsive: true, displayModeBar: false }});
 
-  // "Download PNG": the map redrawn at a fixed size, with title, legend and the
-  // site's citation line (same wording as figureCitation in app.js).
-  const TITLE = "Leading financing function by country";
-  document.getElementById("map-dl").addEventListener("click", async e => {{
+  // "Download PNG": the whole page (both panels) as one image via html-to-image,
+  // with the site's citation line under it (same wording as figureCitation in app.js).
+  const TITLE = "Which financing functions research focuses on";
+  document.getElementById("page-dl").addEventListener("click", async e => {{
     const btn = e.currentTarget;
     btn.disabled = true;
     try {{
-      const S = 2, W = 1600 * S, MAPH = 720 * S, pad = 32 * S;
-      const url = await window.Plotly.toImage("map", {{ format: "png", width: 1600, height: 720, scale: S }});
-      const img = await new Promise((resolve, reject) => {{
-        const im = new Image();
-        im.onload = () => resolve(im);
-        im.onerror = reject;
-        im.src = url;
+      const S = 2, node = document.querySelector(".wrap");
+      const shot = await window.htmlToImage.toCanvas(node, {{
+        pixelRatio: S, backgroundColor: "#f7f3ec", width: node.scrollWidth, height: node.scrollHeight,
+        filter: n => !(n.classList && (n.classList.contains("q") || n.classList.contains("dl")))
       }});
-      const items = MAP.order.map(([, name, colour, n]) => [colour, name + " (" + n + ")"])
-        .concat([["#c9c3b8", "Tie"], ["#e6e1d8", "Fewer than " + MAP.min_n + " function-tagged studies"], ["#f1ede6", "No study"]]);
       const date = new Date().toLocaleDateString("en-GB", {{ day: "numeric", month: "long", year: "numeric" }});
       const cite = "Source: 3ie (2026). Health Systems Financing (HSF) Evidence Map: " + TITLE +
         ". https://3ieimpact.pages.dev/. Downloaded " + date + ".";
-      const font = (wt, px) => wt + " " + px * S + "px Inter, 'Segoe UI', Arial, sans-serif";
+      const pad = 24 * S, W = shot.width;
       const canvas = document.createElement("canvas");
-      let ctx = canvas.getContext("2d");
-      // Lay the legend out in rows first, to know the canvas height.
-      ctx.font = font(400, 15);
-      const sw = 14 * S, gap = 22 * S, rowH = 26 * S, rows = [[]];
-      let x = pad;
-      for (const [colour, label] of items) {{
-        const w = sw + 8 * S + ctx.measureText(label).width;
-        if (x + w > W - pad && rows[rows.length - 1].length) {{ rows.push([]); x = pad; }}
-        rows[rows.length - 1].push([colour, label, x]);
-        x += w + gap;
-      }}
-      const headH = pad + 34 * S + 26 * S, legH = rows.length * rowH + 12 * S;
       canvas.width = W;
-      canvas.height = headH + legH + MAPH + 60 * S;
-      ctx = canvas.getContext("2d");
+      canvas.height = shot.height + 44 * S;
+      const ctx = canvas.getContext("2d");
       ctx.fillStyle = "#f7f3ec";
       ctx.fillRect(0, 0, W, canvas.height);
-      ctx.textBaseline = "top";
-      ctx.fillStyle = "#1d1d1d";
-      ctx.font = font(800, 28);
-      ctx.fillText(TITLE, pad, pad);
-      ctx.fillStyle = "#6b665d";
-      ctx.font = font(400, 15);
-      ctx.fillText("Function tagged most often among the studies naming each country (" + {json.dumps(SOURCE_NAME)} + ")", pad, pad + 38 * S);
-      ctx.textBaseline = "middle";
-      rows.forEach((row, i) => row.forEach(([colour, label, lx]) => {{
-        const y = headH + i * rowH + rowH / 2;
-        ctx.fillStyle = colour;
-        ctx.fillRect(lx, y - sw / 2, sw, sw);
-        ctx.strokeStyle = "#cfc8bc";
-        ctx.lineWidth = S;
-        ctx.strokeRect(lx, y - sw / 2, sw, sw);
-        ctx.fillStyle = "#3b3832";
-        ctx.fillText(label, lx + sw + 8 * S, y);
-      }}));
-      ctx.drawImage(img, 0, headH + legH);
-      ctx.textBaseline = "top";
+      ctx.drawImage(shot, 0, 0);
       ctx.fillStyle = "#d9d3c7";
-      ctx.fillRect(pad, headH + legH + MAPH + 8 * S, W - 2 * pad, S);
+      ctx.fillRect(pad, shot.height, W - 2 * pad, S);
       ctx.fillStyle = "#6b665d";
-      ctx.font = font(400, 13);
-      ctx.fillText(cite, pad, headH + legH + MAPH + 22 * S);
+      ctx.font = 12 * S + "px Inter, 'Segoe UI', Arial, sans-serif";
+      ctx.textBaseline = "top";
+      ctx.fillText(cite, pad, shot.height + 14 * S);
       const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "leading-financing-function-by-country.png";
+      link.download = "which-financing-functions-research-focuses-on.png";
       document.body.appendChild(link);
       link.click();
       link.remove();
