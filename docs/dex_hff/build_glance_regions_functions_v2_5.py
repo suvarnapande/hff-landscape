@@ -390,6 +390,12 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
 .sec b {{ background:var(--ink); color:#fff; font-size:11px; width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; border-radius:3px; }}
 .sec h2 {{ font:800 20px/1 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; font-stretch:condensed; text-transform:uppercase; margin:0; }}
 .sec span {{ color:var(--muted); font-size:12px; }}
+.exporting .regions {{ overflow:visible; }}
+.exporting #map {{ height:520px; }}
+.exporting .kpis {{ grid-template-columns:repeat(6, minmax(0, 1fr)); }}
+.exporting .kpi {{ border-top:0; }}
+.exporting h1 {{ font-size:34px; }}
+.wrap.exporting {{ padding:28px 24px 32px; }}
 .eyebrow-r {{ display:flex; align-items:center; gap:10px; }}
 .dl {{ padding:5px 11px; border:1px solid var(--ink); border-radius:5px; background:#fff; color:var(--ink); font:600 12px/1 Inter, "Segoe UI", Arial, sans-serif; cursor:pointer; }}
 .dl:hover {{ background:var(--ink); color:#fff; }}
@@ -519,11 +525,27 @@ const MAP = {json.dumps(MAP, separators=(",", ":"))};
     const btn = e.currentTarget;
     btn.disabled = true;
     try {{
+      // Lay the page out at its full width first, so a narrow window (or the site's
+      // iframe) does not crop the region cards; restored afterwards.
       const S = 2, node = document.querySelector(".wrap");
-      const shot = await window.htmlToImage.toCanvas(node, {{
-        pixelRatio: S, backgroundColor: "#f7f3ec", width: node.scrollWidth, height: node.scrollHeight,
-        filter: n => !(n.classList && (n.classList.contains("q") || n.classList.contains("dl")))
-      }});
+      const plots = [...document.querySelectorAll(".js-plotly-plot")];
+      const relayout = () => Promise.all(plots.map(el => window.Plotly.Plots.resize(el)));
+      const frame = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      node.style.width = node.style.maxWidth = "1200px";
+      node.classList.add("exporting");
+      let shot;
+      try {{
+        await relayout();
+        await frame();
+        shot = await window.htmlToImage.toCanvas(node, {{
+          pixelRatio: S, backgroundColor: "#f7f3ec", width: node.scrollWidth, height: node.scrollHeight,
+          filter: n => !(n.classList && (n.classList.contains("q") || n.classList.contains("dl")))
+        }});
+      }} finally {{
+        node.style.width = node.style.maxWidth = "";
+        node.classList.remove("exporting");
+        await relayout();
+      }}
       const date = new Date().toLocaleDateString("en-GB", {{ day: "numeric", month: "long", year: "numeric" }});
       const cite = "Source: 3ie (2026). Health Systems Financing (HSF) Evidence Map: " + TITLE +
         ". https://3ieimpact.pages.dev/. Downloaded " + date + ".";
