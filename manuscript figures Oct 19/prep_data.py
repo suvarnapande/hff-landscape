@@ -148,6 +148,34 @@ with open(HERE / "region_trend.csv", "w", newline="", encoding="utf-8") as f:
         for y, one, two in coverage(idx):
             w.writerow([r, y, one, two])
 
+# ---- headline numbers for the "evidence at a glance" figures (as on the web page) ---
+toa = dct["levels"]["type_of_analysis"]
+toa_known = [v for v in studies["type_of_analysis"] if toa[v] != "Unclear"]
+s_cs = {}
+for s, c in zip(geo["s"], geo["c"]):
+    s_cs.setdefault(s, set()).add(c)
+inc = [c["income"] for c in countries]
+with_inc = [cs for cs in s_cs.values() if any(inc[c] for c in cs)]
+oa = json.loads((DOCS / "data" / "open_access_v5.json").read_text(encoding="utf-8"))
+tagged_all = len(s_fns)
+fn_all = Counter(fn for v in s_fns.values() for fn in v)
+top_fn, top_k = fn_all.most_common(1)[0]
+kpis = {
+    "n_studies": N, "year0": year0, "year1": max(studies["year"]),
+    "n_countries_data": len(countries), "n_countries_named": sum(1 for c in countries if c["studies"]),
+    "n_pairs": sum(c["studies"] for c in countries),
+    "n_fn_tagged": tagged_all, "top_fn": top_fn, "top_fn_pct": 100 * top_k / tagged_all,
+    "fp_pct": 100 * len(fp_studies) / N,
+    "quant_pct": 100 * sum(toa[v] == "Quantitative" for v in toa_known) / len(toa_known),
+    "oa_pct": oa["oa_share_pct_of_doi"],
+    "lmic_pct": 100 * sum(any(inc[c] and inc[c] != "High income" for c in cs) for cs in with_inc) / len(with_inc),
+    "n_country_named_studies": len(s_cs),
+}
+with open(HERE / "kpis.csv", "w", newline="", encoding="utf-8") as f:
+    w = csv.writer(f)
+    w.writerow(["key", "value"])
+    w.writerows(kpis.items())
+
 print(f"map: {sum(1 for c in countries if c.get('pop') and c['studies'])} countries with a rate; "
       f"{sum(c['studies'] for c in countries):,} study-country pairs")
 print(f"aid vs research: {research_total:,} study-country pairs; DAH 2022-24 mean total {aid_total:,.0f}")
