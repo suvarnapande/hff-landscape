@@ -5687,10 +5687,10 @@ gallery = [
         "blurb": "Whether research is distributed in proportion to health needs: where evidence falls short "
                  "of disease burden, how concentrated the L&MICs evidence base is, and where evidence "
                  "deserts remain.",
-        # Interactive HTML page written by build_glance_regions_functions_v2_5.py (run that first).
+        # Interactive HTML page written by build_glance_manuscript_v2_5.py (run that first).
         "figs": ([{
-            "file": "fig_glance_functions.html", "title": 'Which financing functions research focuses on',
-            "caption": "Interactive page: each country is coloured by the financing function tagged most often among the studies naming it (Other and Unclear left out; a study can carry more than one function; grey = fewer than 5 function-tagged studies, or a tie). Benefits decisions leads in 49 of the 150 countries with a clear lead and revenue raising in 44. A profile card for each WHO region shows its function mix (the top function is 16-24% of the region's function tags), disease focus, top financing functions, financial protection as an outcome and country coverage over time. Places that the WHO's country list does not assign to a region (Taiwan, Hong Kong, Kosovo) take the WHO region of their UN M49 sub-region.",
+            "file": "fig_glance_functions.html", "title": 'Health financing research at a glance',
+            "caption": "Interactive page: headline numbers and study-country pairs as reported in the HSF interim manuscript; a map of studies per 10 million people by country, on a log colour scale (grey = no study or no population data); and a profile card for each WHO region: function shares of single-country studies (the manuscript's Figure 4), financial protection among single-country studies with a classifiable outcome (all studies: 11%), and country coverage over time. Places that the WHO's country list does not assign to a region (Taiwan, Hong Kong, Kosovo) take the WHO region of their UN M49 sub-region.",
         }] if (FIGS / "fig_glance_functions.html").exists() else []) + ([
             fig_entry("fig_map_bivariate.png", "Where high burden meets low evidence"),
             fig_entry("fig_map_burden.png", "Research intensity against disease burden (map)"),
