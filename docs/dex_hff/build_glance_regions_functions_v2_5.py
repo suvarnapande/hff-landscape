@@ -539,6 +539,9 @@ const MAP = {json.dumps(MAP, separators=(",", ":"))};
         await frame();
         shot = await window.htmlToImage.toCanvas(node, {{
           pixelRatio: S, backgroundColor: "#f7f3ec", width: node.scrollWidth, height: node.scrollHeight,
+          // the live page is centred with margin:auto; without this the copied left margin
+          // shifts the snapshot right and crops it in a wide window
+          style: {{ margin: "0" }},
           filter: n => !(n.classList && (n.classList.contains("q") || n.classList.contains("dl")))
         }});
       }} finally {{

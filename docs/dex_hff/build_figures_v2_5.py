@@ -1192,6 +1192,15 @@ def method_squarify(vals, x, y, w, h):
 
 
 design_rows = method_rows("study_design")
+# study_design mixes methods with topics, one label per study. Show the two kinds
+# as separate groups so the panel does not read as a single list of methods.
+DESIGN_FOCUS = {"Policy & implementation", "Descriptive system analyses", "Comparative health systems",
+                "Provider/payment system", "Political economy & governance"}
+design_groups = [
+    ("RESEARCH METHOD", [r for r in design_rows if r[0] != "Unclear" and r[0] not in DESIGN_FOCUS]),
+    ("FOCUS OF THE STUDY", [r for r in design_rows if r[0] in DESIGN_FOCUS]),
+    (None, [r for r in design_rows if r[0] == "Unclear"]),
+]
 dtype_rows = method_rows("data_type")
 dsource_rows = method_rows("data_source")
 mc_desc = (f"Distribution of {N:,} studies by study design, data type and data source. "
@@ -1227,19 +1236,32 @@ def method_card(theme, title, question, x0, y0, x1, y1, band_h=0.075, right_note
                  va="top", ha="right")
 
 
-# Study design: dot plot with % and n.
-method_card("design", "Study design", "How were the studies designed?", 0.015, 0.08, 0.468, 0.895,
-            right_note=f"% of studies\n(n = {N:,})")
+# Study design: dot plot with % and n, in two groups (methods, then topics).
+method_card("design", "Study design", "What kind of study is it? One label per study.", 0.015, 0.08, 0.468,
+            0.895, right_note=f"% of studies\n(n = {N:,})")
 ax = fig.add_axes([0.19, 0.135, 0.25, 0.665])
-ys = list(range(len(design_rows)))[::-1]
-for (lab, n), y, c in zip(design_rows, ys, method_colors(design_rows, METHOD_THEMES["design"]["cols"])):
-    p = 100 * n / N
-    ax.hlines(y, 0, p, color=c, lw=2)
-    ax.scatter([p], [y], s=70, color=c, zorder=3, edgecolor="white", lw=1)
-    ax.text(p + 0.9, y + 0.13, method_pct(n), fontsize=10, fontweight="bold", va="center")
-    ax.text(p + 0.9, y - 0.27, f"(n = {n:,})", fontsize=8.6, color=METHOD_MUTED, va="center")
-ax.set_yticks(ys, [r[0] for r in design_rows], fontsize=10)
-ax.set_ylim(-0.7, len(design_rows) - 0.4)
+y, ticks, labels = 0, [], []
+for head, rows in design_groups:
+    if not rows:
+        continue
+    if head:
+        y -= 0.35
+        ax.text(-0.02, y, head, transform=ax.get_yaxis_transform(),
+                fontsize=8.6, fontweight="bold", color=METHOD_THEMES["design"]["accent"], ha="right",
+                va="center")
+        y -= 0.85
+    for (lab, n), c in zip(rows, method_colors(rows, METHOD_THEMES["design"]["cols"])):
+        p = 100 * n / N
+        ax.hlines(y, 0, p, color=c, lw=2)
+        ax.scatter([p], [y], s=70, color=c, zorder=3, edgecolor="white", lw=1)
+        ax.text(p + 0.9, y + 0.13, method_pct(n), fontsize=10, fontweight="bold", va="center")
+        ax.text(p + 0.9, y - 0.27, f"(n = {n:,})", fontsize=8.6, color=METHOD_MUTED, va="center")
+        ticks.append(y)
+        labels.append(lab)
+        y -= 1
+    y -= 0.25
+ax.set_yticks(ticks, labels, fontsize=10)
+ax.set_ylim(y + 0.5, 0.1)
 ax.set_xlim(0, 30)
 for s in ("top", "right", "left"):
     ax.spines[s].set_visible(False)
@@ -1339,8 +1361,11 @@ if small:
         axc.text(0.995, ly, f"{method_pct(n)} (n = {n:,})", fontsize=9, va="center", ha="right",
                  color=SUBHEAD_COLOR, clip_on=False)
 
-fig.text(0.022, 0.045, f"Note: Based on {N:,} studies. Each study was assigned one category per dimension "
+fig.text(0.022, 0.068, f"Note: Based on {N:,} studies. Each study was assigned one category per dimension "
          "(study design, data type and data source). Percentages may not sum to 100% due to rounding.",
+         fontsize=9, color=SUBHEAD_COLOR)
+fig.text(0.022, 0.045, "Study design: some labels describe the research method, others the focus of the study. "
+         "Each study has only one label, so many studies could fit a label in each group.",
          fontsize=9, color=SUBHEAD_COLOR)
 fig.text(0.022, 0.022, "Unclear: no category could be assigned because the study's title and abstract did not "
          "give enough information to classify it confidently (the field was left blank at extraction).",
