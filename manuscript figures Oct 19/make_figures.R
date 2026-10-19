@@ -33,6 +33,10 @@ world <- st_transform(world, "+proj=robin")
 
 n_pairs <- sum(rates$studies)
 n_rated <- sum(!is.na(rates$per10m))
+# Caption totals as reported in the manuscript text (section 3.2.2), which come from a
+# different country matching than the site data drawn here (47,693 pairs, 184 countries).
+MS_PAIRS <- 47488
+MS_COUNTRIES <- 198
 breaks <- c(3, 10, 30, 100, 300, 1000)
 
 p1 <- ggplot(world) +
@@ -44,13 +48,13 @@ p1 <- ggplot(world) +
   coord_sf(expand = FALSE, datum = NA) +
   labs(title = "Health financing studies per 10 million people, by country studied",
        caption = paste0(
-         "Each study counts once in each country it names (", format(n_pairs, big.mark = ","), " study-country pairs across ",
-         n_rated, " countries and territories). Population: World Bank. Log scale, darker = more studies per ",
+         "Each study counts once in each country it names (", format(MS_PAIRS, big.mark = ","), " study-country pairs across ",
+         MS_COUNTRIES, " countries and territories). Population: World Bank. Log scale, darker = more studies per ",
          "person; values below 3 or above 1,000 take the end colours. Grey: no study naming the country, or no ",
          "population data.")) +
   theme_hee(grid = "none") +
   theme(axis.text = element_blank(), axis.title = element_blank())
-save_fig(p1, "fig1_studies_per_10m_map", 4.3)
+save_fig(p1, "fig1_studies_per_10m_map_v2", 4.3)
 
 # ---- fig 8: aid vs research, by region -----------------------------------------
 av <- read.csv("aid_vs_research.csv")

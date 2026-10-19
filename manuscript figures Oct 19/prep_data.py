@@ -29,6 +29,15 @@ with open(HERE / "map_per10m.csv", "w", newline="", encoding="utf-8") as f:
         w.writerow([c["iso3"], c["country"], c["studies"], c.get("pop") or "", rate])
 
 
+# ---- glance figure, panel A: studies per 100,000 DALYs (the HEE reference's measure) --
+with open(HERE / "map_per100k_dalys.csv", "w", newline="", encoding="utf-8") as f:
+    w = csv.writer(f)
+    w.writerow(["iso3", "country", "studies", "dalys", "per100k_dalys"])
+    for c in countries:
+        rate = 1e5 * c["studies"] / c["dalys"] if c.get("dalys") and c["studies"] else ""
+        w.writerow([c["iso3"], c["country"], c["studies"], c.get("dalys") or "", rate])
+
+
 # ---- fig 8: aid vs research, by GBD super-region -----------------------------------
 def gbd_bucket(income, un_region):
     if income == "High income":
@@ -116,12 +125,19 @@ with open(HERE / "region_functions.csv", "w", newline="", encoding="utf-8") as f
         for fn in sorted(named):
             w.writerow([r, len(region_studies[r]), len(tagged), fn, 100 * cnt[fn] / len(tagged)])
 
+# Two bases for financial protection: all studies (as on the web page), and studies with
+# an outcome domain other than 'Unclear' (as in the manuscript text, 41,309 studies).
+with_outcome = {s for s, g in zip(out_j["s"], out_j["g"]) if out_groups[g] != "Unclear"}
 with open(HERE / "region_fp.csv", "w", newline="", encoding="utf-8") as f:
     w = csv.writer(f)
-    w.writerow(["region", "n_studies", "fp_share", "all_studies_fp_share", "all_studies_n"])
+    w.writerow(["region", "n_studies", "fp_share", "all_studies_fp_share", "all_studies_n",
+                "n_with_outcome", "fp_share_outcome", "all_outcome_fp_share", "all_with_outcome_n"])
     for r in REGIONS:
         ss = region_studies[r]
-        w.writerow([r, len(ss), 100 * len(ss & fp_studies) / len(ss), 100 * len(fp_studies) / N, N])
+        so = ss & with_outcome
+        w.writerow([r, len(ss), 100 * len(ss & fp_studies) / len(ss), 100 * len(fp_studies) / N, N,
+                    len(so), 100 * len(so & fp_studies) / len(so), 100 * len(fp_studies) / len(with_outcome),
+                    len(with_outcome)])
 
 # Cumulative share of a region's countries named by >=1 and >=2 studies, by year
 # (2026 is a partial year and is left out, as on the web page).
@@ -166,6 +182,8 @@ kpis = {
     "n_pairs": sum(c["studies"] for c in countries),
     "n_fn_tagged": tagged_all, "top_fn": top_fn, "top_fn_pct": 100 * top_k / tagged_all,
     "fp_pct": 100 * len(fp_studies) / N,
+    "n_with_outcome": len(with_outcome),
+    "fp_pct_outcome": 100 * len(fp_studies) / len(with_outcome),
     "quant_pct": 100 * sum(toa[v] == "Quantitative" for v in toa_known) / len(toa_known),
     "oa_pct": oa["oa_share_pct_of_doi"],
     "lmic_pct": 100 * sum(any(inc[c] and inc[c] != "High income" for c in cs) for cs in with_inc) / len(with_inc),
@@ -175,6 +193,19 @@ with open(HERE / "kpis.csv", "w", newline="", encoding="utf-8") as f:
     w = csv.writer(f)
     w.writerow(["key", "value"])
     w.writerows(kpis.items())
+
+# ---- financial protection by region, manuscript basis -----------------------------------
+# Single-country studies (as for the manuscript's Figure 4), with an outcome domain other
+# than 'Unclear' (as for its 11% headline).
+single = {s: next(iter(cs)) for s, cs in s_cs.items() if len(cs) == 1}
+with open(HERE / "region_fp_single.csv", "w", newline="", encoding="utf-8") as f:
+    w = csv.writer(f)
+    w.writerow(["region", "n_single", "n_single_with_outcome", "fp_share_outcome", "all_outcome_fp_share"])
+    for r in REGIONS:
+        ss = {s for s, c in single.items() if region_of[c] == r}
+        so = ss & with_outcome
+        w.writerow([r, len(ss), len(so), 100 * len(so & fp_studies) / len(so),
+                    100 * len(fp_studies) / len(with_outcome)])
 
 print(f"map: {sum(1 for c in countries if c.get('pop') and c['studies'])} countries with a rate; "
       f"{sum(c['studies'] for c in countries):,} study-country pairs")
