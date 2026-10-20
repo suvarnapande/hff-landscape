@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-19d";
+const BUILD = "2026-10-20a";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -214,6 +214,8 @@ export function normalizeFilter(filt, db) {
     function: arr(f.function),
     outcome: arr(f.outcome),
     design: arr(f.design),
+    funder: arr(f.funder),
+    language: arr(f.language),
     analysis: one(f.analysis),
     datatype: one(f.datatype),
     datasource: one(f.datasource),
@@ -234,6 +236,12 @@ export function applyFilters(db, filt) {
   const datatypeCode = f.datatype !== "All" ? db.codeOf.data_type.get(f.datatype) : null;
   const datasourceCode = f.datasource !== "All" ? db.codeOf.data_source.get(f.datasource) : null;
   const scopeCode = f.scope !== "All" ? db.codeOf.geo_scope.get(f.scope) : null;
+  // Funder and language come from data/study_filters.json (db.studyFilters).
+  const sf = db.studyFilters;
+  const funderIdx = sf && f.funder.length
+    ? new Set(f.funder.map(name => sf.funders.indexOf(name))) : null;
+  const languageIdx = sf && f.language.length
+    ? new Set(f.language.map(name => sf.languages.indexOf(name))) : null;
   let funcSet = null;
   if (f.function.length) {
     funcSet = new Set();
@@ -261,6 +269,8 @@ export function applyFilters(db, filt) {
     if (scopeCode !== null && st.geo_scope[s] !== scopeCode) continue;
     if (funcSet && !funcSet.has(s)) continue;
     if (outcomeSet && !outcomeSet.has(s)) continue;
+    if (funderIdx && !sf.funder[s].some(i => funderIdx.has(i))) continue;
+    if (languageIdx && !languageIdx.has(sf.language[s])) continue;
     base[s] = 1;
   }
 
@@ -1561,7 +1571,9 @@ if (typeof document !== "undefined") {
       + '<li><strong>Single country:</strong> one country identified.</li>'
       + '<li><strong>Multi-country:</strong> two or more countries identified.</li>'
       + '<li><strong>Region/global:</strong> a location is recorded, but it is a region or "global" rather than specific countries.</li>'
-      + '<li><strong>No country stated:</strong> no study location is recorded.</li></ul>'
+      + '<li><strong>No country stated:</strong> no study location is recorded.</li></ul>',
+    "x-funder": '<p>As named in the publication record. Fewer than one in five studies report a funder, so choosing a funder shows only studies that name it. Numbers in brackets are studies.</p>',
+    "x-language": '<p>From the publication record. Almost all included studies are in English, which reflects how studies were searched rather than the wider literature.</p>'
   };
 
   function setupFilterHelp() {
@@ -2870,18 +2882,21 @@ if (typeof document !== "undefined") {
     });
   }
 
-  function makeMultiSelect(id, options, placeholder, key) {
+  // counts (optional) adds "(n)" after each option, e.g. studies per funder.
+  function makeMultiSelect(id, options, placeholder, key, counts) {
     const sel = $(id);
-    for (const o of options) {
+    options.forEach((o, i) => {
       const opt = document.createElement("option");
       opt.value = o;
-      opt.textContent = o;
+      opt.textContent = counts ? `${o} (${fmtNum(counts[i])})` : o;
       sel.appendChild(opt);
-    }
+    });
     state.ts[key] = new window.TomSelect(sel, {
       plugins: ["remove_button"],
       placeholder: placeholder,
       allowEmptyOption: false,
+      // Keep the data order (most studies first), also among search matches.
+      sortField: [{ field: "$order" }, { field: "$score" }],
       onChange: vals => {
         state.filt[key] = Array.isArray(vals) ? vals.slice() : (vals ? [vals] : []);
         refreshExplorer();
@@ -2893,7 +2908,7 @@ if (typeof document !== "undefined") {
     const m = db.dict.meta;
     state.filt = {
       years: db.years.slice(),
-      income: [], region: [], function: [], outcome: [], design: [],
+      income: [], region: [], function: [], outcome: [], design: [], funder: [], language: [],
       analysis: "All", datatype: "All", datasource: "All", scope: "All"
     };
 
@@ -2921,6 +2936,9 @@ if (typeof document !== "undefined") {
     makeMultiSelect("x-function", db.function_grps, "All functions", "function");
     makeMultiSelect("x-outcome", db.outcome_grps, "All domains", "outcome");
     makeMultiSelect("x-design", db.levels.study_design, "All designs", "design");
+    const sf = db.studyFilters;
+    makeMultiSelect("x-funder", sf.funders, "All studies", "funder", sf.funder_n);
+    makeMultiSelect("x-language", sf.languages, "All languages", "language", sf.language_n);
 
     makeRadios("x-analysis", "x_analysis", ["All", "Quantitative", "Qualitative", "Mixed methods"]);
 
@@ -2947,7 +2965,7 @@ if (typeof document !== "undefined") {
 
     $("x-reset").addEventListener("click", () => {
       slider.noUiSlider.set(db.years);
-      for (const k of ["income", "region", "function", "outcome", "design"]) state.ts[k].clear();
+      for (const k of ["income", "region", "function", "outcome", "design", "funder", "language"]) state.ts[k].clear();
       const first = $("x-analysis").querySelector("input");
       first.checked = true;
       state.filt.analysis = "All";
@@ -3792,10 +3810,11 @@ if (typeof document !== "undefined") {
       if (!r.ok) throw new Error("failed to load data/" + name + ".json: " + r.status);
       return r.json();
     };
-    const [dict, studies, geo, func, outcome, countries, content, openAccess, funderTypes] = await Promise.all(
+    const [dict, studies, geo, func, outcome, countries, content, openAccess, funderTypes, studyFilters] = await Promise.all(
       ["dict", "studies", "geo", "function", "outcome", "countries", "content",
-       "open_access_v5", "funder_types_v5"].map(get));
+       "open_access_v5", "funder_types_v5", "study_filters"].map(get));
     db = loadData({ dict, studies, geo, func, outcome, countries, content });
+    db.studyFilters = studyFilters;
     db.overviewMetrics = { openAccess, funderTypes };
 
     // Sections listed here stay in content.json (and their figures stay built)
