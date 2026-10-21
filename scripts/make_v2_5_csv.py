@@ -22,13 +22,13 @@ The bibliographic, topic and MeSH columns are copied as they are; in v2.5 they a
 the studies added after v1 too, except the topic columns of the 49 HTA studies Decision 17
 re-included (not in the topic model).
 
-Run: python docs/dex_hff/make_v2_5_csv.py
+Run: python scripts/make_v2_5_csv.py
 """
 from pathlib import Path
 
 import pandas as pd
 
-DEX = Path(__file__).resolve().parent
+DEX = Path(__file__).resolve().parent.parent / "docs" / "dex_hff"
 src = DEX / "v2_5_1" / "hff_analysis_dataset_v2_5_1_included.csv"
 dst = DEX / "v2_5_1" / "hff_v2_5_1_site.csv"
 

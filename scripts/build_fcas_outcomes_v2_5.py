@@ -28,7 +28,7 @@ Outputs:
   docs/figures/fig_outcome_by_context_v5.png
   docs/data/fcas_outcomes_v5.json   headline numbers + figure captions
 
-Run: python docs/dex_hff/build_fcas_outcomes_v5.py
+Run: python scripts/build_fcas_outcomes_v2_5.py
 """
 import json
 from collections import Counter
@@ -44,7 +44,7 @@ import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent.parent  # docs/
+ROOT = Path(__file__).resolve().parent.parent / "docs"  # docs/
 DEX = ROOT / "dex_hff"
 FIGS = ROOT / "figures"
 DATA = ROOT / "data"

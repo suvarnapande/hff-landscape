@@ -15,7 +15,7 @@ Inputs:
 Outputs (docs/data/):
   dict.json, studies.json, function.json, outcome.json, geo.json, countries.json, content.json
 
-Run: python docs/dex_hff/build_data_v2_5.py  (after make_v2_5_csv.py)
+Run: python scripts/build_data_v2_5.py  (after make_v2_5_csv.py)
 """
 import json
 import re
@@ -24,7 +24,7 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent.parent  # docs/
+ROOT = Path(__file__).resolve().parent.parent / "docs"  # docs/
 DEX = ROOT / "dex_hff"
 DATA = ROOT / "data"
 BUILD_DATE = "2026-10-13"

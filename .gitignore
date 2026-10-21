@@ -1,4 +1,8 @@
-# Raw extraction source data and build scripts — kept locally only, not published.
+# Raw extraction source data — kept locally only, not published (build scripts are in scripts/).
 # Mirrors HEE's own setup: the public site repo ships the built dashboard
 # (docs/index.html, app.js, data/*.json), not the raw pipeline inputs/scripts.
 docs/dex_hff/
+
+# Local-only archive of superseded raw datasets (several GB).
+archive/raw_old.zip
+__pycache__/

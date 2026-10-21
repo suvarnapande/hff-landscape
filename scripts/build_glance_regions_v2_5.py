@@ -1,16 +1,4 @@
-"""[At-a-glance copy of build_glance_regions_functions_v2_5.py (that script is kept):
-  - map: studies per 100,000 DALYs (one blue ramp, log scale) instead of the leading function,
-    matching the manuscript figure fig_glance_1_evidence_at_a_glance_v2;
-  - the function colour key moves from the map to panel B (the cards' mix bars);
-  - title without "(Un)equal weight". Still writes docs/figures/fig_glance_functions.html.]
-
-[Earlier: financing-function copy of build_glance_regions_v2_5.py: health expenditure is dropped.
-  - map: each country coloured by the financing function its studies are tagged with most
-    (countries with fewer than MIN_FN_STUDIES function-tagged studies, or a tie, in grey);
-  - card marker row: a stacked bar of the region's full function mix, accent = its top function;
-  - writes docs/figures/fig_glance_functions.html, so fig_glance_regions.html is left as is;
-  - no disease-focus row (disease groups are still computed for the console summary);
-  - a "Download PNG" button saves the whole page as one image (html-to-image).]
+"""[v2.5 copy of build_glance_regions_v2_4.py: reads the HFF dataset v2.5.1 (v2_5_1/hff_v2_5_1_site.csv); otherwise unchanged.]
 
 Builds docs/figures/fig_glance_regions.html — the HFF version of HEE's
 "(Un)equal weight at a glance" page: a research-intensity map plus one profile
@@ -19,13 +7,13 @@ card per WHO region (v2.4: WHO regions replace the World Bank regions of the ear
 HEE divides research output by disease burden (DALYs) and profiles QALY use.
 HFF studies are about health financing, so here:
   - research intensity = studies per US$1bn of total health expenditure
-    (countries.json `total_spend_bn`, PPP US$bn, 2022) instead of per 100,000 DALYs [dropped in this copy];
+    (countries.json `total_spend_bn`, PPP US$bn, 2022) instead of per 100,000 DALYs;
   - the "Top three" row shows financing functions (HFF has these; HEE left it blank);
   - the utility-measure row becomes "Financial protection as an outcome".
 
 Reads docs/data/*.json plus the raw v5 CSV (only `record_id` and `mesh_theme`,
 for the disease waffle). Run after build_data_v5.py:
-    python docs/dex_hff/build_glance_regions_v5.py
+    python scripts/build_glance_regions_v2_5.py
 """
 import html
 import json
@@ -35,11 +23,11 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent.parent  # docs/
+ROOT = Path(__file__).resolve().parent.parent / "docs"  # docs/
 DATA = ROOT / "data"
 FIGS = ROOT / "figures"
-RAW_CSV = Path(__file__).resolve().parent / "v2_5_1" / "hff_v2_5_1_site.csv"
-OUT = FIGS / "fig_glance_functions.html"
+RAW_CSV = ROOT / "dex_hff" / "v2_5_1" / "hff_v2_5_1_site.csv"
+OUT = FIGS / "fig_glance_regions.html"
 SOURCE_NAME = "HFF dataset v2.5.1"
 LAST_FULL_YEAR = 2025
 
@@ -186,64 +174,64 @@ pct_lmic = 100 * sum(1 for cs in with_income
                      if any(inc_of_c[c] and inc_of_c[c] != "High income" for c in cs)) / len(with_income)
 
 # ---------------------------------------------------------------------------
-# Financing functions. The site palette (build_figures_v2_5.py) uses several close
-# blues, which cannot be told apart on a categorical map, so this page has its own.
+# Map: studies per US$1bn health expenditure, log colour scale centred on the
+# median country (cream), clipped symmetrically at the 5th/95th percentiles.
+# ---------------------------------------------------------------------------
+map_rows = []
+for c in countries:
+    spend = c.get("total_spend_bn")
+    has_spend = spend not in (None, 0)
+    map_rows.append({"iso3": c["iso3"], "country": c["country"], "n": c["studies"],
+                     "spend": round(spend, 2) if has_spend else None,
+                     "rate": c["studies"] / spend if has_spend else None})
+pos = sorted(r["rate"] for r in map_rows if r["rate"])
+
+
+def quantile(vals, q):
+    k = (len(vals) - 1) * q
+    lo, hi = math.floor(k), math.ceil(k)
+    return vals[lo] + (vals[hi] - vals[lo]) * (k - lo)
+
+
+median_rate = quantile(pos, 0.5)
+lmed = math.log10(median_rate)
+half = max(lmed - math.log10(quantile(pos, 0.05)), math.log10(quantile(pos, 0.95)) - lmed)
+ZMIN, ZMAX = lmed - half, lmed + half
+COLOURS = [[0, "#c2412d"], [0.25, "#e58c6c"], [0.5, "#efe4d6"], [0.75, "#8d9fd3"], [1, "#4b64b4"]]
+
+
+def scale_pos(rate):
+    return min(1.0, max(0.0, (math.log10(rate) - ZMIN) / (ZMAX - ZMIN)))
+
+
+def scale_colour(t, lighten=0.35):
+    for (t0, c0), (t1, c1) in zip(COLOURS, COLOURS[1:]):
+        if t <= t1:
+            f = (t - t0) / (t1 - t0) if t1 > t0 else 0
+            a = [int(c0[i:i + 2], 16) for i in (1, 3, 5)]
+            b = [int(c1[i:i + 2], 16) for i in (1, 3, 5)]
+            rgb = [x + (y - x) * f for x, y in zip(a, b)]
+            rgb = [x + (255 - x) * lighten for x in rgb]
+            return "#" + "".join(f"{round(x):02x}" for x in rgb)
+    return COLOURS[-1][1]
+
+
+# ---------------------------------------------------------------------------
+# Region cards
 # ---------------------------------------------------------------------------
 FUNCTION_COLORS = {
-    "Revenue Raising": "#4e79a7", "Benefits decisions": "#f28e2b", "Public financial management": "#59a14f",
-    "Pooling": "#b07aa1", "Purchasing": "#e15759", "Overall": "#9c755f",
-    "Recurrent financing for the procurement and distribution of supply chain inputs": "#76b7b2",
-    "Capital investment: infrastructure": "#edc948", "Capital investment: other health system inputs": "#ff9da7",
+    "Benefits decisions": "#1764C0", "Public financial management": "#2F9B92", "Purchasing": "#63B0BC",
+    "Revenue Raising": "#93A3D0", "Pooling": "#B8C2CF",
+    "Recurrent financing for the procurement and distribution of supply chain inputs": "#7E94B1",
+    "Capital investment: infrastructure": "#D2B06B", "Capital investment: other health system inputs": "#88B7A8",
+    "Overall": "#A48BB8",
 }
 SHORT_FN = {"Recurrent financing for the procurement and distribution of supply chain inputs":
             "Recurrent financing (supply chain)",
             "Capital investment: other health system inputs": "Capital investment: other inputs",
             "Revenue Raising": "Revenue raising"}
 NAMED_FUNCTIONS = [f for f in FUNC_GRPS if f not in ("Other", "Unclear")]
-FN_ORDER = sorted(NAMED_FUNCTIONS, key=lambda f: -sum(1 for v in s_functions.values() if f in v))
-MIN_FN_STUDIES = 5
 
-
-def function_mix(ss):
-    """Function-tagged studies among `ss`, and how often each named function is tagged."""
-    tagged = [s for s in ss if s_functions[s] & set(NAMED_FUNCTIONS)]
-    return tagged, Counter(f for s in tagged for f in s_functions[s] if f in NAMED_FUNCTIONS)
-
-
-# ---------------------------------------------------------------------------
-# Map: each country takes the colour of its most-tagged function.
-# ---------------------------------------------------------------------------
-c_studies = defaultdict(set)
-for s, c in zip(geo_j["s"], geo_j["c"]):
-    c_studies[c].add(s)
-map_rows = []
-for i, c in enumerate(countries):
-    tagged, cnt = function_mix(c_studies[i])
-    top = cnt.most_common()
-    lead = [f for f, k in top if k == top[0][1]] if top else []
-    status = ("none" if not c["studies"] else "few" if len(tagged) < MIN_FN_STUDIES
-              else "tie" if len(lead) > 1 else "fn")
-    map_rows.append({"iso3": c["iso3"], "country": c["country"], "n": c["studies"], "nf": len(tagged),
-                     "status": status, "fn": lead[0] if status == "fn" else None,
-                     "top": [[SHORT_FN.get(f, f), round(100 * k / len(tagged))] for f, k in top[:3]]})
-dom_counts = Counter(r["fn"] for r in map_rows if r["fn"])
-
-# ---------------------------------------------------------------------------
-# Map (this copy): studies per 100,000 DALYs, the HEE reference's measure, on one
-# blue ramp (theme_hee hee_ord) with a log scale clipped at 0.1 and 30.
-# ---------------------------------------------------------------------------
-RATE_MIN, RATE_MAX = 0.1, 30
-HEE_ORD = ["#86b6ef", "#6da7ec", "#5598e7", "#3987e5", "#2a78d6", "#256abf", "#1c5cab", "#184f95",
-           "#104281", "#0d366b"]
-rate_rows = [{"iso3": c["iso3"], "country": c["country"], "n": c["studies"],
-              "rate": round(1e5 * c["studies"] / c["dalys"], 4) if c.get("dalys") and c["studies"] else None,
-              "dalys": bool(c.get("dalys"))} for c in countries]
-n_rated = sum(1 for r in rate_rows if r["rate"])
-
-
-# ---------------------------------------------------------------------------
-# Region cards
-# ---------------------------------------------------------------------------
 
 def largest_remainder(counts, total=100):
     s = sum(counts.values())
@@ -308,15 +296,20 @@ cards = []
 summary = []
 for code, (name, isos, lon, lat) in WB_REGIONS.items():
     ss = region_studies[code]
-    fn_tagged, fn_counts = function_mix(ss)
-    n_tags = sum(fn_counts.values())
-    top_fn, top_k = fn_counts.most_common(1)[0]
-    mix = "".join(f'<b style="width:{100 * fn_counts[f] / n_tags:.2f}%;background:{FUNCTION_COLORS[f]}" '
-                  f'title="{html.escape(SHORT_FN.get(f, f))}: {100 * fn_counts[f] / n_tags:.0f}% of tags"></b>'
-                  for f in FN_ORDER if fn_counts[f])
+    in_ref = [c for c in countries if REGION_OF[c["iso3"]] == code]
+    spend_idx = {c_iso.index(c["iso3"]) for c in in_ref if c.get("total_spend_bn")}
+    spend = sum(c["total_spend_bn"] for c in in_ref if c.get("total_spend_bn"))
+    n_rate = sum(1 for s in ss if s_countries[s] & spend_idx)
+    rate = n_rate / spend
+    t = scale_pos(rate)
 
     dz = Counter(disease_of[s] for s in ss if s in disease_of)
+    dots = largest_remainder({k: dz.get(k, 0) for k in WAFFLE})
+    waffle = "".join(f'<i style="background:{WAFFLE[k]}"></i>' * dots[k] for k in WAFFLE)
+    waffle_labels = "".join(f'<span style="color:{WAFFLE[k]}">{dots[k]}%</span>' for k in WAFFLE)
 
+    fn_tagged = [s for s in ss if s_functions[s] & set(NAMED_FUNCTIONS)]
+    fn_counts = Counter(f for s in fn_tagged for f in s_functions[s] if f in NAMED_FUNCTIONS)
     top3 = ""
     for f, k in fn_counts.most_common(3):
         share = 100 * k / len(fn_tagged)
@@ -326,16 +319,17 @@ for code, (name, isos, lon, lat) in WB_REGIONS.items():
 
     fp = 100 * sum(1 for s in ss if FP in s_outcomes[s]) / len(ss)
     yrs, one, two = coverage_series(set(isos))
-    summary.append((code, len(ss), top_fn, 100 * top_k / n_tags, fp, dz))
+    summary.append((code, len(ss), rate, fp, dz))
     cards.append(f"""
-      <div class="card" style="--accent:{FUNCTION_COLORS[top_fn]}">
+      <div class="card" style="--accent:{scale_colour(t)}">
         <div class="sil" id="sil-{code}" aria-hidden="true"></div>
         <h3>{html.escape(name)}</h3>
         <div class="tagline"><span class="tag">{code}</span> n = {len(ss):,}</div>
         <div class="row row-scale">
-          <div class="mix">{mix}</div>
-          <div class="scale-v">Most tagged: <strong>{html.escape(SHORT_FN.get(top_fn, top_fn))}</strong></div>
+          <div class="scale"><span class="marker" style="left:{100 * t:.1f}%"></span></div>
+          <div class="scale-v">{rate:.1f} per US$1bn spent</div>
         </div>
+        <div class="row row-waffle"><div class="waffle">{waffle}</div><div class="waffle-labels">{waffle_labels}</div><div class="waffle-n">n = {sum(dz.values()):,} disease-coded</div></div>
         <div class="row row-top3">{top3}</div>
         <div class="row row-utility">
           <div class="big">{fp:.0f}%</div>
@@ -349,25 +343,16 @@ for code, (name, isos, lon, lat) in WB_REGIONS.items():
 # ---------------------------------------------------------------------------
 n_disease = len(disease_of)
 REGION_NAME = {k: v[0] for k, v in WB_REGIONS.items()}
-n_fn_mapped = sum(dom_counts.values())
-(d1, k1), (d2, k2) = dom_counts.most_common(2)
-by_top = defaultdict(list)
-for code, _, f, _, _, _ in summary:
-    by_top[SHORT_FN.get(f, f).lower()].append(code)
-region_rate = {}
-for code in WB_REGIONS:
-    with_dalys = {i for i, c in enumerate(countries) if REGION_OF[c["iso3"]] == code and c.get("dalys")}
-    n_reg = sum(1 for s in region_studies[code] if s_countries[s] & with_dalys)
-    region_rate[code] = 1e5 * n_reg / sum(countries[i]["dalys"] for i in with_dalys)
-rr_hi = max(region_rate, key=region_rate.get)
-rr_lo = min(region_rate, key=region_rate.get)
-LEDE = (f"Relative to disease burden, health financing research is most concentrated in the {REGION_NAME[rr_hi]} "
-        f"({region_rate[rr_hi]:.1f} studies per 100,000 DALYs) and thinnest in the {REGION_NAME[rr_lo]} "
-        f"({region_rate[rr_lo]:.2f}), a {region_rate[rr_hi] / region_rate[rr_lo]:.0f}-fold gap. Across all studies, "
-        f"{SHORT_FN.get(FN_ORDER[0], FN_ORDER[0]).lower()} is the financing function tagged most often; by region, "
-        + "; ".join(f"{f} leads in {', '.join(codes)}" for f, codes in by_top.items()) + ".")
+by_rate = sorted(summary, key=lambda r: r[2])
+by_n = sorted(summary, key=lambda r: r[1])
+hi, lo = by_rate[-1], by_rate[0]
+LEDE = (f"Measured against what health systems spend, the pattern reverses: {REGION_NAME[hi[0]]} has the most "
+        f"health financing research per dollar ({hi[2]:.1f} studies per US$1bn), {hi[2] / lo[2]:.0f}× "
+        f"{REGION_NAME[lo[0]]} ({lo[2]:.1f}). That reflects how little is spent there, not a large evidence base: "
+        f"in absolute terms {REGION_NAME[by_n[-1][0]]} is named by {by_n[-1][1]:,} studies and "
+        f"{REGION_NAME[hi[0]]} by {hi[1]:,}.")
 MAP = {
-    "rows": rate_rows, "zmin": math.log10(RATE_MIN), "zmax": math.log10(RATE_MAX), "colours": HEE_ORD,
+    "rows": map_rows, "zmin": ZMIN, "zmax": ZMAX, "median": median_rate, "colours": COLOURS,
     "tags": [{"code": k, "lon": v[0], "lat": v[1]} for k, v in TAGS.items()],
     "silhouettes": {k: {"isos": v[1], "lon": v[2], "lat": v[3]} for k, v in WB_REGIONS.items()},
 }
@@ -378,14 +363,16 @@ def q(note):
             f'data-note="{html.escape(note, quote=True)}">?</button>')
 
 
-MIX_NOTE = ("How often each financing function is tagged among the region's function-tagged studies (Other and "
-            "Unclear left out). A study can carry more than one function, so this counts tags, not studies, and "
-            "the segments add up to 100%. Colours as in the key above the cards; the card's top border takes the "
-            "colour of the function tagged most.")
-MAP_NOTE = (f"Studies naming the country per 100,000 disability-adjusted life years (DALYs, GBD 2023), for the "
-            f"{n_rated} countries with at least one study and burden data. A study naming several countries counts "
-            f"in each. Log colour scale; values below {RATE_MIN:g} or above {RATE_MAX:g} take the end colours. Grey = "
-            f"no study naming the country, or no burden data (Hong Kong, Kosovo).")
+RATE_NOTE = ("Studies naming at least one country in the region, divided by the region's total health "
+             "expenditure (PPP US$ billions, 2022, summed over its countries with spending data), per US$1bn. "
+             "The marker sits on the same colour scale as the map.")
+DISEASE_NOTE = (f"Share of the region's disease-coded studies, split into communicable (infectious, maternal and "
+                f"neonatal), non-communicable and injuries. Each study is placed in one of 11 disease groups, "
+                f"matched from its PubMed MeSH terms. Caveats: only {n_disease:,} of {N:,} studies "
+                f"({100 * n_disease / N:.0f}%) have a disease group, because most health financing studies have no "
+                f"PubMed MeSH terms or are not about a single disease; 'metabolic & nutritional' (diabetes and "
+                f"malnutrition together) is counted as non-communicable because the keyword rules cannot "
+                f"separate them.")
 TOP3_NOTE = ("The three financing functions tagged most often among the region's studies. Bar = share of the "
              "region's studies with at least one named function (Other and Unclear left out). A study can carry "
              "more than one function, so shares can add up to more than 100%.")
@@ -401,7 +388,7 @@ page = f"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Health financing research at a glance</title>
+<title>(Un)equal weight at a glance</title>
 <style>
 :root {{ --ink:#1d1d1d; --muted:#6b665d; --line:#d9d3c7; --bg:#f7f3ec; --card:#ece6dc; --red:#c2412d; }}
 * {{ box-sizing: border-box; }}
@@ -415,40 +402,26 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
 .sec b {{ background:var(--ink); color:#fff; font-size:11px; width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; border-radius:3px; }}
 .sec h2 {{ font:800 20px/1 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; font-stretch:condensed; text-transform:uppercase; margin:0; }}
 .sec span {{ color:var(--muted); font-size:12px; }}
-.exporting .regions {{ overflow:visible; }}
-.exporting #map {{ height:520px; }}
-.exporting .kpis {{ grid-template-columns:repeat(6, minmax(0, 1fr)); }}
-.exporting .kpi {{ border-top:0; }}
-.exporting h1 {{ font-size:34px; }}
-.wrap.exporting {{ padding:28px 24px 32px; }}
-.eyebrow-r {{ display:flex; align-items:center; gap:10px; }}
-.dl {{ padding:5px 11px; border:1px solid var(--ink); border-radius:5px; background:#fff; color:var(--ink); font:600 12px/1 Inter, "Segoe UI", Arial, sans-serif; cursor:pointer; }}
-.dl:hover {{ background:var(--ink); color:#fff; }}
-.dl:disabled {{ opacity:.5; cursor:wait; }}
 #map {{ height:520px; }}
-.kpis {{ display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); border-top:1.5px solid var(--ink); border-bottom:1px solid var(--line); margin:8px 0 6px; }}
+.kpis {{ display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); border-top:1.5px solid var(--ink); border-bottom:1px solid var(--line); margin-top:8px; }}
 .kpi {{ padding:16px 14px 14px; border-left:1px solid var(--line); }}
 .kpi:first-child {{ border-left:0; padding-left:0; }}
 .kpi-v {{ font:800 36px/1 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; font-stretch:condensed; display:flex; align-items:flex-start; gap:4px; }}
 .kpi-l {{ color:var(--muted); font-size:12px; margin-top:8px; }}
-.regions {{ display:grid; grid-template-columns:150px repeat(6, minmax(118px, 1fr)); gap:10px; overflow-x:auto; padding-bottom:6px; }}
+.regions {{ display:grid; grid-template-columns:150px repeat(7, minmax(118px, 1fr)); gap:10px; overflow-x:auto; padding-bottom:6px; }}
 .labels {{ display:grid; grid-template-rows:var(--rows); padding-top:17px; }}
 .lab {{ font-size:11px; color:var(--muted); padding-right:6px; }}
 .lab strong {{ display:block; color:var(--ink); font:800 15px/1.1 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; text-transform:uppercase; margin-bottom:4px; }}
 .lab .key {{ display:flex; align-items:center; gap:5px; }}
 .lab .key i {{ width:9px; height:9px; border-radius:2px; display:inline-block; }}
-.wrap {{ --rows: 62px 52px 24px 58px 140px 112px 104px; }}
+.wrap {{ --rows: 62px 40px 24px 58px 166px 140px 112px 104px; }}
 .sil {{ height:58px; }}
 .card {{ display:grid; grid-template-rows:var(--rows); background:var(--card); border-radius:10px; border-top:5px solid var(--accent); padding:12px 10px; min-width:0; }}
 .card h3 {{ font:800 14px/1.15 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; text-transform:uppercase; text-align:center; margin:0; align-self:center; }}
 .tag {{ background:var(--ink); color:#fff; font-size:10px; font-weight:700; padding:2px 5px; border-radius:3px; }}
 .row-scale, .tagline {{ font-size:11px; text-align:center; color:#3b3832; }}
-.mix {{ display:flex; height:12px; margin:8px 2px 6px; border-radius:3px; overflow:hidden; }}
-.mix b {{ display:block; height:100%; border-right:1px solid var(--card); }}
-.mix b:last-child {{ border-right:0; }}
-.fn-key {{ display:flex; flex-wrap:wrap; gap:4px 14px; font-size:11.5px; color:#3b3832; margin:4px 0 2px; }}
-.fn-key span {{ display:inline-flex; align-items:center; gap:5px; }}
-.fn-key i {{ width:10px; height:10px; border-radius:2px; display:inline-block; }}
+.scale {{ position:relative; height:6px; margin:10px 6px 6px; border-radius:3px; background:linear-gradient(90deg,#c2412d,#e58c6c,#efe4d6,#8d9fd3,#4b64b4); }}
+.marker {{ position:absolute; top:-4px; width:9px; height:14px; margin-left:-4.5px; background:var(--ink); border-radius:4px; border:1.5px solid #fff; }}
 .scale-v {{ font-size:10.5px; color:var(--muted); }}
 .waffle {{ display:grid; grid-template-columns:repeat(10, 1fr); gap:2px; width:100%; max-width:112px; margin:6px auto 0; }}
 .waffle i {{ display:block; aspect-ratio:1; border-radius:50%; }}
@@ -476,21 +449,24 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
 </head>
 <body>
 <div class="wrap">
-  <div class="eyebrow"><span>HFF evidence map</span><span class="eyebrow-r"><button class="dl" id="page-dl" type="button" title="Download the whole page (map and region profiles) as a PNG with a citation"><span aria-hidden="true">&#10515;</span> Download PNG</button><span class="badge">Draft · data: {SOURCE_NAME}</span></span></div>
-  <h1>Health financing research at a glance</h1>
+  <div class="eyebrow"><span>HFF evidence map</span><span class="badge">Draft · data: {SOURCE_NAME}</span></div>
+  <h1>(Un)equal weight: Health financing research output compared to health expenditure</h1>
   <p class="lede">{html.escape(LEDE)}</p>
 
-  <div class="kpis"><div class="kpi"><div class="kpi-v">{N:,}</div><div class="kpi-l">health financing studies, {YEAR0}–{YEAR1}</div></div><div class="kpi"><div class="kpi-v">{n_countries_named}{q("Countries in the map's country data named by at least one study in the period. Region or global labels (for example 'Europe' or 'Global') are not countries and are not counted.")}</div><div class="kpi-l">countries profiled in the map with at least one</div></div><div class="kpi"><div class="kpi-v">{pct_fp:.0f}%{q("Share of all studies whose outcome domains include financial protection. A study can carry more than one outcome domain.")}</div><div class="kpi-l">investigate financial protection as an outcome</div></div><div class="kpi"><div class="kpi-v">{pct_quant:.0f}%{q(f"Share of studies with a clear type of analysis that are quantitative only (mixed methods and qualitative are the rest). Studies whose type of analysis is unclear (about {pct_unclear_toa:.0f}%) are left out of the base.")}</div><div class="kpi-l">are quantitative</div></div><div class="kpi"><div class="kpi-v">{pct_oa:.0f}%{q("Share of studies with a DOI that are open access (from OpenAlex, matched by DOI). Studies without a DOI are left out of the base.")}</div><div class="kpi-l">are open access</div></div><div class="kpi"><div class="kpi-v">{pct_lmic:.0f}%{q("Share of studies naming at least one country that name at least one low- or middle-income country (World Bank income groups). Studies naming no country are left out of the base.")}</div><div class="kpi-l">focus on low- and middle-income countries</div></div></div>
-  <div class="sec"><b>A</b><h2>Geographic distribution of health financing studies</h2><span>Studies per 100,000 DALYs (log colour scale)</span>{q(MAP_NOTE)}</div>
+  <div class="sec"><b>A</b><h2>Research intensity by country</h2><span>Studies per US$1bn total health expenditure · median {median_rate:.1f}</span>{q("Studies naming the country, divided by its total health expenditure (PPP US$ billions, 2022), per US$1bn. Colour is on a log scale centred on the median country. Grey = no study naming the country, or no spending data (Venezuela, Hong Kong).")}</div>
   <div id="map"></div>
 
+  <div class="kpis"><div class="kpi"><div class="kpi-v">{N:,}</div><div class="kpi-l">health financing studies, {YEAR0}–{YEAR1}</div></div><div class="kpi"><div class="kpi-v">{n_countries_named}{q("Countries in the map's country data named by at least one study in the period. Region or global labels (for example 'Europe' or 'Global') are not countries and are not counted.")}</div><div class="kpi-l">countries profiled in the map with at least one</div></div><div class="kpi"><div class="kpi-v">{pct_fp:.0f}%{q("Share of all studies whose outcome domains include financial protection. A study can carry more than one outcome domain.")}</div><div class="kpi-l">investigate financial protection as an outcome</div></div><div class="kpi"><div class="kpi-v">{pct_quant:.0f}%{q(f"Share of studies with a clear type of analysis that are quantitative only (mixed methods and qualitative are the rest). Studies whose type of analysis is unclear (about {pct_unclear_toa:.0f}%) are left out of the base.")}</div><div class="kpi-l">are quantitative</div></div><div class="kpi"><div class="kpi-v">{pct_oa:.0f}%{q("Share of studies with a DOI that are open access (from OpenAlex, matched by DOI). Studies without a DOI are left out of the base.")}</div><div class="kpi-l">are open access</div></div><div class="kpi"><div class="kpi-v">{pct_lmic:.0f}%{q("Share of studies naming at least one country that name at least one low- or middle-income country (World Bank income groups). Studies naming no country are left out of the base.")}</div><div class="kpi-l">focus on low- and middle-income countries</div></div></div>
 
   <div class="sec"><b>B</b><h2>Profile of studies by region</h2><span>Each card matches the black region tag on the map</span></div>
-  <div class="fn-key">{"".join(f'<span><i style="background:{FUNCTION_COLORS[f]}"></i>{html.escape(SHORT_FN.get(f, f))}</span>' for f in FN_ORDER)}</div>
   <div class="regions">
     <div class="labels">
       <div></div><div></div><div></div>
-      <div class="lab"><strong>Function mix {q(MIX_NOTE)}</strong>Share of function tags; colours as in the key above</div>
+      <div class="lab">Marker shows where each region falls on the map's colour scale {q(RATE_NOTE)}</div>
+      <div class="lab"><strong>Disease focus {q(DISEASE_NOTE)}</strong>Share of disease-coded studies. 1 dot = 1%
+        <span class="key"><i style="background:#3f8f80"></i>Communicable</span>
+        <span class="key"><i style="background:#8a63a8"></i>Non-communicable</span>
+        <span class="key"><i style="background:#d8a03c"></i>Injuries</span></div>
       <div class="lab"><strong>Top three financing functions {q(TOP3_NOTE)}</strong>Bar = share of function-tagged studies</div>
       <div class="lab"><strong>Financial protection as an outcome {q(FP_NOTE)}</strong>Black = financial protection studied; red line = all-study average</div>
       <div class="lab"><strong>Trend over time {q(TREND_NOTE)}</strong>% of the region's countries with a study: solid = at least 1, dashed = 2 or more, grey = all regions (at least 1)</div>
@@ -502,33 +478,30 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
     <div>
       <p>Data: HFF evidence map web build ({SOURCE_NAME}); {YEAR0}–{YEAR1} publication years. Search dates: xx {q("Search dates are not in the web data; they need to come from the review protocol.")}</p>
       <p>Regions: WHO (AFR African, AMR Americas, SEAR South-East Asia, EUR European, EMR Eastern Mediterranean, WPR Western Pacific), as listed by the WHO Global Health Observatory; places that the WHO's country list does not assign to a region (Taiwan, Hong Kong, Kosovo) take the WHO region of their UN M49 sub-region. Map and trend lines cover the {len(countries)} countries in the map's country data; trends run to {LAST_FULL_YEAR}.</p>
-      <p>Financing functions: the HFF financing function groups (Other and Unclear left out); a study can carry more than one. Outcome: financial protection outcome domain. Map: studies per 100,000 DALYs (GBD 2023), Robinson projection; grey = no study naming the country or no burden data.</p>
+      <p>Health expenditure: total health spending, PPP US$ billions, 2022 (the site's country reference data). Outcome: financial protection outcome domain. Disease groups: 11 groups matched from PubMed MeSH terms, grouped into communicable, non-communicable and injuries. Map: Robinson projection; grey = no study naming the country or no spending data.</p>
     </div>
   </div>
 </div>
 <div id="pop" role="dialog"></div>
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js" integrity="sha384-UbfRVKN3/elS1r7JcK2FhmPP+KlJ4CvYwbyYD7tH+uTkbT9bNJr9eJeQ0FoFbAgz" crossorigin="anonymous"></script>
 <script>
 const MAP = {json.dumps(MAP, separators=(",", ":"))};
 (function () {{
   const rows = MAP.rows;
   const has = rows.filter(r => r.rate > 0);
   const none = rows.filter(r => !(r.rate > 0));
-  const fmt = v => v >= 1 ? v.toFixed(1) : v.toFixed(2);
+  const fmt = v => v.toLocaleString("en-GB", {{ maximumFractionDigits: 1 }});
   window.Plotly.newPlot("map", [
     {{ type: "choropleth", locations: has.map(r => r.iso3), z: has.map(r => Math.log10(r.rate)),
-       text: has.map(r => r.country + "<br>" + r.n.toLocaleString("en-GB") + " studies<br>" + fmt(r.rate) +
-         " per 100,000 DALYs"), hoverinfo: "text",
-       zmin: MAP.zmin, zmax: MAP.zmax, colorscale: MAP.colours.map((c, i) => [i / (MAP.colours.length - 1), c]),
+       text: has.map(r => r.country + "<br>" + r.n.toLocaleString("en-GB") + " studies<br>US$" + fmt(r.spend) +
+         "bn health spending<br>" + r.rate.toFixed(1) + " studies per US$1bn"), hoverinfo: "text",
+       zmin: MAP.zmin, zmax: MAP.zmax, colorscale: MAP.colours,
        marker: {{ line: {{ color: "#ffffff", width: 0.4 }} }},
-       colorbar: {{ title: {{ text: "per 100,000<br>DALYs", font: {{ size: 11 }} }}, thickness: 10, len: 0.55, x: 0.02,
-         y: 0.3, tickvals: [-1, Math.log10(0.3), 0, Math.log10(3), 1, Math.log10(30)],
-         ticktext: ["0.1", "0.3", "1", "3", "10", "30"] }} }},
+       colorbar: {{ title: {{ text: "per US$1bn<br>spent", font: {{ size: 11 }} }}, thickness: 10, len: 0.55, x: 0.02, y: 0.3,
+         tickvals: [MAP.zmin, Math.log10(MAP.median), MAP.zmax], ticktext: ["low", "median", "high"] }} }},
     {{ type: "choropleth", locations: none.map(r => r.iso3), z: none.map(() => 0), showscale: false,
-       text: none.map(r => r.country + "<br>" + (r.dalys ? "no study naming it" : r.n.toLocaleString("en-GB") +
-         " studies<br>no burden data")), hoverinfo: "text", colorscale: [[0, "#dcd6cc"], [1, "#dcd6cc"]],
-       marker: {{ line: {{ color: "#ffffff", width: 0.4 }} }} }},
+       text: none.map(r => r.country + "<br>" + (r.spend === null ? r.n.toLocaleString("en-GB") + " studies<br>no spending data" : "no study naming it")),
+       hoverinfo: "text", colorscale: [[0, "#dcd6cc"], [1, "#dcd6cc"]], marker: {{ line: {{ color: "#ffffff", width: 0.4 }} }} }},
     // Region tags: black boxes, then their white codes on top.
     {{ type: "scattergeo", lon: MAP.tags.map(t => t.lon), lat: MAP.tags.map(t => t.lat), mode: "markers",
        marker: {{ symbol: "square", size: 30, color: "#1d1d1d" }}, hoverinfo: "skip" }},
@@ -542,67 +515,6 @@ const MAP = {json.dumps(MAP, separators=(",", ":"))};
            landcolor: "#e6e1d8", showcountries: true, countrycolor: "#ffffff", bgcolor: "rgba(0,0,0,0)",
            lataxis: {{ range: [-58, 85] }} }}
   }}, {{ responsive: true, displayModeBar: false }});
-
-  // "Download PNG": the whole page (both panels) as one image via html-to-image,
-  // with the site's citation line under it (same wording as figureCitation in app.js).
-  const TITLE = "Health financing research at a glance";
-  document.getElementById("page-dl").addEventListener("click", async e => {{
-    const btn = e.currentTarget;
-    btn.disabled = true;
-    try {{
-      // Lay the page out at its full width first, so a narrow window (or the site's
-      // iframe) does not crop the region cards; restored afterwards.
-      const S = 2, node = document.querySelector(".wrap");
-      const plots = [...document.querySelectorAll(".js-plotly-plot")];
-      const relayout = () => Promise.all(plots.map(el => window.Plotly.Plots.resize(el)));
-      const frame = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-      node.style.width = node.style.maxWidth = "1200px";
-      node.classList.add("exporting");
-      let shot;
-      try {{
-        await relayout();
-        await frame();
-        shot = await window.htmlToImage.toCanvas(node, {{
-          pixelRatio: S, backgroundColor: "#f7f3ec", width: node.scrollWidth, height: node.scrollHeight,
-          // the live page is centred with margin:auto; without this the copied left margin
-          // shifts the snapshot right and crops it in a wide window
-          style: {{ margin: "0" }},
-          filter: n => !(n.classList && (n.classList.contains("q") || n.classList.contains("dl")))
-        }});
-      }} finally {{
-        node.style.width = node.style.maxWidth = "";
-        node.classList.remove("exporting");
-        await relayout();
-      }}
-      const date = new Date().toLocaleDateString("en-GB", {{ day: "numeric", month: "long", year: "numeric" }});
-      const cite = "Source: 3ie (2026). Health Systems Financing (HSF) Evidence Map: " + TITLE +
-        ". https://3ieimpact.pages.dev/. Downloaded " + date + ".";
-      const pad = 24 * S, W = shot.width;
-      const canvas = document.createElement("canvas");
-      canvas.width = W;
-      canvas.height = shot.height + 44 * S;
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#f7f3ec";
-      ctx.fillRect(0, 0, W, canvas.height);
-      ctx.drawImage(shot, 0, 0);
-      ctx.fillStyle = "#d9d3c7";
-      ctx.fillRect(pad, shot.height, W - 2 * pad, S);
-      ctx.fillStyle = "#6b665d";
-      ctx.font = 12 * S + "px Inter, 'Segoe UI', Arial, sans-serif";
-      ctx.textBaseline = "top";
-      ctx.fillText(cite, pad, shot.height + 14 * S);
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "health-financing-research-at-a-glance.png";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setTimeout(() => URL.revokeObjectURL(link.href), 2000);
-    }} finally {{
-      btn.disabled = false;
-    }}
-  }});
 }})();
 // Region silhouettes above each card: the region's countries filled black
 // in a fixed window (same country outlines as the main map).
@@ -646,10 +558,9 @@ OUT.write_text(page, encoding="utf-8")
 print(f"Wrote {OUT}")
 print(f"  studies {N:,}; countries named {n_countries_named}; financial protection {pct_fp:.1f}%; "
       f"quantitative {pct_quant:.1f}% (unclear {pct_unclear_toa:.1f}%); OA {pct_oa}%; L&MICs {pct_lmic:.1f}%")
-print(f"  leading function by country: {dict(dom_counts)}; ties {sum(r['status'] == 'tie' for r in map_rows)}; "
-      f"too few {sum(r['status'] == 'few' for r in map_rows)}; "
+print(f"  median {median_rate:.2f} studies per US$1bn; colour range {10 ** ZMIN:.2f}-{10 ** ZMAX:.2f}; "
       f"disease-coded {n_disease:,}")
-for code, n, top_fn, top_pct, fp, dz in summary:
+for code, n, rate, fp, dz in summary:
     tot = sum(dz.values())
     mix = " / ".join(f"{100 * dz.get(k, 0) / tot:.0f}" for k in WAFFLE) if tot else "-"
-    print(f"  {code}: n={n:,}  top {SHORT_FN.get(top_fn, top_fn)} ({top_pct:.0f}% of tags)  FP {fp:.0f}%  disease comm/ncd/inj {mix} (n={tot})")
+    print(f"  {code}: n={n:,}  {rate:.1f}/US$1bn  FP {fp:.0f}%  disease comm/ncd/inj {mix} (n={tot})")

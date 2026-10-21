@@ -22,7 +22,7 @@ Outputs:
   docs/figures/fig_oa_author_income_v5.png
   docs/data/open_access_v5.json   headline numbers + figure captions
 
-Run: python docs/dex_hff/build_open_access_v5.py
+Run: python scripts/build_open_access_v2_5.py
 """
 import ast
 import json
@@ -40,7 +40,7 @@ import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent.parent  # docs/
+ROOT = Path(__file__).resolve().parent.parent / "docs"  # docs/
 DEX = ROOT / "dex_hff"
 FIGS = ROOT / "figures"
 DATA = ROOT / "data"
@@ -70,8 +70,8 @@ INCOME_OF_ISO3 = {c["iso3"]: c["income"] for c in countries}
 NAME_OF_ISO3 = {c["iso3"]: c["country"] for c in countries}
 SHORT_COUNTRY = {"United States of America": "United States", "United Republic of Tanzania": "Tanzania"}
 
-# Reuse build_figures_v5.py's ISO2 -> ISO3 table rather than keeping a second copy.
-_src = (DEX / "build_figures_v5.py").read_text(encoding="utf-8")
+# Reuse build_figures_v2_5.py's ISO2 -> ISO3 table (same as v5's) rather than keeping a second copy.
+_src = (Path(__file__).resolve().parent / "build_figures_v2_5.py").read_text(encoding="utf-8")
 ISO2_TO_ISO3 = ast.literal_eval(re.search(r"ISO2_TO_ISO3 = (\{.*?\n\})", _src, re.S).group(1))
 ISO3_NAMES_EXTRA = {"TWN": "Taiwan", "ISR": "Israel", "HKG": "Hong Kong", "SGP": "Singapore"}
 

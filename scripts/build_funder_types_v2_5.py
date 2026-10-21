@@ -14,7 +14,7 @@ Outputs:
   docs/data/funder_types_v5.csv    funder string -> type, with study counts (audit)
   docs/data/funder_types_v5.json   headline numbers + figure caption
 
-Run: python docs/dex_hff/build_funder_types_v5.py
+Run: python scripts/build_funder_types_v2_5.py
 """
 import json
 import re
@@ -29,7 +29,7 @@ fig_text_fit.install()
 import matplotlib.ticker as mticker
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent.parent  # docs/
+ROOT = Path(__file__).resolve().parent.parent / "docs"  # docs/
 DEX = ROOT / "dex_hff"
 FIGS = ROOT / "figures"
 DATA = ROOT / "data"

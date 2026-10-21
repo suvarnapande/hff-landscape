@@ -1,13 +1,4 @@
-"""[Manuscript copy of build_glance_at_a_glance_v2_5.py (that script is kept): follows how
-HSF_Interim_Manuscript_Draft_v2.0.docx calculates its numbers, like the manuscript figures in
-'manuscript figures Oct 19' (make_glance_figures_v3.R):
-  - headline numbers are the ones stated in the manuscript text (MS below);
-  - map: studies per 10 million people ("relative to population", manuscript Figure 2);
-  - region cards: function shares and n are the manuscript's Figure 4 values (single-country
-    studies, FIG4 below); financial protection = share of the region's single-country studies
-    with an outcome domain other than 'Unclear' (the base of the manuscript's 11%).]
-
-[Earlier: at-a-glance copy of build_glance_regions_functions_v2_5.py (that script is kept):
+"""[At-a-glance copy of build_glance_regions_functions_v2_5.py (that script is kept):
   - map: studies per 100,000 DALYs (one blue ramp, log scale) instead of the leading function,
     matching the manuscript figure fig_glance_1_evidence_at_a_glance_v2;
   - the function colour key moves from the map to panel B (the cards' mix bars);
@@ -34,7 +25,7 @@ HFF studies are about health financing, so here:
 
 Reads docs/data/*.json plus the raw v5 CSV (only `record_id` and `mesh_theme`,
 for the disease waffle). Run after build_data_v5.py:
-    python docs/dex_hff/build_glance_regions_v5.py
+    python scripts/build_glance_at_a_glance_v2_5.py
 """
 import html
 import json
@@ -44,10 +35,10 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent.parent  # docs/
+ROOT = Path(__file__).resolve().parent.parent / "docs"  # docs/
 DATA = ROOT / "data"
 FIGS = ROOT / "figures"
-RAW_CSV = Path(__file__).resolve().parent / "v2_5_1" / "hff_v2_5_1_site.csv"
+RAW_CSV = ROOT / "dex_hff" / "v2_5_1" / "hff_v2_5_1_site.csv"
 OUT = FIGS / "fig_glance_functions.html"
 SOURCE_NAME = "HFF dataset v2.5.1"
 LAST_FULL_YEAR = 2025
@@ -241,25 +232,12 @@ dom_counts = Counter(r["fn"] for r in map_rows if r["fn"])
 # Map (this copy): studies per 100,000 DALYs, the HEE reference's measure, on one
 # blue ramp (theme_hee hee_ord) with a log scale clipped at 0.1 and 30.
 # ---------------------------------------------------------------------------
-RATE_MIN, RATE_MAX = 3, 1000
+RATE_MIN, RATE_MAX = 0.1, 30
 HEE_ORD = ["#86b6ef", "#6da7ec", "#5598e7", "#3987e5", "#2a78d6", "#256abf", "#1c5cab", "#184f95",
            "#104281", "#0d366b"]
 rate_rows = [{"iso3": c["iso3"], "country": c["country"], "n": c["studies"],
-              "rate": round(1e7 * c["studies"] / c["pop"], 4) if c.get("pop") and c["studies"] else None,
-              "dalys": bool(c.get("pop"))} for c in countries]
-
-# Numbers as stated in the manuscript text, and its Figure 4 (single-country studies).
-MS = {"studies": 53411, "empirical_pct": 93, "countries": 198, "pairs": 47488, "named_pct": 83,
-      "named": 44122, "us_pct": 29, "oa_pct": 64, "n_doi": 42144, "funder_pct": 18, "n_funder": 9501,
-      "fp_pct": 11, "n_outcome": 41309}
-FIG4_FN = ["Benefits decisions", "Purchasing", "Pooling", "Revenue Raising", "Public financial management",
-           "Overall", "Recurrent financing for the procurement and distribution of supply chain inputs",
-           "Capital investment: other health system inputs", "Capital investment: infrastructure"]
-FIG4 = {  # region: (n single-country studies, shares in FIG4_FN order)
-    "AFR": (3730, [22, 15, 21, 21, 19, 13, 15, 6, 5]), "AMR": (18743, [25, 27, 29, 10, 13, 5, 5, 3, 3]),
-    "EMR": (1658, [20, 19, 16, 21, 15, 20, 14, 5, 5]), "EUR": (8704, [28, 26, 10, 13, 20, 12, 8, 3, 6]),
-    "SEAR": (2180, [20, 12, 24, 20, 21, 12, 12, 6, 5]), "WPR": (7339, [27, 22, 23, 14, 13, 10, 9, 4, 4]),
-}
+              "rate": round(1e5 * c["studies"] / c["dalys"], 4) if c.get("dalys") and c["studies"] else None,
+              "dalys": bool(c.get("dalys"))} for c in countries]
 n_rated = sum(1 for r in rate_rows if r["rate"])
 
 
@@ -330,33 +308,30 @@ cards = []
 summary = []
 for code, (name, isos, lon, lat) in WB_REGIONS.items():
     ss = region_studies[code]
-    n_single, shares = FIG4[code]
-    share_of = dict(zip(FIG4_FN, shares))
-    tot = sum(shares)
-    top_fn = max(FIG4_FN, key=share_of.get)
-    top_k = share_of[top_fn]
-    mix = "".join(f'<b style="width:{100 * share_of[f] / tot:.2f}%;background:{FUNCTION_COLORS[f]}" '
-                  f'title="{html.escape(SHORT_FN.get(f, f))}: {share_of[f]}% of single-country studies"></b>'
-                  for f in FN_ORDER if share_of[f])
+    fn_tagged, fn_counts = function_mix(ss)
+    n_tags = sum(fn_counts.values())
+    top_fn, top_k = fn_counts.most_common(1)[0]
+    mix = "".join(f'<b style="width:{100 * fn_counts[f] / n_tags:.2f}%;background:{FUNCTION_COLORS[f]}" '
+                  f'title="{html.escape(SHORT_FN.get(f, f))}: {100 * fn_counts[f] / n_tags:.0f}% of tags"></b>'
+                  for f in FN_ORDER if fn_counts[f])
 
     dz = Counter(disease_of[s] for s in ss if s in disease_of)
 
     top3 = ""
-    for f in sorted(FIG4_FN, key=lambda f: -share_of[f])[:3]:
-        share = share_of[f]
+    for f, k in fn_counts.most_common(3):
+        share = 100 * k / len(fn_tagged)
         top3 += (f'<div class="dz"><span class="dz-icon" style="background:{FUNCTION_COLORS[f]}"></span>'
                  f'<span class="dz-name">{html.escape(SHORT_FN.get(f, f))}</span><span class="dz-v">{share:.0f}%</span>'
                  f'<div class="dz-bar"><b style="width:{share:.1f}%;background:{FUNCTION_COLORS[f]}"></b></div></div>')
 
-    single_cls = [s for s in ss if len(s_countries[s]) == 1 and s_outcomes[s] - {"Unclear"}]
-    fp = 100 * sum(1 for s in single_cls if FP in s_outcomes[s]) / len(single_cls)
+    fp = 100 * sum(1 for s in ss if FP in s_outcomes[s]) / len(ss)
     yrs, one, two = coverage_series(set(isos))
-    summary.append((code, n_single, top_fn, top_k, fp, dz))
+    summary.append((code, len(ss), top_fn, 100 * top_k / n_tags, fp, dz))
     cards.append(f"""
       <div class="card" style="--accent:{FUNCTION_COLORS[top_fn]}">
         <div class="sil" id="sil-{code}" aria-hidden="true"></div>
         <h3>{html.escape(name)}</h3>
-        <div class="tagline"><span class="tag">{code}</span> n = {n_single:,}</div>
+        <div class="tagline"><span class="tag">{code}</span> n = {len(ss):,}</div>
         <div class="row row-scale">
           <div class="mix">{mix}</div>
           <div class="scale-v">Most tagged: <strong>{html.escape(SHORT_FN.get(top_fn, top_fn))}</strong></div>
@@ -364,7 +339,7 @@ for code, (name, isos, lon, lat) in WB_REGIONS.items():
         <div class="row row-top3">{top3}</div>
         <div class="row row-utility">
           <div class="big">{fp:.0f}%</div>
-          <div class="ubar"><b style="width:{fp:.1f}%"></b><span class="avg" style="left:{MS["fp_pct"]}%"></span></div>
+          <div class="ubar"><b style="width:{fp:.1f}%"></b><span class="avg" style="left:{pct_fp:.1f}%"></span></div>
         </div>
         <div class="row row-trend">{sparkline(one, two)}</div>
       </div>""")
@@ -379,11 +354,18 @@ n_fn_mapped = sum(dom_counts.values())
 by_top = defaultdict(list)
 for code, _, f, _, _, _ in summary:
     by_top[SHORT_FN.get(f, f).lower()].append(code)
-LEDE = (f"In all, {MS['named']:,} studies ({MS['named_pct']}%) named at least one country, giving {MS['pairs']:,} "
-        f"study-country pairs across {MS['countries']} countries and territories. {MS['us_pct']}% of studies were about "
-        f"one country, the United States. Relative to population, research is densest in North America, Australia, "
-        f"New Zealand and parts of northern and western Europe, and thinnest in North Africa and the Middle East, "
-        f"parts of Central Africa and Central Asia.")
+region_rate = {}
+for code in WB_REGIONS:
+    with_dalys = {i for i, c in enumerate(countries) if REGION_OF[c["iso3"]] == code and c.get("dalys")}
+    n_reg = sum(1 for s in region_studies[code] if s_countries[s] & with_dalys)
+    region_rate[code] = 1e5 * n_reg / sum(countries[i]["dalys"] for i in with_dalys)
+rr_hi = max(region_rate, key=region_rate.get)
+rr_lo = min(region_rate, key=region_rate.get)
+LEDE = (f"Relative to disease burden, health financing research is most concentrated in the {REGION_NAME[rr_hi]} "
+        f"({region_rate[rr_hi]:.1f} studies per 100,000 DALYs) and thinnest in the {REGION_NAME[rr_lo]} "
+        f"({region_rate[rr_lo]:.2f}), a {region_rate[rr_hi] / region_rate[rr_lo]:.0f}-fold gap. Across all studies, "
+        f"{SHORT_FN.get(FN_ORDER[0], FN_ORDER[0]).lower()} is the financing function tagged most often; by region, "
+        + "; ".join(f"{f} leads in {', '.join(codes)}" for f, codes in by_top.items()) + ".")
 MAP = {
     "rows": rate_rows, "zmin": math.log10(RATE_MIN), "zmax": math.log10(RATE_MAX), "colours": HEE_ORD,
     "tags": [{"code": k, "lon": v[0], "lat": v[1]} for k, v in TAGS.items()],
@@ -396,20 +378,20 @@ def q(note):
             f'data-note="{html.escape(note, quote=True)}">?</button>')
 
 
-MIX_NOTE = ("Each function's share of the region's single-country studies (as in the manuscript's Figure 4), "
-            "scaled so the segments add up to 100%. A study can address more than one function. Colours as in the key "
-            "above the cards; the card's top border takes the colour of the function studied most.")
-MAP_NOTE = (f"Studies naming the country per 10 million people (World Bank population). A study naming several "
-            f"countries counts in each. Log colour scale; values below {RATE_MIN:g} or above {RATE_MAX:,} take the end "
-            f"colours. Grey = no study naming the country, or no population data. The manuscript reports "
-            f"{MS['pairs']:,} study-country pairs across {MS['countries']} countries and territories.")
-TOP3_NOTE = ("The three financing functions studied most often in the region's single-country studies, with "
-             "each one's share of those studies (as in the manuscript's Figure 4). A study can address more than one "
-             "function, so shares can add up to more than 100%.")
-FP_NOTE = (f"Share of the region's single-country studies with a classifiable outcome (an outcome domain other "
-           f"than 'Unclear') that examine financial protection (for example out-of-pocket or catastrophic health "
-           f"spending). The red line is the share across all {MS['n_outcome']:,} studies with a classifiable outcome "
-           f"({MS['fp_pct']}%).")
+MIX_NOTE = ("How often each financing function is tagged among the region's function-tagged studies (Other and "
+            "Unclear left out). A study can carry more than one function, so this counts tags, not studies, and "
+            "the segments add up to 100%. Colours as in the key above the cards; the card's top border takes the "
+            "colour of the function tagged most.")
+MAP_NOTE = (f"Studies naming the country per 100,000 disability-adjusted life years (DALYs, GBD 2023), for the "
+            f"{n_rated} countries with at least one study and burden data. A study naming several countries counts "
+            f"in each. Log colour scale; values below {RATE_MIN:g} or above {RATE_MAX:g} take the end colours. Grey = "
+            f"no study naming the country, or no burden data (Hong Kong, Kosovo).")
+TOP3_NOTE = ("The three financing functions tagged most often among the region's studies. Bar = share of the "
+             "region's studies with at least one named function (Other and Unclear left out). A study can carry "
+             "more than one function, so shares can add up to more than 100%.")
+FP_NOTE = (f"Share of the region's studies whose outcome domains include financial protection (for example "
+           f"out-of-pocket or catastrophic health spending). A study can carry more than one outcome domain. "
+           f"The red line is the share across all studies ({pct_fp:.0f}%).")
 TREND_NOTE = (f"Cumulative share of the region's countries (the {len(countries)} countries in the map's country "
               f"data) named by at least one study, or by two or more, by each year. The grey line is the same for "
               f"all regions combined. The final, partial year of data ({YEAR1}) is left out.")
@@ -444,8 +426,7 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
 .dl:hover {{ background:var(--ink); color:#fff; }}
 .dl:disabled {{ opacity:.5; cursor:wait; }}
 #map {{ height:520px; }}
-.kpis {{ display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); }}
-.kpis-5 {{ grid-template-columns:repeat(5, minmax(0, 1fr)); border-top:1.5px solid var(--ink); border-bottom:1px solid var(--line); margin:8px 0 6px; }}
+.kpis {{ display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); border-top:1.5px solid var(--ink); border-bottom:1px solid var(--line); margin:8px 0 6px; }}
 .kpi {{ padding:16px 14px 14px; border-left:1px solid var(--line); }}
 .kpi:first-child {{ border-left:0; padding-left:0; }}
 .kpi-v {{ font:800 36px/1 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; font-stretch:condensed; display:flex; align-items:flex-start; gap:4px; }}
@@ -499,8 +480,8 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
   <h1>Health financing research at a glance</h1>
   <p class="lede">{html.escape(LEDE)}</p>
 
-  <div class="kpis kpis-5"><div class="kpi"><div class="kpi-v">{MS["studies"]:,}</div><div class="kpi-l">health financing studies, {YEAR0}–{YEAR1}</div></div><div class="kpi"><div class="kpi-v">{MS["empirical_pct"]}%{q("Studies other than literature reviews (49,800 of 53,411).")}</div><div class="kpi-l">are empirical analyses</div></div><div class="kpi"><div class="kpi-v">{MS["countries"]}{q("Countries and territories named by at least one study, as reported in the manuscript. Region or global labels (for example 'Europe' or 'Global') are not counted.")}</div><div class="kpi-l">countries or territories with at least one study</div></div><div class="kpi"><div class="kpi-v">{MS["oa_pct"]}%{q("Share of the 42,144 studies with a DOI that are open access (OpenAlex, matched by DOI).")}</div><div class="kpi-l">are open access</div></div><div class="kpi"><div class="kpi-v">{MS["funder_pct"]}%{q("Studies reporting at least one research funder (9,501 of 53,411).")}</div><div class="kpi-l">report a funder</div></div></div>
-  <div class="sec"><b>A</b><h2>Geographic distribution of health financing studies</h2><span>Studies per 10 million people (log colour scale) · n = {MS["pairs"]:,} study-country pairs</span>{q(MAP_NOTE)}</div>
+  <div class="kpis"><div class="kpi"><div class="kpi-v">{N:,}</div><div class="kpi-l">health financing studies, {YEAR0}–{YEAR1}</div></div><div class="kpi"><div class="kpi-v">{n_countries_named}{q("Countries in the map's country data named by at least one study in the period. Region or global labels (for example 'Europe' or 'Global') are not countries and are not counted.")}</div><div class="kpi-l">countries profiled in the map with at least one</div></div><div class="kpi"><div class="kpi-v">{pct_fp:.0f}%{q("Share of all studies whose outcome domains include financial protection. A study can carry more than one outcome domain.")}</div><div class="kpi-l">investigate financial protection as an outcome</div></div><div class="kpi"><div class="kpi-v">{pct_quant:.0f}%{q(f"Share of studies with a clear type of analysis that are quantitative only (mixed methods and qualitative are the rest). Studies whose type of analysis is unclear (about {pct_unclear_toa:.0f}%) are left out of the base.")}</div><div class="kpi-l">are quantitative</div></div><div class="kpi"><div class="kpi-v">{pct_oa:.0f}%{q("Share of studies with a DOI that are open access (from OpenAlex, matched by DOI). Studies without a DOI are left out of the base.")}</div><div class="kpi-l">are open access</div></div><div class="kpi"><div class="kpi-v">{pct_lmic:.0f}%{q("Share of studies naming at least one country that name at least one low- or middle-income country (World Bank income groups). Studies naming no country are left out of the base.")}</div><div class="kpi-l">focus on low- and middle-income countries</div></div></div>
+  <div class="sec"><b>A</b><h2>Geographic distribution of health financing studies</h2><span>Studies per 100,000 DALYs (log colour scale)</span>{q(MAP_NOTE)}</div>
   <div id="map"></div>
 
 
@@ -509,9 +490,9 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
   <div class="regions">
     <div class="labels">
       <div></div><div></div><div></div>
-      <div class="lab"><strong>Function mix {q(MIX_NOTE)}</strong>Share of single-country studies</div>
-      <div class="lab"><strong>Top three financing functions {q(TOP3_NOTE)}</strong>Bar = share of single-country studies</div>
-      <div class="lab"><strong>Financial protection as an outcome {q(FP_NOTE)}</strong>Black = single-country studies; red line = all studies (11%)</div>
+      <div class="lab"><strong>Function mix {q(MIX_NOTE)}</strong>Share of function tags; colours as in the key above</div>
+      <div class="lab"><strong>Top three financing functions {q(TOP3_NOTE)}</strong>Bar = share of function-tagged studies</div>
+      <div class="lab"><strong>Financial protection as an outcome {q(FP_NOTE)}</strong>Black = financial protection studied; red line = all-study average</div>
       <div class="lab"><strong>Trend over time {q(TREND_NOTE)}</strong>% of the region's countries with a study: solid = at least 1, dashed = 2 or more, grey = all regions (at least 1)</div>
     </div>
     {"".join(cards)}
@@ -521,7 +502,7 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
     <div>
       <p>Data: HFF evidence map web build ({SOURCE_NAME}); {YEAR0}–{YEAR1} publication years. Search dates: xx {q("Search dates are not in the web data; they need to come from the review protocol.")}</p>
       <p>Regions: WHO (AFR African, AMR Americas, SEAR South-East Asia, EUR European, EMR Eastern Mediterranean, WPR Western Pacific), as listed by the WHO Global Health Observatory; places that the WHO's country list does not assign to a region (Taiwan, Hong Kong, Kosovo) take the WHO region of their UN M49 sub-region. Map and trend lines cover the {len(countries)} countries in the map's country data; trends run to {LAST_FULL_YEAR}.</p>
-      <p>Financing functions: the HFF financing function groups (Other and Unclear left out); a study can carry more than one. Outcome: financial protection outcome domain. Map: studies per 10 million people (World Bank population), Robinson projection; grey = no study naming the country or no population data. Headline numbers, study-country pairs and the regional function shares (single-country studies) are as reported in the HSF interim manuscript.</p>
+      <p>Financing functions: the HFF financing function groups (Other and Unclear left out); a study can carry more than one. Outcome: financial protection outcome domain. Map: studies per 100,000 DALYs (GBD 2023), Robinson projection; grey = no study naming the country or no burden data.</p>
     </div>
   </div>
 </div>
@@ -534,19 +515,19 @@ const MAP = {json.dumps(MAP, separators=(",", ":"))};
   const rows = MAP.rows;
   const has = rows.filter(r => r.rate > 0);
   const none = rows.filter(r => !(r.rate > 0));
-  const fmt = v => v >= 10 ? v.toFixed(0) : v.toFixed(1);
+  const fmt = v => v >= 1 ? v.toFixed(1) : v.toFixed(2);
   window.Plotly.newPlot("map", [
     {{ type: "choropleth", locations: has.map(r => r.iso3), z: has.map(r => Math.log10(r.rate)),
        text: has.map(r => r.country + "<br>" + r.n.toLocaleString("en-GB") + " studies<br>" + fmt(r.rate) +
-         " per 10 million people"), hoverinfo: "text",
+         " per 100,000 DALYs"), hoverinfo: "text",
        zmin: MAP.zmin, zmax: MAP.zmax, colorscale: MAP.colours.map((c, i) => [i / (MAP.colours.length - 1), c]),
        marker: {{ line: {{ color: "#ffffff", width: 0.4 }} }},
-       colorbar: {{ title: {{ text: "per 10 million<br>people", font: {{ size: 11 }} }}, thickness: 10, len: 0.55, x: 0.02,
-         y: 0.3, tickvals: [3, 10, 30, 100, 300, 1000].map(Math.log10),
-         ticktext: ["3", "10", "30", "100", "300", "1,000"] }} }},
+       colorbar: {{ title: {{ text: "per 100,000<br>DALYs", font: {{ size: 11 }} }}, thickness: 10, len: 0.55, x: 0.02,
+         y: 0.3, tickvals: [-1, Math.log10(0.3), 0, Math.log10(3), 1, Math.log10(30)],
+         ticktext: ["0.1", "0.3", "1", "3", "10", "30"] }} }},
     {{ type: "choropleth", locations: none.map(r => r.iso3), z: none.map(() => 0), showscale: false,
        text: none.map(r => r.country + "<br>" + (r.dalys ? "no study naming it" : r.n.toLocaleString("en-GB") +
-         " studies<br>no population data")), hoverinfo: "text", colorscale: [[0, "#dcd6cc"], [1, "#dcd6cc"]],
+         " studies<br>no burden data")), hoverinfo: "text", colorscale: [[0, "#dcd6cc"], [1, "#dcd6cc"]],
        marker: {{ line: {{ color: "#ffffff", width: 0.4 }} }} }},
     // Region tags: black boxes, then their white codes on top.
     {{ type: "scattergeo", lon: MAP.tags.map(t => t.lon), lat: MAP.tags.map(t => t.lat), mode: "markers",

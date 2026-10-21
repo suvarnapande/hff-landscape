@@ -24,7 +24,7 @@ Output:
                                    "language": [language index per study]}
   funders and languages are sorted by study count (most first); "Not recorded" goes last.
 
-Run: python docs/dex_hff/build_study_filters_v2_5.py  (after build_data_v2_5.py)
+Run: python scripts/build_study_filters_v2_5.py  (after build_data_v2_5.py)
 """
 import json
 import re
@@ -33,7 +33,7 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent.parent  # docs/
+ROOT = Path(__file__).resolve().parent.parent / "docs"  # docs/
 DEX = ROOT / "dex_hff"
 DATA = ROOT / "data"
 SOURCE_NAME = "HFF dataset v2.5.1"
@@ -95,7 +95,8 @@ keys_of_s = []
 for fn in rows["research_funder"]:
     keys = set()
     if isinstance(fn, str) and fn.strip() and fn != "Could not find":
-        for t in {fix_text(t) for t in fn.split(";")}:
+        # sorted() so tied spellings resolve the same way on every run (set order varies).
+        for t in sorted({fix_text(t) for t in fn.split(";")}):
             if not t:
                 continue
             key = _norm_funder_key(t)

@@ -19,15 +19,15 @@ in docs/dex_hff/v2_5_1/:
   PRISMA_v2_5_1.json                         selection flow with the new exclusion line
   CHANGES_v2_5_1.md                          what changed and why
 
-Run: python docs/dex_hff/make_v2_5_1.py
+Run: python scripts/make_v2_5_1.py
 """
 import json
 from pathlib import Path
 
 import pandas as pd
 
-V25 = Path(__file__).resolve().parent / "v2.5 from Lucas" / "hff_share_v2_5"
-OUT = Path(__file__).resolve().parent / "v2_5_1"
+V25 = Path(__file__).resolve().parent.parent / "docs" / "dex_hff" / "v2.5 from Lucas" / "hff_share_v2_5"
+OUT = Path(__file__).resolve().parent.parent / "docs" / "dex_hff" / "v2_5_1"
 OUT.mkdir(exist_ok=True)
 REASON = "published_before_2010"
 PRE_2010 = {

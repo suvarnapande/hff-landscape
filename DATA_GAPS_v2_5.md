@@ -79,23 +79,25 @@ count and the map agree at 53,411.
 
 ## How to rebuild
 
-From `docs/` (the `_v2_5` scripts are copies of the `_v2_4` ones that read
-`dex_hff/v2_5_1/hff_v2_5_1_site.csv`; the `_v2_4` scripts are unchanged):
+From the repository root. The scripts live in `scripts/` (see `scripts/README.md`); they read the
+raw inputs from `docs/dex_hff/`, which stays local. The `_v2_5` scripts are copies of the `_v2_4`
+ones (now in `archive/scripts_old/`) that read `docs/dex_hff/v2_5_1/hff_v2_5_1_site.csv`:
 
 ```bash
-python dex_hff/make_v2_5_1.py                    # v2.5 -> v2.5.1 (excludes the three pre-2010 studies)
-python dex_hff/make_v2_5_csv.py                  # v2.5.1 analysis file -> site layout
+python scripts/make_v2_5_1.py                    # v2.5 -> v2.5.1 (excludes the three pre-2010 studies)
+python scripts/make_v2_5_csv.py                  # v2.5.1 analysis file -> site layout
 export PYTHONIOENCODING=utf-8
-python dex_hff/build_data_v2_5.py                # data/*.json, Overview tiles, Methods funnel
-python dex_hff/build_study_meta_v2_5.py          # Explorer CSV download
-python dex_hff/build_texts_v2_5.py               # Country profile titles and abstracts
-python dex_hff/build_glance_regions_v2_5.py      # "(Un)equal weight at a glance" page
-python dex_hff/build_figures_v2_5.py             # gallery figures (about 5 minutes)
-python dex_hff/build_funder_types_v2_5.py
-python dex_hff/build_fcas_outcomes_v2_5.py
-python dex_hff/build_open_access_v2_5.py
-python dex_hff/build_outcome_combined_v2_5.py    # after build_figures and build_fcas_outcomes
-python dex_hff/build_function_outcome_themes_v2_5.py
+python scripts/build_data_v2_5.py                # data/*.json, Overview tiles, Methods funnel
+python scripts/build_study_meta_v2_5.py          # Explorer CSV download
+python scripts/build_study_filters_v2_5.py       # Explorer funder and language filters
+python scripts/build_texts_v2_5.py               # Country profile titles and abstracts
+python scripts/build_glance_regions_v2_5.py      # "(Un)equal weight at a glance" page
+python scripts/build_figures_v2_5.py             # gallery figures (about 5 minutes)
+python scripts/build_funder_types_v2_5.py
+python scripts/build_fcas_outcomes_v2_5.py
+python scripts/build_open_access_v2_5.py
+python scripts/build_outcome_combined_v2_5.py    # after build_figures and build_fcas_outcomes
+python scripts/build_function_outcome_themes_v2_5.py
 ```
 
 **These scripts do not produce the published site on their own.** After them, three things must
@@ -103,8 +105,8 @@ be re-applied:
 
 - **Plain-language figures.** 70 gallery figures carry the approved plain-language titles and
   captions. Re-render them with
-  `python dex_hff/plain_language_review/render_copy_v2_5.py v2_5 rendered_v2_5`, then copy the
-  PNGs into `figures/`. The renderer reads `figure_copy_v2_5.json`, the approved copy with its
+  `python scripts/copy/render_copy_v2_5.py v2_5 rendered_v2_5`, then copy the PNGs from
+  `docs/dex_hff/plain_language_review/rendered_v2_5/` into `docs/figures/`. The renderer reads `figure_copy_v2_5.json`, the approved copy with its
   counts updated to v2.5.1 (disease 7,881 of 53,411; "Other" without a theme 6,830; Benefits
   decisions share 25% at the end of the period; 536 studies in the funder flow).
 - **Edited text in `data/content.json`.** The approved wording, technical notes and Kosovo notes

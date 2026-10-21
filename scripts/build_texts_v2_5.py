@@ -17,7 +17,7 @@ Inputs:
 Output:
   docs/data/texts/<ISO3>.json  ->  {"s": [study indices...], "title": [...], "abstract": [...]}
 
-Run: python docs/dex_hff/build_texts_v5.py  (after build_data_v5.py)
+Run: python scripts/build_texts_v2_5.py  (after build_data_v2_5.py)
 """
 import json
 import re
@@ -26,7 +26,7 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent.parent  # docs/
+ROOT = Path(__file__).resolve().parent.parent / "docs"  # docs/
 DEX = ROOT / "dex_hff"
 DATA = ROOT / "data"
 OUT = DATA / "texts"

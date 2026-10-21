@@ -16,7 +16,7 @@ with the same clean-up as fig_outcome_other_themes_v5 / fig_outcome_combined.
 
 Run after build_figures_v2_5.py and build_fcas_outcomes_v2_5.py (it adds its gallery entry to
 content.json, which those regenerate):
-    python docs/dex_hff/build_function_outcome_themes_v2_5.py
+    python scripts/build_function_outcome_themes_v2_5.py
 """
 import json
 from collections import Counter, defaultdict
@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent.parent  # docs/
+ROOT = Path(__file__).resolve().parent.parent / "docs"  # docs/
 DEX = ROOT / "dex_hff"
 FIGS = ROOT / "figures"
 DATA = ROOT / "data"

@@ -15,7 +15,7 @@ get the WHO region of the other countries in their UN M49 sub-region, and who_re
 so. Taiwan has no World Bank API entry either; it gets East Asia & Pacific, as the World Bank
 classifies "Taiwan, China".
 
-Run: python docs/dex_hff/make_country_regions_v2_4.py   (then build_data_v2_4.py)
+Run: python scripts/make_country_regions_v2_4.py   (then build_data_v2_5.py)
 """
 import csv
 import datetime
@@ -24,7 +24,7 @@ import urllib.request
 from collections import Counter
 from pathlib import Path
 
-DEX = Path(__file__).resolve().parent
+DEX = Path(__file__).resolve().parent.parent / "docs" / "dex_hff"
 DATA = DEX.parent / "data"
 OUT = DEX / "country_regions_v2_4.csv"
 OUT_JSON = DEX / "country_regions_v2_4.json"

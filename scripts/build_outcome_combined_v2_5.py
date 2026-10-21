@@ -13,7 +13,7 @@ are dropped and "Not clustered" + "Other outcome (none of these themes)" form "N
 
 Run after build_figures_v2_5.py and build_fcas_outcomes_v2_5.py (it adds its entry to the
 "Financing functions & outcomes" gallery section of content.json, which those regenerate):
-    python docs/dex_hff/build_outcome_combined_v2_5.py
+    python scripts/build_outcome_combined_v2_5.py
 """
 import json
 import textwrap
@@ -28,7 +28,7 @@ import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent.parent  # docs/
+ROOT = Path(__file__).resolve().parent.parent / "docs"  # docs/
 DEX = ROOT / "dex_hff"
 FIGS = ROOT / "figures"
 DATA = ROOT / "data"

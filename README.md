@@ -10,7 +10,15 @@ assessments are Benefits decisions) and the build order are in [DATA_GAPS_v2_5.m
 the open gaps (DALYs for Kosovo, health spending for five added countries) are in
 [DATA_GAPS_v2_4.md](DATA_GAPS_v2_4.md). The pipeline description below is for the earlier builds.
 
-Data pipeline: `docs/dex_hff/build_data.py` reads
+**Where things are (since 20 October 2026):**
+- `scripts/`: the scripts that build the current site data and figures, with the run order in
+  [scripts/README.md](scripts/README.md). `scripts/dataset/` holds the dataset team's v2.5 build
+  scripts; `scripts/copy/` re-renders the figures with the approved plain-language copy.
+- `archive/`: superseded scripts (`scripts_old/`, `copy_review/`), the v4 data and figures, and
+  design mockups. Kept for reference; nothing in the site or in `scripts/` uses them.
+- `docs/dex_hff/`: raw inputs (dataset CSVs, IHME and World Bank workbooks). Local only, not in git.
+
+Data pipeline: `archive/scripts_old/build_data.py` reads
 `docs/dex_hff/hff_pipeline_full_single_model.csv` (52,826 LLM-classified records) and
 `docs/dex_hff/hff_pipeline_summary.xlsx` (`Stage Funnel` sheet) and writes the six JSON
 files the app reads from `docs/data/`:
@@ -26,10 +34,10 @@ files the app reads from `docs/data/`:
 - `content.json` — hero text, glance tiles, the pipeline-stage funnel (from the
   `Stage Funnel` sheet), and the Explorer's filter/chart registries
 
-Rebuild: `python docs/dex_hff/build_data.py` (reads the CSV/xlsx, overwrites `docs/data/*.json`,
+Rebuild: `python archive/scripts_old/build_data.py` (reads the CSV/xlsx, overwrites `docs/data/*.json`,
 prints a validation report — record counts, unmatched geography names, category counts).
 
-`docs/dex_hff/build_texts.py` writes one small JSON shard per country to `docs/data/texts/`
+`archive/scripts_old/build_texts.py` writes one small JSON shard per country to `docs/data/texts/`
 (`{"s": [...], "title": [...], "abstract": [...]}`), used by the Country Profile tab's
 "click a study, read it" feature. Title/abstract text for the full population is ~94MB, too
 large to bundle upfront, so shards are fetched lazily by the client only when a study point
@@ -56,7 +64,7 @@ this:
 Runtime deps are pinned jsdelivr CDNs: plotly.js-dist-min 2.35.2, tom-select 2.3.1,
 noUiSlider 15.8.1, Google Fonts (Newsreader + Inter). No build step, no bundler.
 
-`docs/dex_hff/build_figures.py` (not committed, run locally) additionally needs `plotly` and
+`archive/scripts_old/build_figures.py` additionally needs `plotly` and
 `kaleido` (`pip install plotly kaleido`) for the one Gallery figure that needs real country
 geometry (`fig_map_bivariate.png`) — Plotly's built-in map is rendered to a PNG via kaleido and
 composited into the usual matplotlib headline/footnote layout, so every figure's typography

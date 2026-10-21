@@ -10,7 +10,7 @@ actual numbers/comparison. The same three pieces are reused verbatim as the
 Gallery card's title/caption in content.json (via FIG_META) — one source of
 truth per figure. 
 
-Run: python docs/dex_hff/build_figures.py
+Run: python scripts/build_figures_v2_5.py
 """
 import json
 import re
@@ -35,7 +35,7 @@ try:
 except ImportError:
     HAVE_PLOTLY = False
 
-ROOT = Path(__file__).resolve().parent.parent  # docs/
+ROOT = Path(__file__).resolve().parent.parent / "docs"  # docs/
 DATA = ROOT / "data"
 FIGS = ROOT / "figures"
 DEX = ROOT / "dex_hff"

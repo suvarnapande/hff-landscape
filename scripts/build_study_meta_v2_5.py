@@ -18,7 +18,7 @@ Output:
                                 "" where the extraction has nothing ("Could not find" etc.).
   url is only kept for studies without a DOI (otherwise the DOI link is used).
 
-Run: python docs/dex_hff/build_study_meta_v5.py  (after build_data_v5.py)
+Run: python scripts/build_study_meta_v2_5.py  (after build_data_v2_5.py)
 """
 import json
 import re
@@ -26,7 +26,7 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent.parent  # docs/
+ROOT = Path(__file__).resolve().parent.parent / "docs"  # docs/
 DEX = ROOT / "dex_hff"
 DATA = ROOT / "data"
 SOURCE_NAME = "HFF dataset v2.5.1"
