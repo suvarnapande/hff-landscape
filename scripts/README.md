@@ -24,6 +24,7 @@ python scripts/build_data_v2_5.py                   # studies, countries, codebo
 python scripts/build_study_meta_v2_5.py             # titles/authors/DOIs for the Explorer CSV download
 python scripts/build_study_filters_v2_5.py          # Explorer funder and language filters
 python scripts/build_texts_v2_5.py                  # per-country titles and abstracts
+python scripts/build_study_text.py                  # every study's title and abstract for the CSV download
 # 3. Figures (docs/figures/)
 python scripts/build_glance_regions_v2_5.py         # "(Un)equal weight at a glance" page
 python scripts/build_figures_v2_5.py                # gallery figures (about 5 minutes)
@@ -50,6 +51,7 @@ to `docs/`.
 | `build_study_meta_v2_5.py` | `docs/data/study_meta.json` |
 | `build_study_filters_v2_5.py` | `docs/data/study_filters.json` |
 | `build_texts_v2_5.py` | `docs/data/texts/<ISO3>.json` |
+| `build_study_text.py` | `docs/data/text/` (`index.json` and chunks `000.json`... of 2,000 studies): titles and abstracts of every study, as in the analysis master, for the Explorer CSV download. Rerun when the master or `studies.json` changes |
 | `build_figures_v2_5.py` | most gallery figures (`--only fig_a.png,fig_b.png` rebuilds just those) |
 | `build_funder_types_v2_5.py`, `build_open_access_v2_5.py`, `build_fcas_outcomes_v2_5.py`, `build_outcome_combined_v2_5.py`, `build_function_outcome_themes_v2_5.py` | one figure family each, plus their summary JSON |
 | `build_glance_regions_v2_5.py`, `build_glance_regions_functions_v2_5.py`, `build_glance_at_a_glance_v2_5.py`, `build_glance_manuscript_v2_5.py` | the "at a glance" HTML pages (site, functions, manuscript variants) |

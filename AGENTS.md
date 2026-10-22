@@ -69,6 +69,9 @@ Background and decisions: `README.md`, `DATA_GAPS_v2_5.md` (current version, reb
 
 ## Recent changes
 
+- 2026-10-22: Explorer CSV download takes titles and abstracts (new last column) for every
+  study from `docs/data/text/` (`scripts/build_study_text.py`); rerun it when the master or
+  `studies.json` changes.
 - 2026-10-21: manuscript figures for funder types, open access by income, and section 3.2.1
   size and growth (`manuscript figures Oct 19/`).
 - 2026-10-20: scripts moved from `docs/dex_hff/` to `scripts/`, old versions to `archive/`;

@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-20a";
+const BUILD = "2026-10-22a";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -3007,8 +3007,46 @@ if (typeof document !== "undefined") {
   }
 
   // "Download filtered studies (CSV)": one row per study matching the Explorer filters.
-  // Titles/authors/DOIs live in data/study_meta.json, fetched only on first click.
+  // Authors/journals/DOIs live in data/study_meta.json; titles and abstracts of every study
+  // in data/text/ (chunks of 2,000 studies, from scripts/build_study_text.py). Both are
+  // fetched only on click, and only the text chunks the selected studies fall in.
   let studyMetaPromise = null;
+  let studyTextIndexPromise = null;
+  const studyTextChunks = new Map();
+
+  function fetchJson(path) {
+    return fetch(path + "?v=" + BUILD).then(r => {
+      if (!r.ok) throw new Error("failed to load " + path + ": " + r.status);
+      return r.json();
+    });
+  }
+
+  // Returns { title(s), abstract(s) } lookups by study index s for the given studies.
+  async function loadStudyText(studies) {
+    if (!studyTextIndexPromise) studyTextIndexPromise = fetchJson("data/text/index.json");
+    let index;
+    try {
+      index = await studyTextIndexPromise;
+    } catch (err) {
+      studyTextIndexPromise = null;
+      throw err;
+    }
+    const needed = [...new Set(studies.map(s => Math.floor(s / index.chunk)))];
+    for (const k of needed) {
+      if (!studyTextChunks.has(k)) {
+        const p = fetchJson("data/text/" + index.files[k]);
+        studyTextChunks.set(k, p);
+        p.catch(() => studyTextChunks.delete(k));
+      }
+    }
+    const chunks = new Map();
+    await Promise.all(needed.map(async k => chunks.set(k, await studyTextChunks.get(k))));
+    const pick = (s, field) => {
+      const c = chunks.get(Math.floor(s / index.chunk));
+      return c ? c[field][s - c.start] || "" : "";
+    };
+    return { title: s => pick(s, "t"), abstract: s => pick(s, "a") };
+  }
 
   function csvCell(v) {
     const t = v == null ? "" : String(v);
@@ -3035,7 +3073,7 @@ if (typeof document !== "undefined") {
       return;
     }
     btn.disabled = true;
-    status.textContent = "Preparing " + fmtNum(rows.length) + " studies…";
+    status.textContent = "Preparing " + fmtNum(rows.length) + " studies with titles and abstracts…";
     try {
       if (!studyMetaPromise) {
         studyMetaPromise = fetch("data/study_meta.json?v=" + BUILD).then(r => {
@@ -3043,9 +3081,9 @@ if (typeof document !== "undefined") {
           return r.json();
         });
       }
-      let meta;
+      let meta, text;
       try {
-        meta = await studyMetaPromise;
+        [meta, text] = await Promise.all([studyMetaPromise, loadStudyText(rows)]);
       } catch (err) {
         studyMetaPromise = null;
         throw err;
@@ -3062,19 +3100,21 @@ if (typeof document !== "undefined") {
       }
       const header = ["record_id", "year", "title", "authors", "journal", "doi", "link",
         "financing_functions", "outcome_domains", "study_design", "type_of_analysis", "data_type",
-        "data_source", "unit_of_observation", "geographic_scope", "countries", "country_income_groups"];
+        "data_source", "unit_of_observation", "geographic_scope", "countries", "country_income_groups",
+        "abstract"];
       const lines = [header.join(",")];
       for (const s of rows) {
         const cs = [...(countriesOf.get(s) || [])].map(c => db.countries[c]);
         const doi = meta.doi[s];
         lines.push([
-          st.id[s], st.year[s], meta.title[s], meta.authors[s], meta.journal[s], doi,
+          st.id[s], st.year[s], text.title(s), meta.authors[s], meta.journal[s], doi,
           doi ? "https://doi.org/" + doi : meta.url[s],
           (functions.get(s) || []).join("; "), (outcomes.get(s) || []).join("; "),
           lv.study_design[st.study_design[s]], lv.type_of_analysis[st.type_of_analysis[s]],
           lv.data_type[st.data_type[s]], lv.data_source[st.data_source[s]],
           lv.unit_of_observation[st.unit_of_observation[s]], lv.geo_scope[st.geo_scope[s]],
-          cs.map(r => r.country).join("; "), [...new Set(cs.map(r => r.income).filter(Boolean))].join("; ")
+          cs.map(r => r.country).join("; "), [...new Set(cs.map(r => r.income).filter(Boolean))].join("; "),
+          text.abstract(s)
         ].map(csvCell).join(","));
       }
       // BOM so Excel opens the UTF-8 file with accents intact.

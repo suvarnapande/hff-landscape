@@ -18,6 +18,12 @@ the open gaps (DALYs for Kosovo, health spending for five added countries) are i
   design mockups. Kept for reference; nothing in the site or in `scripts/` uses them.
 - `docs/dex_hff/`: raw inputs (dataset CSVs, IHME and World Bank workbooks). Local only, not in git.
 
+**Latest updates**
+- 22 October 2026: the Explorer's "Download filtered studies (CSV)" now takes every title from
+  the analysis master and adds an `abstract` column (last). The text of all 53,411 studies is in
+  `docs/data/text/` (built by `scripts/build_study_text.py`), fetched in chunks only when the
+  button is clicked. Titles keep the authors' wording ("LMIC" is not changed to "L&MICs").
+
 Data pipeline: `archive/scripts_old/build_data.py` reads
 `docs/dex_hff/hff_pipeline_full_single_model.csv` (52,826 LLM-classified records) and
 `docs/dex_hff/hff_pipeline_summary.xlsx` (`Stage Funnel` sheet) and writes the six JSON
