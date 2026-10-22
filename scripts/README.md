@@ -27,14 +27,14 @@ python scripts/build_texts_v2_5.py                  # per-country titles and abs
 python scripts/build_study_text.py                  # every study's title and abstract for the CSV download
 # 3. Figures (docs/figures/)
 python scripts/build_glance_regions_v2_5.py         # "(Un)equal weight at a glance" page
-python scripts/build_figures_v2_5.py                # gallery figures (about 5 minutes)
+python scripts/build_figures_v2_6.py                # gallery figures (about 5 minutes)
 python scripts/build_funder_types_v2_5.py
-python scripts/build_fcas_outcomes_v2_5.py
-python scripts/build_open_access_v2_5.py
+python scripts/build_fcas_outcomes_v2_6.py
+python scripts/build_open_access_v2_6.py
 python scripts/build_outcome_combined_v2_5.py       # after build_figures and build_fcas_outcomes
 python scripts/build_function_outcome_themes_v2_5.py
 # 4. Approved plain-language copy on the gallery figures
-python scripts/copy/render_copy_v2_5.py v2_5 rendered_v2_5
+python scripts/copy/render_copy_v2_6.py v2_6 rendered_v2_6   # add --figs a.png,b.png for just those
 ```
 
 A full run does not reproduce the published site by itself: some text was edited by hand after
@@ -52,15 +52,16 @@ to `docs/`.
 | `build_study_filters_v2_5.py` | `docs/data/study_filters.json` |
 | `build_texts_v2_5.py` | `docs/data/texts/<ISO3>.json` |
 | `build_study_text.py` | `docs/data/text/` (`index.json` and chunks `000.json`... of 2,000 studies): titles and abstracts of every study, as in the analysis master, for the Explorer CSV download. Rerun when the master or `studies.json` changes |
-| `build_figures_v2_5.py` | most gallery figures (`--only fig_a.png,fig_b.png` rebuilds just those) |
-| `build_funder_types_v2_5.py`, `build_open_access_v2_5.py`, `build_fcas_outcomes_v2_5.py`, `build_outcome_combined_v2_5.py`, `build_function_outcome_themes_v2_5.py` | one figure family each, plus their summary JSON |
+| `build_figures_v2_6.py` | most gallery figures (`--only fig_a.png,fig_b.png` rebuilds just those, without touching `content.json`). v2.6 (22 October 2026) counts studies by each country's income group in the publication year in every figure, and footnotes state the basis |
+| `build_funder_types_v2_5.py`, `build_open_access_v2_6.py`, `build_fcas_outcomes_v2_6.py`, `build_outcome_combined_v2_5.py`, `build_function_outcome_themes_v2_5.py` | one figure family each, plus their summary JSON |
 | `build_glance_regions_v2_5.py`, `build_glance_regions_functions_v2_5.py`, `build_glance_at_a_glance_v2_5.py`, `build_glance_manuscript_v2_5.py` | the "at a glance" HTML pages (site, functions, manuscript variants) |
 | `build_hidden_figures_v5.py` | figures kept in the repo but hidden on the site |
 | `build_descriptive_summary_v2_5.py` | a standalone four-panel summary figure (not on the site) |
 | `make_country_regions_v2_4.py` | `docs/dex_hff/country_regions_v2_4.csv` (WHO/UN/World Bank regions; fetches online) |
 | `search_urls_hta_v2_5_1.py` | publication links for the HTA studies with no DOI (queries OpenAlex) |
 | `fig_text_fit.py` | helper imported by the figure scripts; keeps notes inside each image |
-| `copy/render_copy_v2_5.py` | re-renders gallery figures with the approved copy in `copy/figure_copy_v2_5.json` |
+| `wb_income_history.py` | helper: World Bank income group of a country in a publication year (from the newest `docs/dex_hff/OGHIST*.xlsx`); used for author countries |
+| `copy/render_copy_v2_6.py` | re-renders gallery figures with the approved copy in `copy/figure_copy_v2_6.json` (its `basis` field adds the income/FCAS basis to the footnote); `--figs` limits it to named figures; writes `meta.json` with each figure's computed numbers to check the captions |
 | `dataset/` | the dataset team's scripts that produce HFF v2.5 itself (they run in that team's repository, not here) |
 
 The `_v2_4` / `_v2_2` / `_v5` names in a few current files are historical: those scripts were

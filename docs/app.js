@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-22a";
+const BUILD = "2026-10-22b";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -513,7 +513,7 @@ export function tableRows(db, flt, k = 25) {
   rows.sort((a, b) => b.studies - a.studies);
   return rows.slice(0, k).map(r => ({
     Country: r.country,
-    Income: r.income,
+    "Income group (current, FY2027)": r.income,
     "Region (WHO)": r.who_region == null ? "" : r.who_region,
     Studies: r.studies,
     "Per 100k DALYs": r.per100k == null ? null : rRound(r.per100k, 2),
@@ -816,7 +816,7 @@ export function countryFacts(db, iso3) {
   if (!r) return [];
   const pop = num(r.pop), dalys = num(r.dalys), spend = num(r.total_spend_bn);
   const pairs = [
-    ["Income group (current)", r.income],
+    ["Income group (current, FY2027)", r.income],
     ["Region (WHO)", r.who_region == null ? "—"
       : r.who_region_source && r.who_region_source !== "WHO"
         ? r.who_region + " (no region in the WHO country list; assigned via its UN M49 sub-region, " + r.un_region + ")"
@@ -1305,7 +1305,7 @@ if (typeof document !== "undefined") {
     window.Plotly.react("land-scatter", traces, {
       font: BASE_FONT,
       margin: { t: 20, b: 60, l: 80, r: 20 },
-      legend: hLegend(-0.18),
+      legend: { ...hLegend(-0.18), title: { text: "Income group (current, FY2027):" } },
       xaxis: { type: "log", title: "disease burden, DALYs (log)", gridcolor: "#eeebe3" },
       yaxis: { type: "log", title: "health spending per person, US$ PPP (log)", gridcolor: "#eeebe3" },
       plot_bgcolor: "rgba(0,0,0,0)",
@@ -1550,7 +1550,7 @@ if (typeof document !== "undefined") {
   const FILTER_HELP = {
     "x-function": '<p>A financing function is a part of how a health system raises, pools or spends money. A study may cover several functions and is counted in each one.</p>',
     "x-outcome": '<p>Choose what the studies examine, such as quality of care or protection from financial hardship. “Other” means an identifiable outcome outside the eight named groups. “Unclear” means the title and abstract did not provide enough information. A study may examine several outcomes.</p>',
-    "x-income": '<p>Countries are grouped by the <a href="https://datahelpdesk.worldbank.org/knowledgebase/articles/906519-world-bank-country-and-lending-groups" target="_blank" rel="noopener">World Bank country and lending groups</a> classification: low, lower-middle, upper-middle and high income. A study counts in every income group of the countries it examines.</p>',
+    "x-income": '<p>Countries are grouped by the <a href="https://datahelpdesk.worldbank.org/knowledgebase/articles/906519-world-bank-country-and-lending-groups" target="_blank" rel="noopener">World Bank country and lending groups</a> classification: low, lower-middle, upper-middle and high income. Each country takes its group in the year the study was published, so a country can move between groups over time. A study counts in every income group of the countries it examines.</p>',
     "x-region": '<p>Regions are the six <a href="https://www.who.int/about/who-we-are/regional-offices" target="_blank" rel="noopener">WHO regions</a> (for example, the African Region or the Western Pacific Region), as listed by the WHO Global Health Observatory. Places that the WHO country list does not assign to a region (Taiwan, Hong Kong, Kosovo) are given the WHO region of the other countries in their <a href="https://unstats.un.org/unsd/methodology/m49/" target="_blank" rel="noopener">UN M49</a> sub-region. A study counts in every region of the countries it examines.</p>',
     "x-datatype": '<p>The kind of data a study analysed, as described in its title and abstract:</p><ul>'
       + '<li><strong>Cross-sectional:</strong> observations at a single point in time.</li>'
@@ -1910,7 +1910,7 @@ if (typeof document !== "undefined") {
     scopeHead.textContent = "Geographic scope";
     cols.append(
       section("Countries", countries, scopeHead, geoScopeStrip()),
-      section("By country income group", incomeBubbleChart()),
+      section("By country income group (in publication year)", incomeBubbleChart()),
       section("By WHO region", regionLollipopChart())
     );
     const note = el("div", "geography-note");
@@ -2981,7 +2981,7 @@ if (typeof document !== "undefined") {
     });
 
     const REG = db.registries;
-    fillSelect($("x-trend-by"), [...REG.TREND_VARS.keys()], ["Income group"]);
+    fillSelect($("x-trend-by"), [...REG.TREND_VARS.keys()], ["Income group (in publication year)"]);
     fillSelect($("x-map-metric"), [...REG.MAP_METRICS.keys()], ["Studies"]);
     fillSelect($("x-comp-var"), [...REG.COMP_VARS.keys()], ["Financing function"]);
     fillSelect($("x-comp-stack"), [...REG.STACK_VARS.keys()], ["None"]);
@@ -3092,19 +3092,20 @@ if (typeof document !== "undefined") {
       const lv = db.levels;
       const functions = studyTagLists(db.function, db.function_grps);
       const outcomes = studyTagLists(db.outcome, db.outcome_grps);
-      const countriesOf = new Map();
+      // study -> geo rows, so each country keeps its income group in the publication year
+      const geoRowsOf = new Map();
       for (let i = 0; i < db.geo.s.length; i++) {
         const s = db.geo.s[i];
-        if (!countriesOf.has(s)) countriesOf.set(s, new Set());
-        countriesOf.get(s).add(db.geo.c[i]);
+        if (!geoRowsOf.has(s)) geoRowsOf.set(s, new Map());
+        if (!geoRowsOf.get(s).has(db.geo.c[i])) geoRowsOf.get(s).set(db.geo.c[i], i);  // a country named twice counts once
       }
       const header = ["record_id", "year", "title", "authors", "journal", "doi", "link",
         "financing_functions", "outcome_domains", "study_design", "type_of_analysis", "data_type",
-        "data_source", "unit_of_observation", "geographic_scope", "countries", "country_income_groups",
-        "abstract"];
+        "data_source", "unit_of_observation", "geographic_scope", "countries",
+        "country_income_groups_in_publication_year", "country_who_regions", "abstract"];
       const lines = [header.join(",")];
       for (const s of rows) {
-        const cs = [...(countriesOf.get(s) || [])].map(c => db.countries[c]);
+        const gi = [...(geoRowsOf.get(s) || new Map()).values()];
         const doi = meta.doi[s];
         lines.push([
           st.id[s], st.year[s], text.title(s), meta.authors[s], meta.journal[s], doi,
@@ -3113,7 +3114,9 @@ if (typeof document !== "undefined") {
           lv.study_design[st.study_design[s]], lv.type_of_analysis[st.type_of_analysis[s]],
           lv.data_type[st.data_type[s]], lv.data_source[st.data_source[s]],
           lv.unit_of_observation[st.unit_of_observation[s]], lv.geo_scope[st.geo_scope[s]],
-          cs.map(r => r.country).join("; "), [...new Set(cs.map(r => r.income).filter(Boolean))].join("; "),
+          gi.map(i => db.countries[db.geo.c[i]].country).join("; "),
+          gi.map(i => (db.geoIncome ? db.geoIncome[i] : db.incomeOf[db.geo.c[i]]) || "unknown").join("; "),
+          gi.map(i => db.regionOf[db.geo.c[i]] || "unknown").join("; "),
           text.abstract(s)
         ].map(csvCell).join(","));
       }
@@ -3375,7 +3378,7 @@ if (typeof document !== "undefined") {
     window.Plotly.react("x-scatter", traces, {
       font: BASE_FONT,
       margin: { t: 20, b: 70, l: 70, r: 20 },
-      legend: hLegend(-0.2),
+      legend: { ...hLegend(-0.2), title: { text: "Income group (current, FY2027):" } },
       xaxis: { type: "log", title: xLabel + " (log)", gridcolor: "#eeebe3" },
       yaxis: { type: "log", title: yLabel + " (log)", gridcolor: "#eeebe3" },
       plot_bgcolor: "rgba(0,0,0,0)",
@@ -3385,7 +3388,7 @@ if (typeof document !== "undefined") {
 
   function renderTable() {
     const rows = tableRows(db, state.result, 25);
-    const cols = ["Country", "Income", "Region (WHO)", "Studies", "Per 100k DALYs", "Per US$1bn", "Per million"];
+    const cols = ["Country", "Income group (current, FY2027)", "Region (WHO)", "Studies", "Per 100k DALYs", "Per US$1bn", "Per million"];
     const numCols = new Set(["Studies", "Per 100k DALYs", "Per US$1bn", "Per million"]);
     // Country/Income/Region cells are data-derived strings: build the table
     // with createElement + textContent — never innerHTML string concat.

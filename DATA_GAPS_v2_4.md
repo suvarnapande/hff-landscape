@@ -189,6 +189,28 @@ differently).
 - **FCAS figures:** the FCAS share keeps the dataset's own lookup as its base (FCAS status comes
   from it); the comparison by income setting fills studies without a dataset group from `geo.json`.
 
+**Checked and corrected 22 October 2026** (`build_figures_v2_6.py`, `build_fcas_outcomes_v2_6.py`,
+`build_open_access_v2_6.py`):
+- Eight figures counted studies by the *current* group and now use the publication year: the
+  forest plot, authorship pattern, co-authorship chord and open access by author income (author
+  countries via `scripts/wb_income_history.py`), topic map by income, disease skew (circular),
+  epidemiological transition and disease trajectory. The authorship-by-function and outcome
+  heatmaps used the current group only as a filter; they now use the publication year too.
+- Numbers that moved: low-income authorship 19/50/31% -> 18/50/32%; forest plot quantitative OR
+  0.40 -> 0.39; chord 24,049 -> 23,677 wholly high-income-authored and 225 -> 274 wholly
+  low-income; injuries 94% -> 93% high-income; topic map overall L&MICs share 35% -> 36%; transition base 1,798 -> 1,813; the glance page's
+  L&MICs share 35% -> 37% (36.7%).
+- Every affected footnote, the Explorer scatter, table, landscape and profile labels now say
+  "current (FY2027)" or "in the publication year". The Explorer CSV column is now
+  `country_income_groups_in_publication_year`, one entry per country, in the order of `countries`.
+- **FCAS in 2026:** the dataset's `fcas` column is filled for 2026 (141 FCAS studies) although its
+  income lookup stops at 2025. Which World Bank list it applies to 2026 is set in the dataset
+  team's `enrich_geo` (not in this repository); the site says "the latest list available". The
+  FCAS trend leaves 2026 out (a part year with no income base).
+- **Still open:** the World Bank history file here runs to FY2025, so 2025 publications without a
+  dataset value use the current group. A newer `OGHIST*.xlsx` in `docs/dex_hff/` is picked up by
+  `wb_income_history.py` automatically; `build_data_v2_5.py` still reads the old file name.
+
 ## 7. Regions: WHO regions on the site, UN M49 archived
 
 Decided 13 October 2026: the map follows the six **WHO regions**. The earlier classification (UN

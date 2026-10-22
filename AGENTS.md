@@ -45,7 +45,7 @@ Background and decisions: `README.md`, `DATA_GAPS_v2_5.md` (current version, reb
 - **Run scripts from the repository root** with `PYTHONIOENCODING=utf-8` and plain `python`.
   *Why: paths are set relative to the root, and the figure scripts import `fig_text_fit` from
   `scripts/`.*
-- **After `scripts/copy/render_copy_v2_5.py`, restore `docs/data/funder_types_v5.csv`** with
+- **After `scripts/copy/render_copy_v2_6.py` (or `_v2_5`), restore `docs/data/funder_types_v5.csv`** with
   `git checkout`. *Why: the renderer rewrites it as a side effect (row order only); noticed when
   re-rendering figures.*
 - **Rebuild country text files only with `build_texts_v2_5.py`.** It splits large countries into
@@ -58,7 +58,12 @@ Background and decisions: `README.md`, `DATA_GAPS_v2_5.md` (current version, reb
   HEE dashboard plus 31 additions; it is not the World Bank's list. Say "countries and
   territories" in text.
 - **Income groups:** World Bank. Study counts use the group in the publication year; country
-  comparisons (maps, profiles) use the current FY2027 group.
+  comparisons (maps, profiles) use the current FY2027 group. Author countries (open access,
+  co-authorship) also use the publication year (`scripts/wb_income_history.py`). Every figure,
+  caption and label says which basis it uses; the renderer keeps only a footnote's first
+  sentence, so put the basis there or in the copy's `basis` field.
+- **FCAS:** the World Bank list of fragile and conflict-affected situations for the publication
+  year; 2026 studies use the latest list available to the dataset.
 - **Regions:** the six WHO regions. Taiwan and Hong Kong (Western Pacific) and Kosovo (European)
   are not assigned by WHO and take the region of their UN sub-region. One figure (aid vs.
   evidence) uses approximate IHME GBD super-regions and says so.
@@ -69,6 +74,10 @@ Background and decisions: `README.md`, `DATA_GAPS_v2_5.md` (current version, reb
 
 ## Recent changes
 
+- 2026-10-22: income basis made consistent (`build_figures_v2_6.py`, `build_fcas_outcomes_v2_6.py`,
+  `build_open_access_v2_6.py`, `copy/render_copy_v2_6.py`): eight figures that counted studies by
+  current income now use the publication year; footnotes, Explorer labels, the CSV column and the
+  glance L&MICs share (35% -> 37%) state or use the right basis. Manuscript figures: `_v2` copies.
 - 2026-10-22: Explorer CSV download takes titles and abstracts (new last column) for every
   study from `docs/data/text/` (`scripts/build_study_text.py`); rerun it when the master or
   `studies.json` changes.

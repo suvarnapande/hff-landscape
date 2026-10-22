@@ -44,3 +44,23 @@ Each row is PASS, DIFF or INFO (no number to compare). `audit_common.py` holds t
 
 R packages: ggplot2, scales, ggtext, sf, rnaturalearth, rnaturalearthdata, ragg.
 `make_figures.R` also looks in `./_rlib` (not committed) for packages installed locally.
+
+## Income and region basis (22 October 2026)
+
+Studies are now counted by the World Bank income group of each country studied **in the study's
+publication year** (site data `docs/data/geo.json` "i"), not the current FY2027 group. New files
+(earlier versions and outputs are kept):
+
+| Script | Writes |
+|---|---|
+| `prep_data_v2.py` | `kpis_v2.csv` (L&MIC share 36.7%, was 35.4%), `aid_vs_research_v2.csv` (Mauritius and Eritrea now in Sub-Saharan Africa), `oa_by_income_v2.csv`, `fig2_functions_by_income_v2.csv`, `fig7_author_location_by_income_v2.csv` |
+| `make_open_access_figure_v2.R` | `fig_open_access_by_income_v2` |
+| `make_income_figures_v2.R` | `fig2_functions_by_income_v2`, `fig7_author_location_by_income_v2` (redrawn; the screenshots used the current group) |
+| `make_figures_v2.R` | `fig8_aid_vs_research_region_v2` (caption: current FY2027 group for the GBD approximation), `fig_unequal_weight_full_v2` (region caption) |
+| `make_glance_figures_v4.R` | `fig_glance_2_profile_by_region_v5` (caption no longer says "WHO regions as assigned by WHO") |
+| `audit_manuscript_text_v2.py` (+ `audit_common_v2.py`) | `audit_manuscript_text_report_v2.md`: each DIFF is a manuscript number to update |
+
+Regions: the six WHO regions; Taiwan and Hong Kong (Western Pacific) and Kosovo (European), which WHO
+does not assign, take the WHO region of their UN M49 sub-region. Run order: `prep_data.py`,
+`prep_data_v2.py`, then the R scripts. Rerun all of them if `docs/data/geo.json` is rebuilt (for
+example with a newer World Bank history file).

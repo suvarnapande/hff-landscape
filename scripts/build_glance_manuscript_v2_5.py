@@ -189,10 +189,14 @@ toa_known = [v for v in studies["type_of_analysis"] if toa[v] != "Unclear"]
 pct_quant = 100 * sum(1 for v in toa_known if toa[v] == "Quantitative") / len(toa_known)
 pct_unclear_toa = 100 * (N - len(toa_known)) / N
 pct_oa = oa_j["oa_share_pct_of_doi"]
-inc_of_c = [c["income"] for c in countries]
-with_income = [cs for cs in s_countries.values() if any(inc_of_c[c] for c in cs)]
-pct_lmic = 100 * sum(1 for cs in with_income
-                     if any(inc_of_c[c] and inc_of_c[c] != "High income" for c in cs)) / len(with_income)
+# L&MICs share: each study-country pair's World Bank income group in the publication year
+# (geo.json "i"), not the current group (fixed 22 October 2026)
+_s_inc = defaultdict(set)
+for _s, _k in zip(geo_j["s"], geo_j["i"]):
+    if _k >= 0:
+        _s_inc[_s].add(LV["income"][_k])
+with_income = [g for s, g in _s_inc.items() if s in s_countries]
+pct_lmic = 100 * sum(1 for g in with_income if g - {"High income"}) / len(with_income)
 
 # ---------------------------------------------------------------------------
 # Financing functions. The site palette (build_figures_v2_5.py) uses several close

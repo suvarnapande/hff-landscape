@@ -92,10 +92,10 @@ python scripts/build_study_meta_v2_5.py          # Explorer CSV download
 python scripts/build_study_filters_v2_5.py       # Explorer funder and language filters
 python scripts/build_texts_v2_5.py               # Country profile titles and abstracts
 python scripts/build_glance_regions_v2_5.py      # "(Un)equal weight at a glance" page
-python scripts/build_figures_v2_5.py             # gallery figures (about 5 minutes)
+python scripts/build_figures_v2_6.py             # gallery figures (about 5 minutes)
 python scripts/build_funder_types_v2_5.py
-python scripts/build_fcas_outcomes_v2_5.py
-python scripts/build_open_access_v2_5.py
+python scripts/build_fcas_outcomes_v2_6.py
+python scripts/build_open_access_v2_6.py
 python scripts/build_outcome_combined_v2_5.py    # after build_figures and build_fcas_outcomes
 python scripts/build_function_outcome_themes_v2_5.py
 ```
@@ -105,9 +105,10 @@ be re-applied:
 
 - **Plain-language figures.** 70 gallery figures carry the approved plain-language titles and
   captions. Re-render them with
-  `python scripts/copy/render_copy_v2_5.py v2_5 rendered_v2_5`, then copy the PNGs from
-  `docs/dex_hff/plain_language_review/rendered_v2_5/` into `docs/figures/`. The renderer reads `figure_copy_v2_5.json`, the approved copy with its
-  counts updated to v2.5.1 (disease 7,881 of 53,411; "Other" without a theme 6,830; Benefits
+  `python scripts/copy/render_copy_v2_6.py v2_6 rendered_v2_6`, then copy the PNGs from
+  `docs/dex_hff/plain_language_review/rendered_v2_6/` into `docs/figures/`. The renderer reads `figure_copy_v2_6.json`
+  (since 22 October 2026; `figure_copy_v2_5.json` plus a `basis` field and the new authorship
+  numbers), the approved copy with its counts updated to v2.5.1 (disease 7,881 of 53,411; "Other" without a theme 6,830; Benefits
   decisions share 25% at the end of the period; 536 studies in the funder flow).
 - **Edited text in `data/content.json`.** The approved wording, technical notes and Kosovo notes
   were written into this file by hand, and a full build overwrites them.

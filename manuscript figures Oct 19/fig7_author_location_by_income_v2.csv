@@ -1,0 +1,13 @@
+income,n,location,studies,share
+Low income,1254,Authors based only in the country studied,225,17.942583732057415
+Low income,1254,Authors based in and outside the country,622,49.601275917065394
+Low income,1254,No author based in the country,407,32.45614035087719
+Lower middle income,3473,Authors based only in the country studied,1333,38.38180247624532
+Lower middle income,3473,Authors based in and outside the country,1453,41.83702850561474
+Lower middle income,3473,No author based in the country,687,19.781169018139938
+Upper middle income,4962,Authors based only in the country studied,2864,57.7186618299073
+Upper middle income,4962,Authors based in and outside the country,1650,33.252720677146314
+Upper middle income,4962,No author based in the country,448,9.028617492946392
+High income,18369,Authors based only in the country studied,14642,79.71038162120965
+High income,18369,Authors based in and outside the country,3119,16.979694049757743
+High income,18369,No author based in the country,608,3.3099243290326092

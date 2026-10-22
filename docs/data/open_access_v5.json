@@ -635,37 +635,37 @@
   },
   "oa_by_author_income_pct": {
     "Low income": {
-      "n": 1135,
-      "oa_share_pct": 86.1
+      "n": 1432,
+      "oa_share_pct": 83.4
     },
     "Lower middle income": {
-      "n": 3919,
-      "oa_share_pct": 73.9
+      "n": 4492,
+      "oa_share_pct": 73.7
     },
     "Upper middle income": {
-      "n": 7157,
-      "oa_share_pct": 74.0
+      "n": 6765,
+      "oa_share_pct": 73.9
     },
     "High income": {
-      "n": 29653,
+      "n": 29415,
       "oa_share_pct": 64.3
     }
   },
   "oa_by_team_pct": {
     "High-income authors only": {
-      "n": 24025,
-      "oa_share_pct": 61.2
+      "n": 23673,
+      "oa_share_pct": 61.1
     },
     "Mixed high-income and L&MICs team": {
-      "n": 5628,
-      "oa_share_pct": 77.2
+      "n": 5742,
+      "oa_share_pct": 77.1
     },
     "L&MICs authors only": {
-      "n": 5550,
-      "oa_share_pct": 71.1
+      "n": 5838,
+      "oa_share_pct": 70.9
     }
   },
-  "n_income_known": 35203,
+  "n_income_known": 35253,
   "figures": [
     {
       "file": "fig_oa_trend_v5.png",

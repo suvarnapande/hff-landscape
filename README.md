@@ -19,6 +19,14 @@ the open gaps (DALYs for Kosovo, health spending for five added countries) are i
 - `docs/dex_hff/`: raw inputs (dataset CSVs, IHME and World Bank workbooks). Local only, not in git.
 
 **Latest updates**
+- 22 October 2026: income groups and FCAS now follow one rule everywhere. Anything that counts
+  studies uses the World Bank income group of each country (studied or author) in the study's
+  publication year; comparisons between countries use the current (FY2027) group; FCAS uses the
+  World Bank list for the publication year (the latest list for 2026). Eight gallery figures that
+  used current income were corrected (forest plot, authorship pattern, co-authorship chord, topic
+  map by income, disease skew, epidemiological transition, disease trajectory, open access by
+  author income), every affected footnote and Explorer label now names its basis, and the CSV
+  download's income column is now per country in the publication year. See `DATA_GAPS_v2_4.md` §6.
 - 22 October 2026: the Explorer's "Download filtered studies (CSV)" now takes every title from
   the analysis master and adds an `abstract` column (last). The text of all 53,411 studies is in
   `docs/data/text/` (built by `scripts/build_study_text.py`), fetched in chunks only when the

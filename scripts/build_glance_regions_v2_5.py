@@ -168,10 +168,14 @@ toa_known = [v for v in studies["type_of_analysis"] if toa[v] != "Unclear"]
 pct_quant = 100 * sum(1 for v in toa_known if toa[v] == "Quantitative") / len(toa_known)
 pct_unclear_toa = 100 * (N - len(toa_known)) / N
 pct_oa = oa_j["oa_share_pct_of_doi"]
-inc_of_c = [c["income"] for c in countries]
-with_income = [cs for cs in s_countries.values() if any(inc_of_c[c] for c in cs)]
-pct_lmic = 100 * sum(1 for cs in with_income
-                     if any(inc_of_c[c] and inc_of_c[c] != "High income" for c in cs)) / len(with_income)
+# L&MICs share: each study-country pair's World Bank income group in the publication year
+# (geo.json "i"), not the current group (fixed 22 October 2026)
+_s_inc = defaultdict(set)
+for _s, _k in zip(geo_j["s"], geo_j["i"]):
+    if _k >= 0:
+        _s_inc[_s].add(LV["income"][_k])
+with_income = [g for s, g in _s_inc.items() if s in s_countries]
+pct_lmic = 100 * sum(1 for g in with_income if g - {"High income"}) / len(with_income)
 
 # ---------------------------------------------------------------------------
 # Map: studies per US$1bn health expenditure, log colour scale centred on the
@@ -456,7 +460,7 @@ h1 {{ font:800 34px/1.12 "Arial Narrow", "Roboto Condensed", Inter, sans-serif; 
   <div class="sec"><b>A</b><h2>Research intensity by country</h2><span>Studies per US$1bn total health expenditure · median {median_rate:.1f}</span>{q("Studies naming the country, divided by its total health expenditure (PPP US$ billions, 2022), per US$1bn. Colour is on a log scale centred on the median country. Grey = no study naming the country, or no spending data (Venezuela, Hong Kong).")}</div>
   <div id="map"></div>
 
-  <div class="kpis"><div class="kpi"><div class="kpi-v">{N:,}</div><div class="kpi-l">health financing studies, {YEAR0}–{YEAR1}</div></div><div class="kpi"><div class="kpi-v">{n_countries_named}{q("Countries in the map's country data named by at least one study in the period. Region or global labels (for example 'Europe' or 'Global') are not countries and are not counted.")}</div><div class="kpi-l">countries profiled in the map with at least one</div></div><div class="kpi"><div class="kpi-v">{pct_fp:.0f}%{q("Share of all studies whose outcome domains include financial protection. A study can carry more than one outcome domain.")}</div><div class="kpi-l">investigate financial protection as an outcome</div></div><div class="kpi"><div class="kpi-v">{pct_quant:.0f}%{q(f"Share of studies with a clear type of analysis that are quantitative only (mixed methods and qualitative are the rest). Studies whose type of analysis is unclear (about {pct_unclear_toa:.0f}%) are left out of the base.")}</div><div class="kpi-l">are quantitative</div></div><div class="kpi"><div class="kpi-v">{pct_oa:.0f}%{q("Share of studies with a DOI that are open access (from OpenAlex, matched by DOI). Studies without a DOI are left out of the base.")}</div><div class="kpi-l">are open access</div></div><div class="kpi"><div class="kpi-v">{pct_lmic:.0f}%{q("Share of studies naming at least one country that name at least one low- or middle-income country (World Bank income groups). Studies naming no country are left out of the base.")}</div><div class="kpi-l">focus on low- and middle-income countries</div></div></div>
+  <div class="kpis"><div class="kpi"><div class="kpi-v">{N:,}</div><div class="kpi-l">health financing studies, {YEAR0}–{YEAR1}</div></div><div class="kpi"><div class="kpi-v">{n_countries_named}{q("Countries in the map's country data named by at least one study in the period. Region or global labels (for example 'Europe' or 'Global') are not countries and are not counted.")}</div><div class="kpi-l">countries profiled in the map with at least one</div></div><div class="kpi"><div class="kpi-v">{pct_fp:.0f}%{q("Share of all studies whose outcome domains include financial protection. A study can carry more than one outcome domain.")}</div><div class="kpi-l">investigate financial protection as an outcome</div></div><div class="kpi"><div class="kpi-v">{pct_quant:.0f}%{q(f"Share of studies with a clear type of analysis that are quantitative only (mixed methods and qualitative are the rest). Studies whose type of analysis is unclear (about {pct_unclear_toa:.0f}%) are left out of the base.")}</div><div class="kpi-l">are quantitative</div></div><div class="kpi"><div class="kpi-v">{pct_oa:.0f}%{q("Share of studies with a DOI that are open access (from OpenAlex, matched by DOI). Studies without a DOI are left out of the base.")}</div><div class="kpi-l">are open access</div></div><div class="kpi"><div class="kpi-v">{pct_lmic:.0f}%{q("Share of studies naming at least one country that name at least one low- or middle-income country (World Bank income group of each country in the year the study was published). Studies naming no country are left out of the base.")}</div><div class="kpi-l">focus on low- and middle-income countries</div></div></div>
 
   <div class="sec"><b>B</b><h2>Profile of studies by region</h2><span>Each card matches the black region tag on the map</span></div>
   <div class="regions">
