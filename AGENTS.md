@@ -80,6 +80,9 @@ Background and decisions: `README.md`, `DATA_GAPS_v2_5.md` (current version, reb
 - 2026-10-23: country profiles: the "How studies are done and reported" chart (quantitative,
   has DOI, administrative data on one axis) is replaced by a type-of-analysis chart; the DOI
   share is a sentence under it. `signal_metrics` in `content.json` is no longer used.
+- 2026-10-23: country profiles: long function and design labels wrap (hover keeps the full
+  name); the technical note says which comparison (median, average, pooled shares) each
+  part of the page uses.
 - 2026-10-22: income basis made consistent (`build_figures_v2_6.py`, `build_fcas_outcomes_v2_6.py`,
   `build_open_access_v2_6.py`, `copy/render_copy_v2_6.py`): eight figures that counted studies by
   current income now use the publication year; footnotes, Explorer labels, the CSV column and the

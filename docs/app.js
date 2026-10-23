@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-23d";
+const BUILD = "2026-10-23e";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -3688,7 +3688,9 @@ if (typeof document !== "undefined") {
       margin: { t: 10, b: 70, l: 170, r: 20 },
       legend: hLegend(-0.22),
       xaxis: { title: "share of function-coded studies (%)", gridcolor: "#eeebe3" },
-      yaxis: { categoryorder: "array", categoryarray: grps, automargin: true },
+      // Long function names wrap so they don't squeeze the bars; hover keeps the full name.
+      yaxis: { categoryorder: "array", categoryarray: grps, automargin: true,
+        tickvals: grps, ticktext: grps.map(g => wrapLabel(g, 40)) },
       plot_bgcolor: "rgba(0,0,0,0)",
       paper_bgcolor: "rgba(0,0,0,0)"
     }, PLOTLY_CFG);
@@ -3719,7 +3721,8 @@ if (typeof document !== "undefined") {
       margin: { t: 10, b: 70, l: 170, r: 20 },
       legend: hLegend(-0.22),
       xaxis: { title: "share of studies (%)", gridcolor: "#eeebe3" },
-      yaxis: { categoryorder: "array", categoryarray: yOrder, automargin: true },
+      yaxis: { categoryorder: "array", categoryarray: yOrder, automargin: true,
+        tickvals: yOrder, ticktext: yOrder.map(t => wrapLabel(t, 40)) },
       plot_bgcolor: "rgba(0,0,0,0)",
       paper_bgcolor: "rgba(0,0,0,0)"
     }, PLOTLY_CFG);
