@@ -74,6 +74,9 @@ Background and decisions: `README.md`, `DATA_GAPS_v2_5.md` (current version, reb
 
 ## Recent changes
 
+- 2026-10-23: Explorer CSV download shows a progress bar (files and MB loaded); the
+  Explorer "type of analysis" tile shows percentages only (no bar); study lists in country
+  profiles link each study's DOI or URL (from `docs/data/study_meta.json`).
 - 2026-10-22: income basis made consistent (`build_figures_v2_6.py`, `build_fcas_outcomes_v2_6.py`,
   `build_open_access_v2_6.py`, `copy/render_copy_v2_6.py`): eight figures that counted studies by
   current income now use the publication year; footnotes, Explorer labels, the CSV column and the

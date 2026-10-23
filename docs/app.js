@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-22b";
+const BUILD = "2026-10-23c";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -1128,6 +1128,9 @@ if (typeof document !== "undefined") {
     loading.textContent = "Loading…";
     list.appendChild(loading);
 
+    // DOIs/URLs come from study_meta.json (shared with the CSV download); if it fails to
+    // load, the titles and abstracts still show, just without links.
+    const metaPromise = loadStudyMeta().catch(err => { console.error(err); return null; });
     try {
       let shard = state.textCache[iso3];
       if (!shard) {
@@ -1151,6 +1154,7 @@ if (typeof document !== "undefined") {
         shard = { ...raw, posOf: new Map(raw.s.map((sv, i) => [sv, i])) };
         state.textCache[iso3] = shard;
       }
+      const meta = await metaPromise;
       list.textContent = "";
       for (const s of sList) {
         const pos = shard.posOf.get(s);
@@ -1159,9 +1163,20 @@ if (typeof document !== "undefined") {
         const entry = el("div", "study-entry");
         const h = el("h4", "study-entry-title");
         h.textContent = title || "(title unavailable)";
+        entry.appendChild(h);
+        const link = meta && studyLink(meta, s);
+        if (link) {
+          const line = el("p", "study-entry-link");
+          const a = el("a");
+          a.href = link.href;
+          a.target = "_blank";
+          a.rel = "noopener";
+          a.textContent = link.text;
+          line.append(link.doi ? "DOI: " : "Publication link: ", a);
+          entry.appendChild(line);
+        }
         const p = el("p", "study-entry-abstract");
         p.textContent = abstract || "No abstract available for this study.";
-        entry.appendChild(h);
         entry.appendChild(p);
         list.appendChild(entry);
       }
@@ -1662,8 +1677,10 @@ if (typeof document !== "undefined") {
 
   // "Type of analysis used in studies" card: shared by the Overview tile and the
   // Methods & data section of Thematic analysis.
-  function fillAnalysisApproachCard(box, studyIdx = null) {
+  // showBar = false (Explorer) shows only the three percentages, side by side.
+  function fillAnalysisApproachCard(box, studyIdx = null, showBar = true) {
     box.classList.add("analysis-approach-card");
+    box.classList.toggle("analysis-approach-plain", !showBar);
     const title = el("div", "value-box-title");
     title.textContent = "Type of analysis used in studies";
     box.appendChild(title);
@@ -1687,10 +1704,12 @@ if (typeof document !== "undefined") {
       const key = approach.label.toLowerCase().replace(" methods", "");
       const segment = el("div", "analysis-approach-segment analysis-" + key);
       segment.style.width = approach.pct + "%";
-      bar.appendChild(segment);
+      if (approach.pct > 0) bar.appendChild(segment);
       const metric = el("div", "analysis-approach-metric");
       metric.classList.add("analysis-metric-" + key);
-      metric.style.width = approach.pct + "%";
+      // Grow in proportion to the share, but never narrower than the label text,
+      // so a 0% or very small share doesn't overlap its neighbours.
+      if (showBar) metric.style.flex = approach.pct + " 1 0";
       const pct = el("strong");
       pct.textContent = approach.pct.toFixed(1) + "%";
       const label = el("span");
@@ -1702,7 +1721,8 @@ if (typeof document !== "undefined") {
     const unclearPct = unclearCode < 0 ? 0 : 100 * counts[unclearCode] / total;
     const note = el("div", "analysis-approach-note");
     note.textContent = unclearPct.toFixed(1) + "% could not be classified.";
-    box.append(bar, metrics, note);
+    if (showBar) box.append(bar);
+    box.append(metrics, note);
   }
 
   // "Geographic scope of studies" card: shared by the Overview tile and the
@@ -3014,15 +3034,66 @@ if (typeof document !== "undefined") {
   let studyTextIndexPromise = null;
   const studyTextChunks = new Map();
 
-  function fetchJson(path) {
-    return fetch(path + "?v=" + BUILD).then(r => {
+  // onBytes (optional) is called with the size of each piece as it arrives, for the
+  // download progress display.
+  function fetchJson(path, onBytes = null) {
+    return fetch(path + "?v=" + BUILD).then(async r => {
       if (!r.ok) throw new Error("failed to load " + path + ": " + r.status);
-      return r.json();
+      if (!onBytes || !r.body) return r.json();
+      const reader = r.body.getReader();
+      const parts = [];
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        parts.push(value);
+        onBytes(value.length);
+      }
+      return JSON.parse(await new Blob(parts).text());
     });
   }
 
+  // study_meta.json, loaded once and shared by the CSV download and the study list in
+  // country profiles. A failed load is forgotten so the next click tries again.
+  function loadStudyMeta(onBytes = null) {
+    if (!studyMetaPromise) {
+      studyMetaPromise = fetchJson("data/study_meta.json", onBytes);
+      studyMetaPromise.catch(() => { studyMetaPromise = null; });
+    }
+    return studyMetaPromise;
+  }
+
+  // Publication link for study s: the DOI if there is one, else the recorded URL.
+  function studyLink(meta, s) {
+    const doi = meta.doi[s];
+    if (doi) return { doi: true, href: "https://doi.org/" + doi, text: doi };
+    const url = meta.url[s];
+    if (url && /^https?:\/\//i.test(url)) return { doi: false, href: url, text: url };
+    return null;
+  }
+
+  // Progress of the files a CSV download needs: files done out of files needed, and MB
+  // received. Files already loaded by an earlier download count as done straight away.
+  function downloadProgress(bar, label) {
+    let total = 0, done = 0, bytes = 0;
+    const show = () => {
+      bar.max = Math.max(1, total);
+      bar.value = done;
+      label.textContent = "Loading study details: " + done + " of " + total + " files ("
+        + (bytes / 1e6).toFixed(1) + " MB)";
+    };
+    return {
+      track(p) {
+        total++;
+        show();
+        p.then(() => { done++; show(); }, () => {});
+        return p;
+      },
+      bytes(n) { bytes += n; show(); }
+    };
+  }
+
   // Returns { title(s), abstract(s) } lookups by study index s for the given studies.
-  async function loadStudyText(studies) {
+  async function loadStudyText(studies, progress) {
     if (!studyTextIndexPromise) studyTextIndexPromise = fetchJson("data/text/index.json");
     let index;
     try {
@@ -3034,10 +3105,11 @@ if (typeof document !== "undefined") {
     const needed = [...new Set(studies.map(s => Math.floor(s / index.chunk)))];
     for (const k of needed) {
       if (!studyTextChunks.has(k)) {
-        const p = fetchJson("data/text/" + index.files[k]);
+        const p = fetchJson("data/text/" + index.files[k], progress.bytes);
         studyTextChunks.set(k, p);
         p.catch(() => studyTextChunks.delete(k));
       }
+      progress.track(studyTextChunks.get(k));
     }
     const chunks = new Map();
     await Promise.all(needed.map(async k => chunks.set(k, await studyTextChunks.get(k))));
@@ -3072,22 +3144,19 @@ if (typeof document !== "undefined") {
       status.textContent = "No studies match the current filters.";
       return;
     }
+    const progressBox = $("x-download-progress");
+    const progressBar = progressBox.querySelector("progress");
+    const progressLabel = progressBox.querySelector("span");
     btn.disabled = true;
     status.textContent = "Preparing " + fmtNum(rows.length) + " studies with titles and abstracts…";
+    progressBox.hidden = false;
+    const progress = downloadProgress(progressBar, progressLabel);
     try {
-      if (!studyMetaPromise) {
-        studyMetaPromise = fetch("data/study_meta.json?v=" + BUILD).then(r => {
-          if (!r.ok) throw new Error("failed to load data/study_meta.json: " + r.status);
-          return r.json();
-        });
-      }
-      let meta, text;
-      try {
-        [meta, text] = await Promise.all([studyMetaPromise, loadStudyText(rows)]);
-      } catch (err) {
-        studyMetaPromise = null;
-        throw err;
-      }
+      progress.track(loadStudyMeta(progress.bytes));
+      const [meta, text] = await Promise.all([loadStudyMeta(), loadStudyText(rows, progress)]);
+      progressBar.removeAttribute("value");  // indeterminate while the file is built
+      progressLabel.textContent = "Building the CSV file…";
+      await new Promise(resolve => setTimeout(resolve, 30));  // let the label show first
       const st = db.studies;
       const lv = db.levels;
       const functions = studyTagLists(db.function, db.function_grps);
@@ -3135,6 +3204,7 @@ if (typeof document !== "undefined") {
       status.textContent = "Download failed. Please try again.";
     } finally {
       btn.disabled = false;
+      progressBox.hidden = true;
     }
   }
 
@@ -3164,7 +3234,7 @@ if (typeof document !== "undefined") {
     const analysisBox = $("v-analysis");
     analysisBox.textContent = "";
     if (state.result.studies.length) {
-      fillAnalysisApproachCard(analysisBox, state.result.studies);
+      fillAnalysisApproachCard(analysisBox, state.result.studies, false);
     } else {
       const title = el("div", "value-box-title");
       title.textContent = "Type of analysis used in studies";
