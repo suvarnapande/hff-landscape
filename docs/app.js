@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-23c";
+const BUILD = "2026-10-23d";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -538,9 +538,11 @@ function profileSets(db, iso3) {
   return { ci, income, cs, ps };
 }
 
-function methodsMixSets(db, cs, ps) {
-  const lv = db.levels.study_design;
-  const col = db.studies.study_design;
+// Share of the country's and the peer group's studies in each level of `column`
+// (study design by default; type of analysis for the profile's analysis chart).
+function methodsMixSets(db, cs, ps, column = "study_design") {
+  const lv = db.levels[column];
+  const col = db.studies[column];
   const cn = new Map(), pn = new Map();
   for (const s of cs) { const t = lv[col[s]]; cn.set(t, (cn.get(t) || 0) + 1); }
   for (const s of ps) { const t = lv[col[s]]; pn.set(t, (pn.get(t) || 0) + 1); }
@@ -670,6 +672,7 @@ export function countryProfile(db, iso3) {
   };
 
   const mm = methodsMixSets(db, mineSet, peerSet);
+  const am = methodsMixSets(db, mineSet, peerSet, "type_of_analysis");
   const sg = signalsSets(db, mineSet, peerSet);
   const bm = benchmark(db, iso3);
 
@@ -690,6 +693,8 @@ export function countryProfile(db, iso3) {
       Object.fromEntries(mm.rows.map(x => [x.type,
         { country_share: x.country_share, peer_share: x.peer_share }])),
       { y_order: mm.y_order }),
+    c_analysis: Object.fromEntries(am.rows.map(x => [x.type,
+      { country_share: x.country_share, peer_share: x.peer_share }])),
     c_signals: Object.fromEntries(sg.rows.map(x => [x.metric,
       { country_pct: x.country_pct, peer_pct: x.peer_pct }])),
     c_benchmark: { median_per100k: bm.median_per100k, n_points: bm.n_points, rows: bm.rows }
@@ -1384,7 +1389,7 @@ if (typeof document !== "undefined") {
     }
     updateCountryViewTabs("profile");
     requestAnimationFrame(() => {
-      for (const id of ["c-trend", "c-mix", "c-methods", "c-signals", "c-strip", "c-benchmark"]) {
+      for (const id of ["c-trend", "c-mix", "c-methods", "c-analysis", "c-strip", "c-benchmark"]) {
         if (window.Plotly && $(id).data) window.Plotly.Plots.resize($(id));
       }
     });
@@ -1412,7 +1417,7 @@ if (typeof document !== "undefined") {
       }
     }
     if (name === "country" && window.Plotly) {
-      for (const id of ["c-trend", "c-mix", "c-methods", "c-signals", "c-strip", "c-benchmark"]) {
+      for (const id of ["c-trend", "c-mix", "c-methods", "c-analysis", "c-strip", "c-benchmark"]) {
         if ($(id).data) window.Plotly.Plots.resize($(id));
       }
     }
@@ -3719,23 +3724,22 @@ if (typeof document !== "undefined") {
       paper_bgcolor: "rgba(0,0,0,0)"
     }, PLOTLY_CFG);
 
-    // Approach & reporting. SIGNAL_METRICS order is fixed in content.json;
-    // reversed here so the first-listed metric renders on top (Plotly's
-    // categoryarray places its first entry at the bottom of a horizontal bar).
-    const sig = prof.c_signals;
-    const sigCats = db.registries.SIGNAL_METRICS.slice().reverse();
-    const sigVal = (side, m) => sig[m] && sig[m][side] != null ? sig[m][side] : null;
-    window.Plotly.react("c-signals", [
+    // Type of analysis: the four levels in a fixed order, Quantitative on top
+    // (reversed because Plotly's categoryarray puts its first entry at the bottom).
+    const ana = prof.c_analysis;
+    const anaCats = ["Quantitative", "Qualitative", "Mixed methods", "Unclear"].reverse();
+    const anaVal = (side, t) => ana[t] && ana[t][side] != null ? ana[t][side] : 0;
+    window.Plotly.react("c-analysis", [
       {
         type: "bar", orientation: "h", name: "country",
-        y: sigCats, x: sigCats.map(m => sigVal("country_pct", m)),
-        marker: { color: spreadPalette(PROFILE_LAVENDER, sigCats.length) },
+        y: anaCats, x: anaCats.map(t => anaVal("country_share", t)),
+        marker: { color: spreadPalette(PROFILE_LAVENDER, anaCats.length) },
         hovertemplate: "%{y}: %{x:.1f}%<extra>country</extra>"
       },
       {
         type: "bar", orientation: "h", name: "income group",
-        y: sigCats, x: sigCats.map(m => sigVal("peer_pct", m)),
-        marker: { color: spreadPalette(PROFILE_PEER, sigCats.length) },
+        y: anaCats, x: anaCats.map(t => anaVal("peer_share", t)),
+        marker: { color: spreadPalette(PROFILE_PEER, anaCats.length) },
         hovertemplate: "%{y}: %{x:.1f}%<extra>income group</extra>"
       }
     ], {
@@ -3743,11 +3747,16 @@ if (typeof document !== "undefined") {
       font: BASE_FONT,
       margin: { t: 10, b: 70, l: 170, r: 20 },
       legend: hLegend(-0.22),
-      xaxis: { title: "% of studies", gridcolor: "#eeebe3" },
-      yaxis: { categoryorder: "array", categoryarray: sigCats, automargin: true },
+      xaxis: { title: "share of studies (%)", gridcolor: "#eeebe3" },
+      yaxis: { categoryorder: "array", categoryarray: anaCats, automargin: true },
       plot_bgcolor: "rgba(0,0,0,0)",
       paper_bgcolor: "rgba(0,0,0,0)"
     }, PLOTLY_CFG);
+    // Whether a study can be found is a separate question, so it is a sentence, not a bar.
+    const doiShare = prof.c_signals["Has DOI"] || {};
+    $("c-link-note").textContent = doiShare.country_pct == null ? "" :
+      Math.round(doiShare.country_pct) + "% of this country's studies have a DOI (similar-income countries: "
+      + Math.round(doiShare.peer_pct) + "%).";
 
     // Peer benchmark: log10×log10 scatter of the filtered income-group
     // rows; peers grey-blue, selected country gold, dashed type-7 median line with
