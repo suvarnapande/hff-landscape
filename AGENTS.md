@@ -71,6 +71,21 @@ Background and decisions: `README.md`, `DATA_GAPS_v2_5.md` (current version, reb
   follows the existing `?` help style in `app.js` (`FILTER_HELP`).
 - **Counting:** a study naming several countries, functions, outcomes or funders counts once in
   each, so shares can sum to more than 100%.
+- **DALYs are not an HFF focus.** They are leftovers from the HEE dashboard (profile tile, bottom
+  chart, landscape bubble chart, Explorer map/scatter options). Don't add DALY wording or
+  definitions to captions or notes, and prefer health spending or population as comparisons.
+  *Why: the project lead's decision, 23 October 2026.*
+- **One chart, one question.** Don't put unrelated measures (e.g. type of analysis, has DOI,
+  data source) on one axis; give a separate measure its own chart or a sentence.
+- **Country profiles** compare with countries in the same current (FY2027) income group: tiles
+  and the bottom chart use the median, studies per year the average per country, and the
+  function, design and analysis charts pooled shares. Keep the technical note in
+  `index.html` in step if this changes. Everything on the profile shows all studies except
+  the study grid, which follows Explorer filters and says so ("Show all" toggle).
+- **Checking changes:** there are no automated tests. `node --check docs/app.js` catches syntax
+  errors. The data functions exported from `app.js` (`loadData`, `applyFilters`,
+  `countryProfile`, `studiesStrip`, ...) run in Node if you set `globalThis.window` and a stub
+  `document` before importing, and load the `docs/data/*.json` files with `fs`.
 
 ## Recent changes
 
