@@ -83,6 +83,10 @@ Background and decisions: `README.md`, `DATA_GAPS_v2_5.md` (current version, reb
 - 2026-10-23: country profiles: long function and design labels wrap (hover keeps the full
   name); the technical note says which comparison (median, average, pooled shares) each
   part of the page uses.
+- 2026-10-23: country profiles: DALY definition and DALY wording removed from the caption and
+  technical note (DALYs are not an HFF focus; the tile and bottom chart still use them). The
+  study grid says when Explorer filters narrow it, with a "Show all" toggle; study design
+  labels back to one line (too many rows to wrap).
 - 2026-10-22: income basis made consistent (`build_figures_v2_6.py`, `build_fcas_outcomes_v2_6.py`,
   `build_open_access_v2_6.py`, `copy/render_copy_v2_6.py`): eight figures that counted studies by
   current income now use the publication year; footnotes, Explorer labels, the CSV column and the

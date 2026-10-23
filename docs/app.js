@@ -1,6 +1,6 @@
 // Cache-busting build token — bump alongside index.html's ?v= query string
 // whenever app.js or the data files change.
-const BUILD = "2026-10-23e";
+const BUILD = "2026-10-23f";
 
 const CODED_COLS = ["study_design", "type_of_analysis", "data_type", "data_source",
   "unit_of_observation", "geo_scope", "era"];
@@ -912,7 +912,8 @@ if (typeof document !== "undefined") {
     result: null,
     country: "AFG",
     ts: {},
-    textCache: {}
+    textCache: {},
+    stripAll: false  // country profile study grid: true = ignore Explorer filters
   };
 
   function debounce(fn, ms) {
@@ -3509,7 +3510,31 @@ if (typeof document !== "undefined") {
   function renderStudiesStrip() {
     if (!state.result) return;
     const iso3 = state.country;
-    const rows = studiesStrip(db, iso3, state.result.mask);
+    // The rest of the profile shows all studies, so say when Explorer filters narrow
+    // this grid, and offer to show all of the country's studies.
+    const filtersOn = state.result.studies.length < db.nStudies;
+    const useFilters = filtersOn && !state.stripAll;
+    const rows = studiesStrip(db, iso3, useFilters ? state.result.mask : null);
+    const shown = new Set(rows.map(r => r.s)).size;
+    const country = db.countries.find(r => r.iso3 === iso3);
+    const total = country ? country.studies : shown;
+    const note = $("c-strip-filter");
+    note.hidden = !filtersOn;
+    if (filtersOn) {
+      const btn = el("button", "c-strip-toggle");
+      btn.type = "button";
+      if (useFilters) {
+        note.textContent = (shown ? "Showing " + fmtNum(shown) + " of " : "None of ")
+          + "this country's " + fmtNum(total) + " studies "
+          + (shown ? "because Explorer filters are on. " : "match the current Explorer filters. ");
+        btn.textContent = "Show all " + fmtNum(total) + " studies";
+      } else {
+        note.textContent = "Showing all " + fmtNum(total) + " of this country's studies; Explorer filters are ignored here. ";
+        btn.textContent = "Apply Explorer filters";
+      }
+      btn.addEventListener("click", () => { state.stripAll = !state.stripAll; renderStudiesStrip(); });
+      note.appendChild(btn);
+    }
     const cats = db.function_grps.concat(["Not classified"]);
     const catIndexOf = new Map(cats.map((c, i) => [c, i]));
     const years = [...new Set(rows.map(r => r.year))].sort((a, b) => a - b);
@@ -3522,7 +3547,8 @@ if (typeof document !== "undefined") {
         margin: { t: 10, b: 10, l: 10, r: 10 },
         xaxis: { visible: false }, yaxis: { visible: false },
         annotations: [{
-          text: "No studies match the current filters", xref: "paper", yref: "paper",
+          text: useFilters ? "No studies match the current Explorer filters" : "No studies for this country",
+          xref: "paper", yref: "paper",
           x: 0.5, y: 0.5, showarrow: false, font: { size: 13, color: "#6b7280" }
         }],
         plot_bgcolor: "rgba(0,0,0,0)", paper_bgcolor: "rgba(0,0,0,0)"
@@ -3721,8 +3747,7 @@ if (typeof document !== "undefined") {
       margin: { t: 10, b: 70, l: 170, r: 20 },
       legend: hLegend(-0.22),
       xaxis: { title: "share of studies (%)", gridcolor: "#eeebe3" },
-      yaxis: { categoryorder: "array", categoryarray: yOrder, automargin: true,
-        tickvals: yOrder, ticktext: yOrder.map(t => wrapLabel(t, 40)) },
+      yaxis: { categoryorder: "array", categoryarray: yOrder, automargin: true },
       plot_bgcolor: "rgba(0,0,0,0)",
       paper_bgcolor: "rgba(0,0,0,0)"
     }, PLOTLY_CFG);

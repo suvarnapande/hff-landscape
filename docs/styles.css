@@ -1957,3 +1957,14 @@ table.dataTable thead th.num { text-align: right; }
   .geography-cols { grid-template-columns: 1fr; }
   .geography-col, .geography-col:first-child, .geography-col:last-child { padding: 0; border-left: 0; }
 }
+/* Country profile study grid: note when Explorer filters narrow it, with a toggle. */
+.c-strip-filter { margin-top: -.25rem; color: var(--hff-ink); }
+.c-strip-toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--hff-accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
